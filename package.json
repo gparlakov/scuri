@@ -6,6 +6,7 @@
   "scripts": {
     "tsc": "tsc",
     "start": "npm run tsc index.ts && node index.js example.component.ts",
+    "create": "npm run tsc create-function.ts && node create-function.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
