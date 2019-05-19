@@ -1,0 +1,27 @@
+{
+  "name": "curi",
+  "version": "1.0.0",
+  "description": " Create (a spec) Update (a spec) Read (class (component, service, directive ... ) dependencies) Incorporate (them in the result )",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gparlakov/curi.git"
+  },
+  "keywords": [
+    "spec",
+    "unit",
+    "test",
+    "generator",
+    "update",
+    "angular"
+  ],
+  "author": "gparlakov@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gparlakov/curi/issues"
+  },
+  "homepage": "https://github.com/gparlakov/curi#readme"
+}
