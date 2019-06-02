@@ -1,3 +1,5 @@
+// goal of this was to create a ts file - perhaps schematics will be better suited for that?
+
 import ts = require("typescript");
 
 function makeFactorialFunction() {
