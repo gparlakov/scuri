@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "id": "SpecSchema",
+  "title": "Spec options Schema",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of component we create a spec for"
+    },
+    "param": {
+      "type": "string",
+      "description": "The constructor parameters"
+    }
+  },
+  "required": ["name"]
+}
