@@ -1,3 +1,5 @@
+import { <%= classify(name) %> } from './<%= dasherize(name) %>.component';
+
 describe('<%= classify(name) %>', () => {
   it('when then should', () => {
     // arrange

@@ -5,7 +5,8 @@
   "scripts": {
     "s": "schematics",
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && jasmine src/**/*_spec.js"
+    "build.test": "tsc -p tsconfig.test.json",
+    "test": "npm run build.test && jasmine src/**/*_spec.js"
   },
   "keywords": [
     "schematics"
@@ -17,7 +18,7 @@
     "@angular-devkit/core": "^7.3.9",
     "@angular-devkit/schematics": "^7.3.9",
     "@angular-devkit/schematics-cli": "^0.800.1",
-    "@types/jasmine": "^3.0.0",
+    "@types/jasmine": "^3.3.13",
     "@types/node": "^8.0.31",
     "jasmine": "^3.0.0",
     "typescript": "~3.2.2"

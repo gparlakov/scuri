@@ -42,7 +42,8 @@ export function spec(options: SpecOptions): Rule {
         params: params,
         toConstructorParams,
         toDeclaration,
-        toBuilderExports
+        toBuilderExports,
+        dasherize: strings.dasherize
       })
     ]);
 
