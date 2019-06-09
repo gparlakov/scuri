@@ -10,12 +10,15 @@ import {
   url
 } from "@angular-devkit/schematics";
 
+import { readClassNamesAndConstructorParams } from "../read/read";
+
 class SpecOptions {
   name: string;
   param: string[];
 }
 
-export function spec(options: SpecOptions): Rule {
+export function spec(options: SpecOptions, context: SchematicContext): Rule {
+  context.logger.info('workd')
   // take one or multiple specified param(s) or an empty array of those
   const specifiedParams = options.param
     ? Array.isArray(options.param)
@@ -23,13 +26,14 @@ export function spec(options: SpecOptions): Rule {
       : [options.param]
     : [];
 
+  readClassNamesAndConstructorParams(options.name);
+
   // turn them  from <name,type> (i.e. 'my:HttpClient') into the type {name: string, type: string } i.e. name: 'my', type:'HttpClient'
   const params = specifiedParams
     .map(p => p.split(":"))
     .map(split => ({ name: split[0], type: split[1] }));
 
   return (_: Tree, _context: SchematicContext) => {
-
     // todo next steps
     // read the file passed in with the name - i.e. test or test.component.ts or test.service.ts or test.directive.ts (or some else)
     // then turn the component's parameters into params here

@@ -4,9 +4,11 @@
   "description": "A blank schematics",
   "scripts": {
     "s": "schematics",
+    "start": "npm run build && npm run s .:spec -- --name ./example/example-component.ts",
     "build": "tsc -p tsconfig.json",
     "build.test": "tsc -p tsconfig.test.json",
-    "test": "npm run build.test && jasmine src/**/*_spec.js"
+    "test": "npm run build.test && jasmine src/**/*_spec.js",
+    "watch": "npm start & chokidar \"src/**/*.ts\" -c \"npm start\""
   },
   "keywords": [
     "schematics"
@@ -22,5 +24,8 @@
     "@types/node": "^8.0.31",
     "jasmine": "^3.0.0",
     "typescript": "~3.2.2"
+  },
+  "devDependencies": {
+    "chokidar-cli": "^1.2.2"
   }
 }

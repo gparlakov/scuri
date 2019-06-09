@@ -55,10 +55,10 @@ function delint(sourceFile: ts.SourceFile) {
         const constrNode = node as ts.ConstructorDeclaration;
 
         constrNode.parameters.forEach(p =>
-          report(p, `param ${p.name.getFullText()} ${p.type.getFullText()}`)
+          report(p, `param ${p.name.getFullText()} ${p.type && p.type.getFullText()}`)
         );
         constrNode.parameters.forEach(p =>
-          report(p, `param ${p.name.getText()} ${p.type.getText()}`)
+          report(p, `param ${p.name.getText()} ${p.type && p.type.getText()}`)
         );
         //constrNode.parameters.forEach(p => console.log('param', p.name, p.type));
 
