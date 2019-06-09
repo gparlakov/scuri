@@ -1,3 +1,4 @@
+import { autoSpy } from 'autoSpy';
 import { <%= classify(name) %> } from './<%= dasherize(name) %>.component';
 
 describe('<%= classify(name) %>', () => {
