@@ -1,36 +1,26 @@
 {
-  "name": "curi",
-  "version": "1.0.0",
-  "description": " Create (a spec) Update (a spec) Read (class (component, service, directive ... ) dependencies) Incorporate (them in the result )",
-  "main": "index.js",
+  "name": "spec",
+  "version": "0.0.0",
+  "description": "A blank schematics",
   "scripts": {
-    "tsc": "tsc",
-    "start": "npm run tsc index.ts && node index.js example.component.ts",
-    "create": "npm run tsc create-function.ts && node create-function.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/gparlakov/curi.git"
+    "s": "schematics",
+    "build": "tsc -p tsconfig.json",
+    "build.test": "tsc -p tsconfig.test.json",
+    "test": "npm run build.test && jasmine src/**/*_spec.js"
   },
   "keywords": [
-    "spec",
-    "unit",
-    "test",
-    "generator",
-    "update",
-    "angular"
+    "schematics"
   ],
-  "author": "gparlakov@gmail.com",
+  "author": "",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/gparlakov/curi/issues"
-  },
-  "homepage": "https://github.com/gparlakov/curi#readme",
+  "schematics": "./src/collection.json",
   "dependencies": {
-    "typescript": "^3.4.5"
-  },
-  "devDependencies": {
-    "@types/node": "^12.0.2"
+    "@angular-devkit/core": "^7.3.9",
+    "@angular-devkit/schematics": "^7.3.9",
+    "@angular-devkit/schematics-cli": "^0.800.1",
+    "@types/jasmine": "^3.3.13",
+    "@types/node": "^8.0.31",
+    "jasmine": "^3.0.0",
+    "typescript": "~3.2.2"
   }
 }
