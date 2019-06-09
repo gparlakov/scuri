@@ -11,6 +11,9 @@ export function readClassNamesAndConstructorParams(
     true
   );
 
+  // todo how to get all classes (deep ? or just shallow - start with just shallow)
+  // todo get all constructor params
+
   read(sourceFile);
 
   return [];
@@ -18,60 +21,38 @@ export function readClassNamesAndConstructorParams(
   function read(node: ts.Node) {
     switch (node.kind) {
       case ts.SyntaxKind.ClassDeclaration: {
-        console.log(
-          "class declaration start",
-          sourceFile.getLineAndCharacterOfPosition(node.getStart()),
-          "end",
-          sourceFile.getLineAndCharacterOfPosition(node.end)
-        );
-        break;
-      }
-
-      case ts.SyntaxKind.ClassExpression: {
-        console.log(
-          "class expression",
-          sourceFile.getLineAndCharacterOfPosition(node.getStart()),
-          "end",
-          sourceFile.getLineAndCharacterOfPosition(node.end)
-        );
-        break;
-      }
-
-      case ts.SyntaxKind.Constructor: {
-        console.log(
-          "consturctor start",
-          sourceFile.getLineAndCharacterOfPosition(node.getStart()),
-          "end",
-          sourceFile.getLineAndCharacterOfPosition(node.end)
-        );
-        const constrNode = node as ts.ConstructorDeclaration;
-
-        constrNode.parameters.forEach(p =>
-          report(p, `param ${p.name.getFullText()} ${p.type && p.type.getFullText()}`)
-        );
-        constrNode.parameters.forEach(p =>
-          report(p, `param ${p.name.getText()} ${p.type && p.type.getText()}`)
-        );
-        //constrNode.parameters.forEach(p => console.log('param', p.name, p.type));
-
+        const result = {
+          name: node.getText(),
+          params: readConstructorParams
+        };
         break;
       }
     }
 
-    function report(node: ts.Node, message: string) {
-      const { line, character } = sourceFile.getLineAndCharacterOfPosition(
-        node.getStart()
-      );
-      console.log(
-        `${sourceFile.fileName} (${line + 1},${character + 1}): ${message}`
-      );
-    }
+    ts.forEachChild(node, read);
   }
+}
+
+function readConstructorParams(node: ts.ClassDeclaration): ConstructorParam[] {
+  let params: ConstructorParam[] = [];
+  ts.forEachChild(node, node => {
+    if (node.kind === ts.SyntaxKind.Constructor) {
+      const constructor = node as ts.ConstructorDeclaration;
+
+      params = constructor.parameters.map(p => ({
+        name: p.name.getText(),
+        type: (p.type && p.type.getText()) || "any" // the type of constructor param or any if not passe
+      }));
+    }
+  });
+  return params;
 }
 export type ClassDescription = {
   name: string;
-  constructorParams: {
-    name: string;
-    type: string;
-  };
+  constructorParams: ConstructorParam[];
+};
+
+type ConstructorParam = {
+  name: string;
+  type: string;
 };

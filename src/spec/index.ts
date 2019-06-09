@@ -17,8 +17,8 @@ class SpecOptions {
   param: string[];
 }
 
-export function spec(options: SpecOptions, context: SchematicContext): Rule {
-  context.logger.info('workd')
+export function spec(options: SpecOptions): Rule {
+
   // take one or multiple specified param(s) or an empty array of those
   const specifiedParams = options.param
     ? Array.isArray(options.param)
