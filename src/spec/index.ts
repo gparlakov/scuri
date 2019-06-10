@@ -18,27 +18,11 @@ class SpecOptions {
 }
 
 export function spec(options: SpecOptions): Rule {
-
-  // take one or multiple specified param(s) or an empty array of those
-  const specifiedParams = options.param
-    ? Array.isArray(options.param)
-      ? options.param
-      : [options.param]
-    : [];
-
-  readClassNamesAndConstructorParams(options.name);
-
-  // turn them  from <name,type> (i.e. 'my:HttpClient') into the type {name: string, type: string } i.e. name: 'my', type:'HttpClient'
-  const params = specifiedParams
-    .map(p => p.split(":"))
-    .map(split => ({ name: split[0], type: split[1] }));
+  const classDescriptions = readClassNamesAndConstructorParams(options.name);
+  const params = classDescriptions[0].constructorParams;
+  // todo - handle case with multiple components/services/pipes/etc. in one file
 
   return (_: Tree, _context: SchematicContext) => {
-    // todo next steps
-    // read the file passed in with the name - i.e. test or test.component.ts or test.service.ts or test.directive.ts (or some else)
-    // then turn the component's parameters into params here
-    // then run the schematic
-
     const templateSource = apply(url("../files"), [
       template({
         classify: strings.classify,

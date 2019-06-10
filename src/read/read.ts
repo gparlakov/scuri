@@ -11,30 +11,37 @@ export function readClassNamesAndConstructorParams(
     true
   );
 
-  // todo how to get all classes (deep ? or just shallow - start with just shallow)
-  // todo get all constructor params
+  return read(sourceFile);
+}
 
-  read(sourceFile);
-
-  return [];
-
-  function read(node: ts.Node) {
-    switch (node.kind) {
-      case ts.SyntaxKind.ClassDeclaration: {
-        const result = {
-          name: node.getText(),
-          params: readConstructorParams
-        };
-        break;
+function read(node: ts.Node) {
+  let result: ClassDescription[] = [];
+  if (node.kind === ts.SyntaxKind.ClassDeclaration) {
+    const classDeclaration = node as ts.ClassDeclaration;
+    result = [
+      {
+        name:
+          classDeclaration.name != null
+            ? classDeclaration.name.getText()
+            : "default",
+        constructorParams: readConstructorParams(node as ts.ClassDeclaration)
       }
-    }
-
-    ts.forEachChild(node, read);
+    ];
   }
+
+  ts.forEachChild(node, n => {
+    const r = read(n);
+    if (r && r.length > 0) {
+      result = result.concat(r);
+    }
+  });
+
+  return result;
 }
 
 function readConstructorParams(node: ts.ClassDeclaration): ConstructorParam[] {
   let params: ConstructorParam[] = [];
+
   ts.forEachChild(node, node => {
     if (node.kind === ts.SyntaxKind.Constructor) {
       const constructor = node as ts.ConstructorDeclaration;
