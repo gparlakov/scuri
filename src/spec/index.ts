@@ -1,15 +1,6 @@
-import { strings } from "@angular-devkit/core";
-import {
-  apply,
-  template,
-  branchAndMerge,
-  mergeWith,
-  Rule,
-  SchematicContext,
-  Tree,
-  url
-} from "@angular-devkit/schematics";
-
+import { basename, normalize, strings } from "@angular-devkit/core";
+import { apply, branchAndMerge, mergeWith, Rule, SchematicContext, template, Tree, url } from "@angular-devkit/schematics";
+import { EOL } from 'os';
 import { readClassNamesAndConstructorParams } from "../read/read";
 
 class SpecOptions {
@@ -22,16 +13,17 @@ export function spec(options: SpecOptions): Rule {
   const params = classDescriptions[0].constructorParams;
   // todo - handle case with multiple components/services/pipes/etc. in one file
 
-  return (_: Tree, _context: SchematicContext) => {
+  return (_tree: Tree, __context: SchematicContext) => {
+
     const templateSource = apply(url("../files"), [
       template({
         classify: strings.classify,
-        name: options.name,
+        name: basename(normalize(options.name)),
         params: params,
         toConstructorParams,
         toDeclaration,
         toBuilderExports,
-        dasherize: strings.dasherize
+        dasherize: strings.dasherize,
       })
     ]);
 
@@ -43,14 +35,14 @@ export function spec(options: SpecOptions): Rule {
   }
 
   function toDeclaration() {
-    return params.map(p => `const ${p.name} = autoSpy(${p.type})`).join("/n");
+    return params.map(p => `const ${p.name} = autoSpy(${p.type})`).join(EOL);
   }
 
   function toBuilderExports() {
     return params.length > 0
       ? params
           .map(p => p.name)
-          .join(",/n")
+          .join("," + EOL)
           .concat(",")
       : "";
   }

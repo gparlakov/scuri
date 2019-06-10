@@ -3,7 +3,7 @@
   "schematics": {
     "spec": {
       "description": "A blank schematic.",
-      "factory": "../dist/spec/index#spec",
+      "factory": "./spec/index#spec",
       "schema": "./spec/schema.json"
     }
   }
