@@ -1,5 +1,5 @@
 import { autoSpy } from 'autoSpy';
-import { <%= classify(name) %> } from './<%= dasherize(name) %>.component';
+import { <%= className %> } from './<%= normalizedName %>';
 
 describe('<%= classify(name) %>', () => {
   it('when then should', () => {
@@ -21,7 +21,7 @@ function setup() {
       return builder;
     },
     build() {
-      return new <%= classify(name) %>(<%= toConstructorParams() %>);
+      return new <%= className %>(<%= toConstructorParams() %>);
     }
   };
 
