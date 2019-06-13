@@ -1,7 +1,7 @@
 import { autoSpy } from 'autoSpy';
 import { <%= className %> } from './<%= normalizedName %>';
 
-describe('<%= classify(name) %>', () => {
+describe('<%= className %>', () => {
   it('when then should', () => {
     // arrange
     const { build } = setup().default();
