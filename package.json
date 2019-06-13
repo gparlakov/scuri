@@ -1,7 +1,7 @@
 {
-  "name": "spec",
-  "version": "0.0.0",
-  "description": "A blank schematics",
+  "name": "curi",
+  "version": "0.1.0",
+  "description": "A spec generator schematic",
   "scripts": {
     "s": "schematics",
     "start": "npm run build && npm run s .:spec -- --name ./example/example.component.ts",
