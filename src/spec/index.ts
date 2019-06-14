@@ -19,8 +19,19 @@ class SpecOptions {
 
 export function spec(options: SpecOptions): Rule {
   const classDescriptions = readClassNamesAndConstructorParams(options.name);
-  const params = classDescriptions[0].constructorParams;
-  const className = classDescriptions[0].name;
+  // we'll take the first class with any number of constructor params or just the first if there are none
+  const classWithConstructorParamsOrFirst =
+    classDescriptions.filter(c => c.constructorParams.length > 0)[0] ||
+    classDescriptions[0];
+  if (classWithConstructorParamsOrFirst == null) {
+    throw new Error("No classes found to be spec-ed!");
+  }
+  const {
+    constructorParams: params,
+    name: className,
+    publicMethods
+  } = classWithConstructorParamsOrFirst;
+
   // todo - handle case with multiple components/services/pipes/etc. in one file
 
   return (_tree: Tree, __context: SchematicContext) => {
@@ -28,7 +39,6 @@ export function spec(options: SpecOptions): Rule {
     const fileName = basename(normalized);
     const ext = extname(fileName);
     const normalizedName = fileName.slice(0, fileName.length - ext.length);
-    console.log(normalizedName);
 
     const templateSource = apply(url("../files"), [
       template({
@@ -44,7 +54,8 @@ export function spec(options: SpecOptions): Rule {
         toConstructorParams,
         toDeclaration,
         toBuilderExports,
-        dasherize: strings.dasherize
+        dasherize: strings.dasherize,
+        publicMethods
       })
     ]);
     // todo - can we format the output?

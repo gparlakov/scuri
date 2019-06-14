@@ -2,3 +2,5 @@
 *.ts
 !*.d.ts
 dist
+read/**/*.d.ts
+!read/read.d.ts

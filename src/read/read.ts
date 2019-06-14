@@ -24,7 +24,8 @@ function read(node: ts.Node) {
           classDeclaration.name != null
             ? classDeclaration.name.getText()
             : "default",
-        constructorParams: readConstructorParams(node as ts.ClassDeclaration)
+        constructorParams: readConstructorParams(node as ts.ClassDeclaration),
+        publicMethods: readPublicMethods(node as ts.ClassDeclaration)
       }
     ];
   }
@@ -54,9 +55,26 @@ function readConstructorParams(node: ts.ClassDeclaration): ConstructorParam[] {
   });
   return params;
 }
+
+function readPublicMethods(node: ts.ClassDeclaration): string[] {
+  let publicMethods: string[] = [];
+
+  ts.forEachChild(node, node => {
+    if (node.kind === ts.SyntaxKind.MethodDeclaration) {
+      const method = node as ts.MethodDeclaration;
+      const flags = ts.getCombinedModifierFlags(method);
+
+      if (flags === 0 || (flags | ts.ModifierFlags.Public) === 0) {
+        publicMethods.push(method.name.getText());
+      }
+    }
+  });
+  return publicMethods;
+}
 export type ClassDescription = {
   name: string;
   constructorParams: ConstructorParam[];
+  publicMethods: string[];
 };
 
 type ConstructorParam = {

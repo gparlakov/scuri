@@ -2,7 +2,7 @@ import { autoSpy } from 'autoSpy';
 import { <%= className %> } from './<%= normalizedName %>';
 
 describe('<%= className %>', () => {
-  it('when then should', () => {
+  <% publicMethods.forEach(meth=> { %>it('when <%= meth %> is called it should', () => {
     // arrange
     const { build } = setup().default();
     const c = build();
@@ -11,6 +11,8 @@ describe('<%= className %>', () => {
     // assert
     // expect(c).toEqual
   });
+
+  <% }) %>
 });
 
 function setup() {

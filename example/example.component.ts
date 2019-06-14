@@ -10,4 +10,6 @@ export class ExampleComponent {
 
     // a comment
     anotherMethod() {}
+    private third() {}
+    public fourth() {}
   }
