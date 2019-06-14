@@ -1,7 +1,7 @@
 {
-  "name": "curi",
+  "name": "scuri",
   "version": "0.1.0",
-  "description": "A spec generator schematic",
+  "description": "A spec generator schematic - Spec Create Update Read (class - component, service, directive and dependencies) Incorporate (them in the result)",
   "scripts": {
     "s": "schematics",
     "start": "npm run build && npm run s .:spec -- --name ./example/example.component.ts",
