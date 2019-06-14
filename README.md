@@ -1,6 +1,19 @@
-# Getting Started With Schematics
+# SCURI
+A spec generator schematic - Spec Create Update Read (class - component, service, directive and dependencies) Incorporate (them in the result)
 
-This repository is a basic Schematic implementation that serves as a starting point to create and publish Schematics to NPM.
+## Getting started
+
+```
+npm install -D scuri
+ng g scuri:spec --name src/app/app.component
+
+```
+### For Angular <= 5
+```
+npm install -D scuri
+npm i @angular-devkit/schematics-cli
+schematics scuri:spec --name src/app/app.component
+```
 
 ### Testing
 
@@ -14,15 +27,3 @@ schematics --help
 ### Unit Testing
 
 `npm run test` will run the unit tests, using Jasmine as a runner and test framework.
-
-### Publishing
-
-To publish, simply do:
-
-```bash
-npm run build
-npm publish
-```
-
-That's it!
- 
