@@ -1,6 +1,10 @@
 # Ignores TypeScript files, but keeps definitions.
+node_modulese
+example
 *.ts
+!src/files/*.ts
 !*.d.ts
 dist
 read/**/*.d.ts
 !read/read.d.ts
+*.tgz

@@ -12,6 +12,7 @@
   },
   "private": true,
   "dependencies": {
+    "@angular-devkit/schematics-cli": "^0.800.3",
     "@angular/animations": "^5.2.0",
     "@angular/common": "^5.2.0",
     "@angular/compiler": "^5.2.0",
@@ -26,9 +27,9 @@
     "zone.js": "^0.8.19"
   },
   "devDependencies": {
+    "@angular-devkit/schematics": "0.7.0",
     "@angular/cli": "~1.7.4",
     "@angular/compiler-cli": "^5.2.0",
-    "@angular-devkit/schematics": "0.7.0",
     "@angular/language-service": "^5.2.0",
     "@types/jasmine": "~2.8.3",
     "@types/jasminewd2": "~2.0.2",
@@ -42,7 +43,7 @@
     "karma-jasmine": "~1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
     "protractor": "~5.1.2",
-    "scuri": "^0.1.0",
+    "scuri": "^0.1.1",
     "ts-node": "~4.1.0",
     "tslint": "~5.9.1",
     "typescript": "~2.5.3"

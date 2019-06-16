@@ -6,14 +6,19 @@ A spec generator schematic - Spec Create Update Read (class - component, service
 ```
 npm install -D scuri
 ng g scuri:spec --name src/app/app.component
-
 ```
+If you gen error of the `Error: Invalid rule result: Function().` see the next section about Angular <= 5.
+
 ### For Angular <= 5
+Since the bundled cli (~1.7.4) is not compatible with the latest schematic version we need to install schematics separately and call scuri with that.
 ```
 npm install -D scuri
 npm i @angular-devkit/schematics-cli
 schematics scuri:spec --name src/app/app.component
 ```
+
+### Use case
+After a component has been created it is boring and tedious to do the tests. Scuri tries to jump start that by walking the components constructor and dependencies and creating mocks for each dependency.
 
 ### Testing
 
