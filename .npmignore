@@ -8,3 +8,5 @@ dist
 read/**/*.d.ts
 !read/read.d.ts
 *.tgz
+tsconfig.json
+tslint.json
