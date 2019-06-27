@@ -18,6 +18,7 @@ class SpecOptions {
 }
 
 export function spec(options: SpecOptions): Rule {
+
   const classDescriptions = readClassNamesAndConstructorParams(options.name);
   // we'll take the first class with any number of constructor params or just the first if there are none
   const classWithConstructorParamsOrFirst =
@@ -34,7 +35,7 @@ export function spec(options: SpecOptions): Rule {
 
   // todo - handle case with multiple components/services/pipes/etc. in one file
 
-  return (tree: Tree, context: SchematicContext) => {
+  return (tree: Tree, _context: SchematicContext) => {
     const normalized = normalize(options.name);
     const fileName = basename(normalized);
     const ext = extname(fileName);
@@ -59,8 +60,7 @@ export function spec(options: SpecOptions): Rule {
       })
     ]);
     // todo - can we format the output?
-    const c = (branchAndMerge(mergeWith(templateSource))(tree, context));
-    return c;
+    return branchAndMerge(mergeWith(templateSource))(tree, _context);
   };
 
   function toConstructorParams() {

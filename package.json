@@ -4,11 +4,13 @@
   "description": "A spec generator schematic - Spec Create Update Read (class - component, service, directive and dependencies) Incorporate (them in the result)",
   "scripts": {
     "s": "schematics",
-    "start": "npm run build && npm run s .:spec -- --name ./example/example.component.ts",
+    "start": "npm run build",
     "build": "tsc -p tsconfig.json",
     "build.test": "tsc -p tsconfig.test.json",
     "test": "npm run build.test && jasmine src/**/*_spec.js",
-    "watch": "chokidar \"src/**/*.ts\" -c \"npm start\" --initial --ignore \"src/**/*.d.ts\""
+    "build.run": "npm run build && npm run s .:spec -- --name ./example/example.component.ts",
+    "watch": "chokidar \"src/**/*.ts\" -c \"npm start\" --initial --ignore \"src/**/*.d.ts\"",
+    "watch.build.run": "chokidar \"src/**/*.ts\" -c \"npm build.run\" --initial --ignore \"src/**/*.d.ts\""
   },
   "keywords": [
     "schematics"
