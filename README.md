@@ -17,6 +17,12 @@ npm i @angular-devkit/schematics-cli
 schematics scuri:spec --name src/app/app.component
 ```
 
+or the `--name` could be omitted and the first argument is passed in as the name
+```
+schematics scuri:spec src/app/app.component
+
+```
+
 ### Use case
 After a component has been created it is boring and tedious to do the tests. Scuri tries to jump start that by walking the components constructor and dependencies and creating mocks for each dependency.
 

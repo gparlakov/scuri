@@ -11,10 +11,6 @@
         "$source": "argv",
         "index": 0
       }
-    },
-    "param": {
-      "type": "string",
-      "description": "The constructor parameters"
     }
   },
   "required": ["name"]
