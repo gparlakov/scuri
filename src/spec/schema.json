@@ -6,7 +6,11 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "The name of component we create a spec for"
+      "description": "The name of component we create a spec for",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
     },
     "param": {
       "type": "string",

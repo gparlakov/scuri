@@ -34,7 +34,7 @@ export function spec(options: SpecOptions): Rule {
 
   // todo - handle case with multiple components/services/pipes/etc. in one file
 
-  return (_tree: Tree, __context: SchematicContext) => {
+  return (tree: Tree, context: SchematicContext) => {
     const normalized = normalize(options.name);
     const fileName = basename(normalized);
     const ext = extname(fileName);
@@ -59,7 +59,8 @@ export function spec(options: SpecOptions): Rule {
       })
     ]);
     // todo - can we format the output?
-    return branchAndMerge(mergeWith(templateSource));
+    const c = (branchAndMerge(mergeWith(templateSource))(tree, context));
+    return c;
   };
 
   function toConstructorParams() {
