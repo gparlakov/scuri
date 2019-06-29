@@ -3,17 +3,9 @@ import { SchematicTestRunner } from "@angular-devkit/schematics/testing";
 import * as path from "path";
 
 const collectionPath = path.join(__dirname, "../../src/collection.json");
-const exampleComponentPath = path.join(
-  __dirname,
-  "../../example/example.component.ts"
-);
-const exampleComponentSpec = path.join(
-  __dirname,
-  "../../example/example.component.ts"
-);
 
 function file(name: string) {
-  return path.join(__dirname, 'files', name);
+  return path.join(__dirname, "files", name);
 }
 
 describe("spec", () => {
@@ -22,23 +14,57 @@ describe("spec", () => {
     expect(() => runner.runSchematic("spec", {}, Tree.empty())).toThrow();
   });
 
-  it("creates a file with dasherized name passed in", () => {
+  it("creates a file when name is passed in", () => {
     const runner = new SchematicTestRunner("schematics", collectionPath);
-    const result = runner.runSchematic(
-      "spec",
-      { name: file('empty-class.ts') },
-      Tree.empty()
-    );
+    const result = runner.runSchematic("spec", { name: file("empty-class.ts") }, Tree.empty());
     expect(result.files[0]).toMatch("empty-class.spec.ts");
   });
 
-  it("creates the spec ", () => {
+  it("creates a file with a non-empty content ", () => {
+    // arrange
     const runner = new SchematicTestRunner("schematics", collectionPath);
-    const result = runner.runSchematic(
-      "spec",
-      { name: exampleComponentPath },
-      Tree.empty()
-    );
-    expect(result.readContent(exampleComponentSpec)).not.toBeNull();
+    // act
+    const result = runner.runSchematic("spec", { name: file("empty-class.ts") }, Tree.empty());
+    // assert
+    expect(result.readContent(result.files[0]).length).toBeGreaterThan(0);
+  });
+
+  describe("targeting the EmptyClass", () => {
+    it("creates a file with the boilerplate setup method ", () => {
+      // arrange
+      const runner = new SchematicTestRunner("schematics", collectionPath);
+      // act
+      const result = runner.runSchematic("spec", { name: file("empty-class.ts") }, Tree.empty());
+      // assert
+      const contents = result.readContent(result.files[0]);
+      expect(contents).toMatch(/function setup\(\) {/);
+      expect(contents).toMatch(/const builder = {/);
+      expect(contents).toMatch(/return new EmptyClass\(\);/);
+    });
+  });
+
+  describe("targeting the has-one-constructor-param class", () => {
+    it("it creates boilerplate with a new instance with one matching constructor parameter ", () => {
+      // arrange
+      const runner = new SchematicTestRunner("schematics", collectionPath);
+      // act
+      const result = runner.runSchematic("spec", { name: file("has-one-constructor-parameter.ts") }, Tree.empty());
+      // assert
+      const contents = result.readContent(result.files[0]);
+      expect(contents).toMatch(/return new HasOneConstructorParameter\(service\);/);
+    });
+  });
+
+  describe("targeting the example component class", () => {
+    it("creates a file with matching number of `it` calls for each public method ", () => {
+      // arrange
+      const runner = new SchematicTestRunner("schematics", collectionPath);
+      // act
+      const result = runner.runSchematic("spec", { name: file("example.component.ts") }, Tree.empty());
+      // assert
+      const contents = result.readContent(result.files[0]);
+      expect(contents).toMatch(/it\('when aMethod is called/);
+      expect(contents).toMatch(/it\('when anotherMethod is called/);
+    });
   });
 });

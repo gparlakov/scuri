@@ -32,5 +32,8 @@
   "devDependencies": {
     "@angular/cli": "^1.7.4",
     "chokidar-cli": "^1.2.2"
+  },
+  "prettier": {
+    "printWidth": 100
   }
 }
