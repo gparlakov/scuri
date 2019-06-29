@@ -8,4 +8,13 @@ import { Component } from "@angular/core";
 export class AppComponent {
   constructor(dep: string) {}
   title = "app";
+  publicMethod() {}
+
+  public explicitPublicMethod() {}
+
+  async asyncPublicMethod() {}
+
+  private privateMethod() {}
+
+  protected protectedMethod() {}
 }
