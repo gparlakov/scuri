@@ -30,7 +30,6 @@
     "typescript": "~3.2.2"
   },
   "devDependencies": {
-    "@angular/cli": "^1.7.4",
     "chokidar-cli": "^1.2.2"
   },
   "prettier": {
