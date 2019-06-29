@@ -9,7 +9,7 @@ After a component has been created it is boring and tedious to do the tests. Scu
 npm install -D scuri
 ng g scuri:spec --name src/app/app.component
 ```
-If you gen error of the `Error: Invalid rule result: Function().` see the [troubleshooting section below](#rule_result_function).
+If you gen error of the `Error: Invalid rule result: Function().` see the [troubleshooting section below](#rule-result-function).
 
 ## Contributing
 
