@@ -13,21 +13,58 @@ If you gen error of the `Error: Invalid rule result: Function().` see the [troub
 
 ## Contributing
 
-### Testing
-To test locally, install `@angular-devkit/schematics-cli` globally and use the `schematics` command line tool. That tool acts the same as the `generate` command of the Angular CLI, but also has a debug mode.
+### Clone and run
+In this example I clone `https://github.com/gparlakov/scuri`. If you want to contribute fork and clone your own forked repo.
 
-Check the documentation with
-```bash
-schematics --help
+```
+git clone https://github.com/gparlakov/scuri
+cd scuri
+npm install
+npm install -g @angular-devkit/schematics-cli
+npm run build
+schematics .:spec --name example/example.component.ts
 ```
 
+Or use the package.json/scripts I'm using in the day-to-day development to speed things up instead of the last three lines from above example.
+```
+npm run build.run -- --force --dry-run false
+```
+ - `--force` is required because there is already an example.component.spec.ts file
+ - `--dry-run false` is required because by default when running local schematics they are run in --dry-run mode - which only shows the expected actions and outcomes but does not actually modify the files on the filesystem
+
+### Use in an Angular app
+In this example I'm using the `example/angular-5-app` bundled with this repo. Feel free to use any Angular application you work on
+```
+cd #into-my-scuri-cloned-src-folder
+npm link
+cd example\angular-5-app
+npm link scuri
+ng g scuri:spec --name src/app/app.component.ts --force
+```
+
+- `cd #into-my-scuri-cloned-src-folder` or wherever you cloned the source - for example `cd scuri`
+- `npm link`  links to the current folder
+- `cd example\angular-5-app`  or any real angular application
+- `npm link scuri` # links scuri to the current folder/packages - as if - you've installed it like npm i -D scuri
+- `ng g scuri:spec --name src/app/app.component.ts --force` # force to overwrite the current spec
+
 ### Unit Testing
-`npm run test` will run the unit tests, using Jasmine as a runner and test framework.
+Single run:
+```
+npm run test
+```
+Runs the unit tests, using Jasmine as a runner and test framework. It builds the spec schematic, then builds the test in `/tests` and runs them.
+
+Or watch and run:
+```
+npm run watch.test
+```
+Will do the same as above but will also watch for file changes and re-run the tests.
 
 
 ## Troubleshooting
 
-###  Rule result Function
+### Rule result Function
 To workaround the `Error: Invalid rule result: Function().` install schematics separately and call `scuri` with that.
 ```
 npm install -D scuri

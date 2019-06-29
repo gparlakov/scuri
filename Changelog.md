@@ -1,4 +1,5 @@
 
+0.2.2 Update docs for easy start and contributor guide.
 0.2.1 Support `async` type of public method. Exclude `private` and `protected`.
 0.2.0 Rule executes and returns so Angular 5 will work with it
 
