@@ -84,5 +84,21 @@ describe("spec", () => {
         "method `protectedMethod` is protected - we should not create a test for it "
       );
     });
+
+    it("creates a file with `it` tests actually calling the public methods of the component/class ", () => {
+      // arrange
+      const runner = new SchematicTestRunner("schematics", collectionPath);
+      console.info = runner.logger.info;
+      // act
+      const result = runner.runSchematic(
+        "spec",
+        { name: file("example.component.ts") },
+        Tree.empty()
+      );
+      // assert
+      const contents = result.readContent(result.files[0]);
+      expect(contents).toMatch(/it\('when aMethod is called/);// the `it` test method
+      expect(contents).toMatch(/\.aMethod\(\)/g); // the call to the component's `aMethod` method
+    });
   });
 });
