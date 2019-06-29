@@ -31,6 +31,8 @@
   "exclude": [
     "src/**/files/**/*",
     "src/**/*_spec.ts",
-    "src/read/example"
+    "src/read/example",
+    "tests"
+
   ]
 }

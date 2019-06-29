@@ -48,7 +48,11 @@ describe("spec", () => {
       // arrange
       const runner = new SchematicTestRunner("schematics", collectionPath);
       // act
-      const result = runner.runSchematic("spec", { name: file("has-one-constructor-parameter.ts") }, Tree.empty());
+      const result = runner.runSchematic(
+        "spec",
+        { name: file("has-one-constructor-parameter.ts") },
+        Tree.empty()
+      );
       // assert
       const contents = result.readContent(result.files[0]);
       expect(contents).toMatch(/return new HasOneConstructorParameter\(service\);/);
@@ -59,12 +63,26 @@ describe("spec", () => {
     it("creates a file with matching number of `it` calls for each public method ", () => {
       // arrange
       const runner = new SchematicTestRunner("schematics", collectionPath);
+      console.info = runner.logger.info;
       // act
-      const result = runner.runSchematic("spec", { name: file("example.component.ts") }, Tree.empty());
+      const result = runner.runSchematic(
+        "spec",
+        { name: file("example.component.ts") },
+        Tree.empty()
+      );
       // assert
       const contents = result.readContent(result.files[0]);
       expect(contents).toMatch(/it\('when aMethod is called/);
       expect(contents).toMatch(/it\('when anotherMethod is called/);
+      expect(contents).toMatch(/it\('when fourth is called/);
+      expect(contents).not.toMatch(
+        /it\('when third is called/,
+        "method `third` is private - we should not create a test for it "
+      );
+      expect(contents).not.toMatch(
+        /it\('when protectedMethod is called/,
+        "method `protectedMethod` is protected - we should not create a test for it "
+      );
     });
   });
 });

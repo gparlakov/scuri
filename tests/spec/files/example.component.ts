@@ -12,7 +12,8 @@ export class ExampleComponent {
   ) {}
 
   // a comment
-  anotherMethod() {}
+  async anotherMethod() {}
   private third() {}
   public fourth() {}
+  protected protectedMethod() {}
 }

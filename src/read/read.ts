@@ -1,9 +1,7 @@
 import { readFileSync } from "fs";
 import * as ts from "typescript";
 
-export function readClassNamesAndConstructorParams(
-  fileName: string
-): ClassDescription[] {
+export function readClassNamesAndConstructorParams(fileName: string): ClassDescription[] {
   const sourceFile = ts.createSourceFile(
     fileName,
     readFileSync(fileName).toString(),
@@ -20,10 +18,7 @@ function read(node: ts.Node) {
     const classDeclaration = node as ts.ClassDeclaration;
     result = [
       {
-        name:
-          classDeclaration.name != null
-            ? classDeclaration.name.getText()
-            : "default",
+        name: classDeclaration.name != null ? classDeclaration.name.getText() : "default",
         constructorParams: readConstructorParams(node as ts.ClassDeclaration),
         publicMethods: readPublicMethods(node as ts.ClassDeclaration)
       }
@@ -62,14 +57,19 @@ function readPublicMethods(node: ts.ClassDeclaration): string[] {
   ts.forEachChild(node, node => {
     if (node.kind === ts.SyntaxKind.MethodDeclaration) {
       const method = node as ts.MethodDeclaration;
-      const flags = ts.getCombinedModifierFlags(method);
 
-      if (flags === 0 || (flags | ts.ModifierFlags.Public) === 0) {
+      if (methodIsPublic(method)) {
         publicMethods.push(method.name.getText());
       }
     }
   });
   return publicMethods;
+}
+
+function methodIsPublic(methodNode: ts.MethodDeclaration) {
+  const flags = ts.getCombinedModifierFlags(methodNode);
+  // check if the private flag is part of this binary flag - if not means the method is public
+  return (flags & ts.ModifierFlags.Private) !== ts.ModifierFlags.Private && (flags & ts.ModifierFlags.Protected) !== ts.ModifierFlags.Protected;
 }
 export type ClassDescription = {
   name: string;
