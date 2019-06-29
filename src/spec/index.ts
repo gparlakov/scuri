@@ -18,12 +18,10 @@ class SpecOptions {
 }
 
 export function spec(options: SpecOptions): Rule {
-
   const classDescriptions = readClassNamesAndConstructorParams(options.name);
   // we'll take the first class with any number of constructor params or just the first if there are none
   const classWithConstructorParamsOrFirst =
-    classDescriptions.filter(c => c.constructorParams.length > 0)[0] ||
-    classDescriptions[0];
+    classDescriptions.filter(c => c.constructorParams.length > 0)[0] || classDescriptions[0];
   if (classWithConstructorParamsOrFirst == null) {
     throw new Error("No classes found to be spec-ed!");
   }
@@ -33,9 +31,7 @@ export function spec(options: SpecOptions): Rule {
     publicMethods
   } = classWithConstructorParamsOrFirst;
 
-  // todo - handle case with multiple components/services/pipes/etc. in one file
-
-  return (tree: Tree, _context: SchematicContext) => {
+  return (tree: Tree, context: SchematicContext) => {
     const normalized = normalize(options.name);
     const fileName = basename(normalized);
     const ext = extname(fileName);
@@ -45,10 +41,7 @@ export function spec(options: SpecOptions): Rule {
       template({
         classify: strings.classify,
         normalizedName: normalizedName,
-        newFileNormalizedName: options.name.slice(
-          0,
-          options.name.length - ext.length
-        ),
+        newFileNormalizedName: options.name.slice(0, options.name.length - ext.length),
         name: options.name,
         className: className,
         params: params,
@@ -59,8 +52,7 @@ export function spec(options: SpecOptions): Rule {
         publicMethods
       })
     ]);
-    // todo - can we format the output?
-    return branchAndMerge(mergeWith(templateSource))(tree, _context);
+    return branchAndMerge(mergeWith(templateSource))(tree, context);
   };
 
   function toConstructorParams() {

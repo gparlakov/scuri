@@ -11,7 +11,7 @@ export class ExampleComponent {
     service: Object
   ) {}
 
-  // a comment
+  // an async public method
   async anotherMethod() {}
   private third() {}
   public fourth() {}
