@@ -1,5 +1,5 @@
 # Ignores TypeScript files, but keeps definitions.
-node_modulese
+node_modules
 example
 *.ts
 !src/files/*.ts
@@ -9,4 +9,6 @@ read/**/*.d.ts
 !read/read.d.ts
 *.tgz
 tsconfig.json
+tsconfig.test.json
 tslint.json
+tests
