@@ -77,7 +77,7 @@ export type ClassDescription = {
   publicMethods: string[];
 };
 
-type ConstructorParam = {
+export type ConstructorParam = {
   name: string;
   type: string;
 };

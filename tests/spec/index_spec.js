@@ -53,7 +53,6 @@ describe("spec", () => {
         it("creates a file with matching number of `it` calls for each public method ", () => {
             // arrange
             const runner = new testing_1.SchematicTestRunner("schematics", collectionPath);
-            console.info = runner.logger.info;
             // act
             const result = runner.runSchematic("spec", { name: file("example.component.ts") }, schematics_1.Tree.empty());
             // assert
@@ -67,13 +66,45 @@ describe("spec", () => {
         it("creates a file with `it` tests actually calling the public methods of the component/class ", () => {
             // arrange
             const runner = new testing_1.SchematicTestRunner("schematics", collectionPath);
-            console.info = runner.logger.info;
             // act
             const result = runner.runSchematic("spec", { name: file("example.component.ts") }, schematics_1.Tree.empty());
             // assert
             const contents = result.readContent(result.files[0]);
             expect(contents).toMatch(/it\('when aMethod is called/); // the `it` test method
             expect(contents).toMatch(/\.aMethod\(\)/g); // the call to the component's `aMethod` method
+        });
+    });
+    fdescribe("with pre-exising spec (UPDATE)", () => {
+        it("creates a file with matching number of `it` calls for each public method ", () => {
+            // arrange
+            const runner = new testing_1.SchematicTestRunner("schematics", collectionPath);
+            const tree = schematics_1.Tree.empty();
+            tree.create(file("to-update.spec.ts"), `import { ToUpdate } from "./to-update";
+
+      describe("ToUpdate", () => {});
+
+      function setup() {
+        let str: string;
+        const spec = autoSpy(Object);
+        const builder = {
+          str,
+          spec,
+          default() {
+            return builder;
+          },
+          build() {
+            return new ToUpdate(str, spec);
+          }
+        };
+
+        return builder;
+      }`);
+            // act
+            const result = runner.runSchematic("spec", { name: file("to-update.ts") }, tree);
+            // assert
+            const contents = result.readContent(result.files[0]);
+            // console.log(contents);
+            expect(contents.includes("spec")).toBeFalsy();
         });
     });
 });

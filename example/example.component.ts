@@ -6,7 +6,7 @@ export class ExampleComponent {
     aMethod(dep: string, service: Object) {}
 
     //a constructor comment
-    constructor(/** shows in full text and is hidden in text */dep: string, service: Object) {}
+    constructor(/** shows in full text and is hidden in text */mep: string, service1: Object) {}
 
     // a comment
     async anotherMethod() {}

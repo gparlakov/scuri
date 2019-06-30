@@ -11,6 +11,8 @@ import {
 } from "@angular-devkit/schematics";
 import { EOL } from "os";
 import { readClassNamesAndConstructorParams } from "../read/read";
+import { update } from "../update/update";
+import { Change, InsertChange, RemoveChange } from "../../lib/utility/change";
 
 class SpecOptions {
   name: string;
@@ -32,27 +34,61 @@ export function spec(options: SpecOptions): Rule {
   } = classWithConstructorParamsOrFirst;
 
   return (tree: Tree, context: SchematicContext) => {
+    // normalize the / and \ according to local OS
     const normalized = normalize(options.name);
+    // --name = ./example/example.component.ts -> example.component.ts
     const fileName = basename(normalized);
+    // --name = ./example/example.component.ts -> .ts
     const ext = extname(fileName);
+    // --name = ./example/example.component.ts -> ./example/example.component
+    // for import { ExampleComponent } from "./example/example.component"
     const normalizedName = fileName.slice(0, fileName.length - ext.length);
+    // the new spec full file name
+    // --name = ./example/example.component.ts -> ./example/example.component (gets .spec.ts added later)
+    const newFileNormalizedName = options.name.slice(0, options.name.length - ext.length);
 
-    const templateSource = apply(url("../files"), [
-      template({
-        classify: strings.classify,
-        normalizedName: normalizedName,
-        newFileNormalizedName: options.name.slice(0, options.name.length - ext.length),
-        name: options.name,
-        className: className,
-        params: params,
-        toConstructorParams,
-        toDeclaration,
-        toBuilderExports,
-        dasherize: strings.dasherize,
-        publicMethods
-      })
-    ]);
-    return branchAndMerge(mergeWith(templateSource))(tree, context);
+    const existingSpecFile = tree.get(newFileNormalizedName + ".spec" + ext);
+    console.log(newFileNormalizedName + ".spec" + ext, existingSpecFile);
+    // if a spec exists we'll update it
+    if (existingSpecFile) {
+      const changes = update(
+        existingSpecFile.path,
+        existingSpecFile.content.toString("utf8"),
+        params,
+        className
+      );
+
+      const recorder = tree.beginUpdate(existingSpecFile.path);
+      changes.forEach((change: Change) => {
+        console.log(change instanceof RemoveChange);
+        if (change instanceof InsertChange) {
+          recorder.insertLeft(change.pos, change.toAdd);
+        }
+        if (change instanceof RemoveChange) {
+          recorder.remove(change.order, change.toRemove.length);
+        }
+      });
+
+      tree.commitUpdate(recorder);
+      return tree;
+    } else {
+      // spec file does not exist
+      const templateSource = apply(url("../files"), [
+        template({
+          classify: strings.classify,
+          normalizedName: normalizedName,
+          newFileNormalizedName,
+          name: options.name,
+          className: className,
+          params: params,
+          toConstructorParams,
+          toDeclaration,
+          toBuilderExports,
+          publicMethods
+        })
+      ]);
+      return branchAndMerge(mergeWith(templateSource))(tree, context);
+    }
   };
 
   function toConstructorParams() {
