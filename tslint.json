@@ -1,14 +1,13 @@
 {
   "defaultSeverity": "error",
-//   "extends": ["tslint:recommended"],
-
+  //   "extends": ["tslint:recommended"],
   "jsRules": {
     "ban": [true, ["fit"]],
     "no-console": true,
-    "quotemark": true
+    "quotemark": [true, "single"  ]
   },
   "rules": {
-    "quotemark": true,
+    "quotemark": [true, "single"],
     "ban": [true, ["fit"]],
     "no-console": true
   },

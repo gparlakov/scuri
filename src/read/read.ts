@@ -1,4 +1,4 @@
-import * as ts from "../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript";
+import * as ts from '../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 
 export function readClassNamesAndConstructorParams(
     fileName: string,
@@ -15,7 +15,7 @@ function read(node: ts.Node) {
         const classDeclaration = node as ts.ClassDeclaration;
         result = [
             {
-                name: classDeclaration.name != null ? classDeclaration.name.getText() : "default",
+                name: classDeclaration.name != null ? classDeclaration.name.getText() : 'default',
                 constructorParams: readConstructorParams(node as ts.ClassDeclaration),
                 publicMethods: readPublicMethods(node as ts.ClassDeclaration)
             }
@@ -41,7 +41,7 @@ function readConstructorParams(node: ts.ClassDeclaration): ConstructorParam[] {
 
             params = constructor.parameters.map(p => ({
                 name: p.name.getText(),
-                type: (p.type && p.type.getText()) || "any" // the type of constructor param or any if not passe
+                type: (p.type && p.type.getText()) || 'any' // the type of constructor param or any if not passe
             }));
         }
     });

@@ -11,8 +11,8 @@ import {
   JsonAstNode,
   JsonAstObject,
   JsonValue,
-} from "@angular-devkit/core";
-import { UpdateRecorder } from "@angular-devkit/schematics";
+} from '@angular-devkit/core';
+import { UpdateRecorder } from '@angular-devkit/schematics';
 
 export function appendPropertyInAstObject(
   recorder: UpdateRecorder,
@@ -27,16 +27,16 @@ export function appendPropertyInAstObject(
     // Insert comma.
     const last = node.properties[node.properties.length - 1];
     const { text, end } = last;
-    const commaIndex = text.endsWith("\n") ? end.offset - 1 : end.offset;
-    recorder.insertRight(commaIndex, ",");
+    const commaIndex = text.endsWith('\n') ? end.offset - 1 : end.offset;
+    recorder.insertRight(commaIndex, ',');
     index = end.offset;
   }
   const content = JSON.stringify(value, null, indent).replace(/\n/g, indentStr);
   recorder.insertRight(
     index,
-    (node.properties.length === 0 && indent ? "\n" : "")
-    + " ".repeat(indent)
-    + `"${propertyName}":${indent ? " " : ""}${content}`
+    (node.properties.length === 0 && indent ? '\n' : '')
+    + ' '.repeat(indent)
+    + `"${propertyName}":${indent ? ' ' : ''}${content}`
     + indentStr.slice(0, -indent),
   );
 }
@@ -88,8 +88,8 @@ export function insertPropertyInAstObjectInOrder(
   recorder.insertRight(
     insertIndex,
     indentStr
-    + `"${propertyName}":${indent ? " " : ""}${content}`
-    + ",",
+    + `"${propertyName}":${indent ? ' ' : ''}${content}`
+    + ',',
   );
 }
 
@@ -109,7 +109,7 @@ export function removePropertyInAstObject(
   if (node.properties.length === 1) {
     // This is a special case. Everything should be removed, including indentation.
     recorder.remove(node.start.offset, node.end.offset - node.start.offset);
-    recorder.insertRight(node.start.offset, "{}");
+    recorder.insertRight(node.start.offset, '{}');
 
     return;
   }
@@ -144,7 +144,7 @@ export function removePropertyInAstObject(
   recorder.remove(start.offset, end.offset - start.offset);
   if (!nextProp) {
 
-    recorder.insertRight(start.offset, "\n");
+    recorder.insertRight(start.offset, '\n');
   }
 }
 
@@ -160,14 +160,14 @@ export function appendValueInAstArray(
   if (node.elements.length > 0) {
     // Insert comma.
     const last = node.elements[node.elements.length - 1];
-    recorder.insertRight(last.end.offset, ",");
+    recorder.insertRight(last.end.offset, ',');
     index = indent ? last.end.offset + 1 : last.end.offset;
   }
 
   recorder.insertRight(
     index,
-    (node.elements.length === 0 && indent ? "\n" : "")
-    + " ".repeat(indent)
+    (node.elements.length === 0 && indent ? '\n' : '')
+    + ' '.repeat(indent)
     + JSON.stringify(value, null, indent).replace(/\n/g, indentStr)
     + indentStr.slice(0, -indent),
   );
@@ -189,5 +189,5 @@ export function findPropertyInAstObject(
 }
 
 function _buildIndent(count: number): string {
-  return count ? "\n" + " ".repeat(count) : "";
+  return count ? '\n' + ' '.repeat(count) : '';
 }

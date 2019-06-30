@@ -1,10 +1,10 @@
-import { update } from "../../src/update/update";
-import { RemoveChange } from "../../lib/utility/change";
+import { update } from '../../src/update/update';
+import { RemoveChange } from '../../lib/utility/change';
 
-describe("Update a spec", () => {
-  it("should return a remove list", () => {
+describe('Update a spec', () => {
+  it('should return a remove list', () => {
     const result = update(
-      "./test",
+      './test',
       `import { autoSpy } from 'autoSpy';
         import { ExampleComponent } from './example.component';
 
@@ -29,7 +29,7 @@ describe("Update a spec", () => {
         }
         `,
       [],
-      "ExampleComponent"
+      'ExampleComponent'
     );
 
     const removes = result.filter(r => r instanceof RemoveChange);

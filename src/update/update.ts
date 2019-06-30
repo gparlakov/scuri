@@ -1,8 +1,8 @@
-import { Change, RemoveChange } from "../../lib/utility/change";
-import * as ts from "../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript";
-import { ConstructorParam } from "../read/read";
-import { findNodes } from "../../lib/utility/ast-utils";
-import { EOL } from "os";
+import { Change, RemoveChange } from '../../lib/utility/change';
+import * as ts from '../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
+import { ConstructorParam } from '../read/read';
+import { findNodes } from '../../lib/utility/ast-utils';
+import { EOL } from 'os';
 
 export function update(
     path: string,
@@ -15,7 +15,7 @@ export function update(
     const setupFunctionNode = readSetupFunction(source);
 
     if (setupFunctionNode == null) {
-        throw new Error("There is no setup function in the source file. We can't update that.");
+        throw new Error('There is no setup function in the source file. We can\'t update that.');
     }
 
     const currentParams = readCurrentParameterNames(setupFunctionNode, classUnderTestName);
@@ -23,7 +23,7 @@ export function update(
     const paramsToRemove = currentParams.filter(p => !dependencies.some(d => d.name === p));
     const paramsToAdd = dependencies.filter(d => !currentParams.some(c => c === d.name));
 
-    console.log("remove", paramsToRemove, "add:", paramsToAdd);
+    console.log('remove', paramsToRemove, 'add:', paramsToAdd);
 
     return remove(paramsToRemove, setupFunctionNode, path);
 }
@@ -34,7 +34,7 @@ function readSetupFunction(source: ts.Node) {
     ts.forEachChild(source, node => {
         if (node.kind === ts.SyntaxKind.FunctionDeclaration) {
             const name = (node as ts.FunctionDeclaration).name;
-            if (name != null && name.text.startsWith("setup")) {
+            if (name != null && name.text.startsWith('setup')) {
                 setupFunctionNode = node as ts.FunctionDeclaration;
                 return true; // finish the forEachChild - we found what we are looking for
             }
