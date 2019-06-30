@@ -120,7 +120,11 @@ describe('spec', () => {
             // arrange
             const runner = new SchematicTestRunner('schematics', collectionPath);
             // act
-            const result = runner.runSchematic('spec', { name: 'example.component.ts' }, exampleComponentTree);
+            const result = runner.runSchematic(
+                'spec',
+                { name: 'example.component.ts' },
+                exampleComponentTree
+            );
             // assert
             const contents = result.readContent('example.component.spec.ts');
             expect(contents).toMatch(/it\('when aMethod is called/);
@@ -140,7 +144,11 @@ describe('spec', () => {
             // arrange
             const runner = new SchematicTestRunner('schematics', collectionPath);
             // act
-            const result = runner.runSchematic('spec', { name: 'example.component.ts' }, exampleComponentTree);
+            const result = runner.runSchematic(
+                'spec',
+                { name: 'example.component.ts' },
+                exampleComponentTree
+            );
             // assert
             const contents = result.readContent('example.component.spec.ts');
             expect(contents).toMatch(/it\('when aMethod is called/); // the `it` test method
