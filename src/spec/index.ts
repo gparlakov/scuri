@@ -74,8 +74,8 @@ export function spec(options: SpecOptions): Rule {
                     recorder.remove(change.order, change.toRemove.length);
                 }
             });
-
             tree.commitUpdate(recorder);
+
             return tree;
         } else {
             // spec file does not exist

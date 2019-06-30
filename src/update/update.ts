@@ -77,20 +77,27 @@ function remove(toRemove: string[], setupFunction: ts.FunctionDeclaration, path:
         .filter(i => !i.parent || i.parent.kind !== ts.SyntaxKind.VariableDeclaration)
         .filter(i => toRemove.includes((i as ts.Identifier).getText()));
 
-    return instantiations.concat(uses).map(i => new RemoveChange(path, i.pos, i.getFullText()));
+    return instantiations
+        .concat(uses)
+        .map(i => new RemoveChange(path, i.pos, getTextPlusCommaIfNextCharIsComma(i)));
 }
 
-// @ts-ignore
-function getTextPlusCommaIfAny(i: ts.Node) {
-    const children = i.parent.getChildren();
-    const useIndex = children.findIndex(c => c === i);
-    if (children[useIndex + 1] && children[useIndex + 1].kind === ts.SyntaxKind.CommaToken) {
-        // there is a comma right after the node
-        return i.getText() + children[useIndex + 1].getText();
-    } else {
-        // there is no comma right after the node
-        return i.getText();
+/**
+ * Since we want to remove some content from the file it might be the case that there is a comma right after it.
+ *
+ * @param i the node to read
+ * @example *
+ * var t = new Class(toRemove, toKeep) // -> we want to remove [toRemove,] <- plus the comma
+ * var t = new Class(toKeep)
+ */
+function getTextPlusCommaIfNextCharIsComma(i: ts.Node) {
+    const nextSymbol = i.getSourceFile().getFullText()[i.getEnd()];
+    let text = i.getFullText();
+    if (nextSymbol === ',') {
+        text += nextSymbol;
     }
+
+    return text;
 }
 
 //@ts-ignore

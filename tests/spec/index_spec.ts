@@ -200,10 +200,9 @@ describe('spec', () => {
             // ToUpdate class has new deps - so we need to update the existing spec file
             const result = runner.runSchematic('spec', { name: 'to-update.ts' }, treeWithASpec);
             // assert
-            const contents = result.readContent(result.files[0]);
+            const contents = result.readContent('to-update.spec.ts');
             // console.log(contents);
             expect(contents.includes('ToUpdate(stringDependency, service)')).toBeFalsy();
-            // expect(contents.includes('ToUpdate(anotherStr, anotherSer)')).toBeTruthy();
         });
     });
 });
