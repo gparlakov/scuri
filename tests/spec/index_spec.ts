@@ -104,7 +104,7 @@ describe('spec', () => {
         });
     });
 
-    fdescribe('with pre-exising spec (UPDATE)', () => {
+    describe('with pre-exising spec (UPDATE)', () => {
         it('removes the removed dependencies', () => {
             // arrange
             const runner = new SchematicTestRunner('schematics', collectionPath);
@@ -114,32 +114,32 @@ describe('spec', () => {
             tree.create(
                 'to-update.ts',
                 `export class ToUpdate {
-        constructor(anotherStr: string, anotherSer: Object) {}
-      }`
+                    constructor(anotherStr: string, anotherSer: Object) {}
+                }`
             );
             // create a .spec file next to to-update.ts with the anotherStr and anotherServ as constructor parameters
             tree.create(
                 'to-update.spec.ts',
                 `import { ToUpdate } from "./to-update";
 
-      describe("ToUpdate", () => {});
+                describe("ToUpdate", () => {});
 
-      function setup() {
-        let stringDependency: string;
-        const service = autoSpy(Object);
-        const builder = {
-          stringDependency,
-          service,
-          default() {
-            return builder;
-          },
-          build() {
-            return new ToUpdate(stringDependency, service);
-          }
-        };
+                function setup() {
+                    let stringDependency: string;
+                    const service = autoSpy(Object);
+                    const builder = {
+                    stringDependency,
+                    service,
+                    default() {
+                        return builder;
+                    },
+                    build() {
+                        return new ToUpdate(stringDependency, service);
+                    }
+                    };
 
-        return builder;
-      }`
+                    return builder;
+                }`
             );
             // act
             // ToUpdate class has new deps - so we need to update the existing spec file
