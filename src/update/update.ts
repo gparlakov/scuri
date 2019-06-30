@@ -21,10 +21,7 @@ export function update(
     const currentParams = readCurrentParameterNames(setupFunctionNode, classUnderTestName);
 
     const paramsToRemove = currentParams.filter(p => !dependencies.some(d => d.name === p));
-    const paramsToAdd = dependencies.filter(d => !currentParams.some(c => c === d.name));
-
-    // tslint:disable-next-line:no-console
-    console.log('remove', paramsToRemove, 'add:', paramsToAdd);
+    // const paramsToAdd = dependencies.filter(d => !currentParams.some(c => c === d.name));
 
     return remove(paramsToRemove, setupFunctionNode, path);
 }
