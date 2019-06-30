@@ -4,10 +4,10 @@
   "jsRules": {
     "ban": [true, ["fit"]],
     "no-console": true,
-    "quotemark": [true, "single"  ]
+    "quotemark": [true, "single", "avoid-escape" ]
   },
   "rules": {
-    "quotemark": [true, "single"],
+    "quotemark": [true, "single", "avoid-escape"],
     "ban": [true, ["fit"]],
     "no-console": true
   },

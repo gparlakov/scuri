@@ -15,7 +15,7 @@ export function update(
     const setupFunctionNode = readSetupFunction(source);
 
     if (setupFunctionNode == null) {
-        throw new Error('There is no setup function in the source file. We can\'t update that.');
+        throw new Error("There is no setup function in the source file. We can't update that.");
     }
 
     const currentParams = readCurrentParameterNames(setupFunctionNode, classUnderTestName);
@@ -23,6 +23,7 @@ export function update(
     const paramsToRemove = currentParams.filter(p => !dependencies.some(d => d.name === p));
     const paramsToAdd = dependencies.filter(d => !currentParams.some(c => c === d.name));
 
+    // tslint:disable-next-line:no-console
     console.log('remove', paramsToRemove, 'add:', paramsToAdd);
 
     return remove(paramsToRemove, setupFunctionNode, path);
@@ -88,7 +89,6 @@ function getTextPlusCommaIfAny(i: ts.Node) {
     const useIndex = children.findIndex(c => c === i);
     if (children[useIndex + 1] && children[useIndex + 1].kind === ts.SyntaxKind.CommaToken) {
         // there is a comma right after the node
-        console.log(i.getText() + children[useIndex + 1].getText());
         return i.getText() + children[useIndex + 1].getText();
     } else {
         // there is no comma right after the node
@@ -98,5 +98,6 @@ function getTextPlusCommaIfAny(i: ts.Node) {
 
 //@ts-ignore
 function _printKindAndText(node: ts.Node) {
+    // tslint:disable-next-line:no-console
     console.log(ts.SyntaxKind[node.kind], node.getText(), EOL);
 }
