@@ -5,9 +5,9 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { Tree } from '@angular-devkit/schematics';
-import { getWorkspace } from '../utility/config';
-import { ProjectType, WorkspaceProject, WorkspaceSchema } from '../utility/workspace-models';
+import { Tree } from "@angular-devkit/schematics";
+import { getWorkspace } from "../utility/config";
+import { ProjectType, WorkspaceProject, WorkspaceSchema } from "../utility/workspace-models";
 
 
 /**
@@ -19,7 +19,7 @@ export function buildDefaultPath(project: WorkspaceProject): string {
     ? `/${project.sourceRoot}/`
     : `/${project.root}/src/`;
 
-  const projectDirName = project.projectType === ProjectType.Application ? 'app' : 'lib';
+  const projectDirName = project.projectType === ProjectType.Application ? "app" : "lib";
 
   return `${root}${projectDirName}`;
 }

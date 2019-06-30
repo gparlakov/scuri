@@ -6,14 +6,14 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { normalize, split } from '@angular-devkit/core';
+import { normalize, split } from "@angular-devkit/core";
 
 export function relativePathToWorkspaceRoot(projectRoot: string | undefined): string {
-  const normalizedPath = split(normalize(projectRoot || ''));
+  const normalizedPath = split(normalize(projectRoot || ""));
 
   if (normalizedPath.length === 0 || !normalizedPath[0]) {
-    return '.';
+    return ".";
   } else {
-    return normalizedPath.map(() => '..').join('/');
+    return normalizedPath.map(() => "..").join("/");
   }
 }

@@ -5,22 +5,22 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { JsonAstObject, JsonParseMode, parseJsonAst } from '@angular-devkit/core';
-import { SchematicsException, Tree } from '@angular-devkit/schematics';
+import { JsonAstObject, JsonParseMode, parseJsonAst } from "@angular-devkit/core";
+import { SchematicsException, Tree } from "@angular-devkit/schematics";
 import {
   appendPropertyInAstObject,
   findPropertyInAstObject,
   insertPropertyInAstObjectInOrder,
   removePropertyInAstObject,
-} from './json-utils';
+} from "./json-utils";
 
 
-const pkgJsonPath = '/package.json';
+const pkgJsonPath = "/package.json";
 export enum NodeDependencyType {
-  Default = 'dependencies',
-  Dev = 'devDependencies',
-  Peer = 'peerDependencies',
-  Optional = 'optionalDependencies',
+  Default = "dependencies",
+  Dev = "devDependencies",
+  Peer = "peerDependencies",
+  Optional = "optionalDependencies",
 }
 
 export interface NodeDependency {
@@ -39,7 +39,7 @@ export function addPackageJsonDependency(tree: Tree, dependency: NodeDependency)
     appendPropertyInAstObject(recorder, packageJsonAst, dependency.type, {
       [dependency.name]: dependency.version,
     }, 2);
-  } else if (depsNode.kind === 'object') {
+  } else if (depsNode.kind === "object") {
     // check if package already added
     const depNode = findPropertyInAstObject(depsNode, dependency.name);
 
@@ -73,7 +73,7 @@ export function removePackageJsonDependency(tree: Tree, name: string): void {
     NodeDependencyType.Peer,
   ].forEach(depType => {
     const depsNode = findPropertyInAstObject(packageJson, depType);
-    if (depsNode !== null && depsNode.kind === 'object') {
+    if (depsNode !== null && depsNode.kind === "object") {
       removePropertyInAstObject(recorder, depsNode, name);
     }
   });
@@ -94,9 +94,9 @@ export function getPackageJsonDependency(tree: Tree, name: string): NodeDependen
       return;
     }
     const depsNode = findPropertyInAstObject(packageJson, depType);
-    if (depsNode !== null && depsNode.kind === 'object') {
+    if (depsNode !== null && depsNode.kind === "object") {
       const depNode = findPropertyInAstObject(depsNode, name);
-      if (depNode !== null && depNode.kind === 'string') {
+      if (depNode !== null && depNode.kind === "string") {
         const version = depNode.value;
         dep = {
           type: depType,
@@ -113,13 +113,13 @@ export function getPackageJsonDependency(tree: Tree, name: string): NodeDependen
 function _readPackageJson(tree: Tree): JsonAstObject {
   const buffer = tree.read(pkgJsonPath);
   if (buffer === null) {
-    throw new SchematicsException('Could not read package.json.');
+    throw new SchematicsException("Could not read package.json.");
   }
   const content = buffer.toString();
 
   const packageJson = parseJsonAst(content, JsonParseMode.Strict);
-  if (packageJson.kind != 'object') {
-    throw new SchematicsException('Invalid package.json. Was expecting an object');
+  if (packageJson.kind != "object") {
+    throw new SchematicsException("Invalid package.json. Was expecting an object");
   }
 
   return packageJson;

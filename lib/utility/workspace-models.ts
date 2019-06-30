@@ -6,23 +6,23 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { experimental } from '@angular-devkit/core';
+import { experimental } from "@angular-devkit/core";
 
 export enum ProjectType {
-    Application = 'application',
-    Library = 'library',
+    Application = "application",
+    Library = "library",
 }
 
 export enum Builders {
-    AppShell = '@angular-devkit/build-angular:app-shell',
-    Server = '@angular-devkit/build-angular:server',
-    Browser = '@angular-devkit/build-angular:browser',
-    Karma = '@angular-devkit/build-angular:karma',
-    TsLint = '@angular-devkit/build-angular:tslint',
-    NgPackagr = '@angular-devkit/build-ng-packagr:build',
-    DevServer = '@angular-devkit/build-angular:dev-server',
-    ExtractI18n = '@angular-devkit/build-angular:extract-i18n',
-    Protractor = '@angular-devkit/build-angular:protractor',
+    AppShell = "@angular-devkit/build-angular:app-shell",
+    Server = "@angular-devkit/build-angular:server",
+    Browser = "@angular-devkit/build-angular:browser",
+    Karma = "@angular-devkit/build-angular:karma",
+    TsLint = "@angular-devkit/build-angular:tslint",
+    NgPackagr = "@angular-devkit/build-ng-packagr:build",
+    DevServer = "@angular-devkit/build-angular:dev-server",
+    ExtractI18n = "@angular-devkit/build-angular:extract-i18n",
+    Protractor = "@angular-devkit/build-angular:protractor",
 }
 
 export interface FileReplacements {
@@ -46,7 +46,7 @@ export interface BrowserBuilderBaseOptions {
 export interface BrowserBuilderOptions extends BrowserBuilderBaseOptions {
     serviceWorker?: boolean;
     optimization?: boolean;
-    outputHashing?: 'all';
+    outputHashing?: "all";
     resourcesOutputPath?: string;
     extractCss?: boolean;
     namedChunks?: boolean;
@@ -157,8 +157,8 @@ export interface WorkspaceTargets<TProjectType extends ProjectType = ProjectType
     test?: TestBuilderTarget;
     serve?: ServeBuilderTarget;
     e2e?: E2EBuilderTarget;
-    'app-shell'?: AppShellBuilderTarget;
-    'extract-i18n'?: ExtractI18nBuilderTarget;
+    "app-shell"?: AppShellBuilderTarget;
+    "extract-i18n"?: ExtractI18nBuilderTarget;
     // TODO(hans): change this any to unknown when google3 supports TypeScript 3.0.
     // tslint:disable-next-line:no-any
     [key: string]: any;

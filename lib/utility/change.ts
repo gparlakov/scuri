@@ -31,7 +31,7 @@ export interface Change {
  * An operation that does nothing.
  */
 export class NoopChange implements Change {
-  description = 'No operation.';
+  description = "No operation.";
   order = Infinity;
   path = null;
   apply() { return Promise.resolve(); }
@@ -48,7 +48,7 @@ export class InsertChange implements Change {
 
   constructor(public path: string, public pos: number, public toAdd: string) {
     if (pos < 0) {
-      throw new Error('Negative positions are invalid');
+      throw new Error("Negative positions are invalid");
     }
     this.description = `Inserted ${toAdd} into position ${pos} of ${path}`;
     this.order = pos;
@@ -77,7 +77,7 @@ export class RemoveChange implements Change {
 
   constructor(public path: string, private pos: number, public toRemove: string) {
     if (pos < 0) {
-      throw new Error('Negative positions are invalid');
+      throw new Error("Negative positions are invalid");
     }
     this.description = `Removed ${toRemove} into position ${pos} of ${path}`;
     this.order = pos;
@@ -104,7 +104,7 @@ export class ReplaceChange implements Change {
   constructor(public path: string, private pos: number, private oldText: string,
               private newText: string) {
     if (pos < 0) {
-      throw new Error('Negative positions are invalid');
+      throw new Error("Negative positions are invalid");
     }
     this.description = `Replaced ${oldText} into position ${pos} of ${path} with ${newText}`;
     this.order = pos;

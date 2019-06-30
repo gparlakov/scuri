@@ -5,18 +5,18 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import { normalize } from '@angular-devkit/core';
-import { SchematicsException, Tree } from '@angular-devkit/schematics';
-import { dirname } from 'path';
-import * as ts from '../third_party/github.com/Microsoft/TypeScript/lib/typescript';
-import { findNode, getSourceNodes } from '../utility/ast-utils';
+import { normalize } from "@angular-devkit/core";
+import { SchematicsException, Tree } from "@angular-devkit/schematics";
+import { dirname } from "path";
+import * as ts from "../third_party/github.com/Microsoft/TypeScript/lib/typescript";
+import { findNode, getSourceNodes } from "../utility/ast-utils";
 
 export function findBootstrapModuleCall(host: Tree, mainPath: string): ts.CallExpression | null {
   const mainBuffer = host.read(mainPath);
   if (!mainBuffer) {
     throw new SchematicsException(`Main file (${mainPath}) not found`);
   }
-  const mainText = mainBuffer.toString('utf-8');
+  const mainText = mainBuffer.toString("utf-8");
   const source = ts.createSourceFile(mainPath, mainText, ts.ScriptTarget.Latest, true);
 
   const allNodes = getSourceNodes(source);
@@ -26,7 +26,7 @@ export function findBootstrapModuleCall(host: Tree, mainPath: string): ts.CallEx
   for (const node of allNodes) {
 
     let bootstrapCallNode: ts.Node | null = null;
-    bootstrapCallNode = findNode(node, ts.SyntaxKind.Identifier, 'bootstrapModule');
+    bootstrapCallNode = findNode(node, ts.SyntaxKind.Identifier, "bootstrapModule");
 
     // Walk up the parent until CallExpression is found.
     while (bootstrapCallNode && bootstrapCallNode.parent
@@ -49,7 +49,7 @@ export function findBootstrapModuleCall(host: Tree, mainPath: string): ts.CallEx
 export function findBootstrapModulePath(host: Tree, mainPath: string): string {
   const bootstrapCall = findBootstrapModuleCall(host, mainPath);
   if (!bootstrapCall) {
-    throw new SchematicsException('Bootstrap call not found');
+    throw new SchematicsException("Bootstrap call not found");
   }
 
   const bootstrapModule = bootstrapCall.arguments[0];
@@ -58,7 +58,7 @@ export function findBootstrapModulePath(host: Tree, mainPath: string): string {
   if (!mainBuffer) {
     throw new SchematicsException(`Client app main file (${mainPath}) not found`);
   }
-  const mainText = mainBuffer.toString('utf-8');
+  const mainText = mainBuffer.toString("utf-8");
   const source = ts.createSourceFile(mainPath, mainText, ts.ScriptTarget.Latest, true);
   const allNodes = getSourceNodes(source);
   const bootstrapModuleRelativePath = allNodes

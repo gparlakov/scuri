@@ -6,9 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import { SchematicsException, Tree } from '@angular-devkit/schematics';
-import { getProject, isWorkspaceProject } from './project';
-import { WorkspaceProject, WorkspaceSchema, WorkspaceTargets } from './workspace-models';
+import { SchematicsException, Tree } from "@angular-devkit/schematics";
+import { getProject, isWorkspaceProject } from "./project";
+import { WorkspaceProject, WorkspaceSchema, WorkspaceTargets } from "./workspace-models";
 
 export function getProjectTargets(project: WorkspaceProject): WorkspaceTargets;
 export function getProjectTargets(
@@ -17,7 +17,7 @@ export function getProjectTargets(
 ): WorkspaceTargets;
 export function getProjectTargets(
   projectOrHost: WorkspaceProject | Tree | WorkspaceSchema,
-  projectName = '',
+  projectName = "",
 ): WorkspaceTargets {
   const project = isWorkspaceProject(projectOrHost)
     ? projectOrHost
@@ -25,7 +25,7 @@ export function getProjectTargets(
 
   const projectTargets = project.targets || project.architect;
   if (!projectTargets) {
-    throw new Error('Project target not found.');
+    throw new Error("Project target not found.");
   }
 
   return projectTargets;
