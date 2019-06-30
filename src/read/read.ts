@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import * as ts from "typescript";
+import * as ts from "../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript";
 
 export function readClassNamesAndConstructorParams(fileName: string): ClassDescription[] {
   const sourceFile = ts.createSourceFile(
