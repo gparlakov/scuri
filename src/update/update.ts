@@ -1,14 +1,15 @@
-import { Change, RemoveChange } from '../../lib/utility/change';
+import { Change, RemoveChange, InsertChange } from '../../lib/utility/change';
 import * as ts from '../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 import { ConstructorParam } from '../read/read';
-import { findNodes } from '../../lib/utility/ast-utils';
+import { findNodes, insertAfterLastOccurrence } from '../../lib/utility/ast-utils';
 import { EOL } from 'os';
-
+export const i = insertAfterLastOccurrence;
 export function update(
     path: string,
     fileContent: string,
     dependencies: ConstructorParam[],
-    classUnderTestName: string
+    classUnderTestName: string,
+    action: 'add' | 'remove'
 ): Change[] {
     const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
 
@@ -21,9 +22,11 @@ export function update(
     const currentParams = readCurrentParameterNames(setupFunctionNode, classUnderTestName);
 
     const paramsToRemove = currentParams.filter(p => !dependencies.some(d => d.name === p));
-    // const paramsToAdd = dependencies.filter(d => !currentParams.some(c => c === d.name));
+    const paramsToAdd = dependencies.filter(d => !currentParams.some(c => c === d.name));
 
-    return remove(paramsToRemove, setupFunctionNode, path);
+    return action === 'remove'
+        ? remove(paramsToRemove, setupFunctionNode, path)
+        : add(paramsToAdd, setupFunctionNode, path);
 }
 
 function readSetupFunction(source: ts.Node) {
@@ -84,7 +87,7 @@ function remove(toRemove: string[], setupFunction: ts.FunctionDeclaration, path:
 
 /**
  * Since we want to remove some content from the file it might be the case that there is a comma right after it.
- *
+ * In that case we want to remove the comma too
  * @param i the node to read
  * @example *
  * var t = new Class(toRemove, toKeep) // -> we want to remove [toRemove,] <- plus the comma
@@ -98,6 +101,73 @@ function getTextPlusCommaIfNextCharIsComma(i: ts.Node) {
     }
 
     return text;
+}
+function add(
+    toAdd: ConstructorParam[],
+    setupFunction: ts.FunctionDeclaration,
+    path: string
+): Change[] {
+    // children of the setup include the block - that's what we want to change
+    const block = setupFunction.getChildren().find(c => c.kind === ts.SyntaxKind.Block) as ts.Block;
+    if (block == null) {
+        throw new Error('Could not find the block of the setup function.');
+    }
+
+    const blockIndentation = '        ';
+
+    return [
+        ...declareNewDependencies(block, toAdd, path, blockIndentation),
+        ...exposeNewDependencies(block, toAdd, path, blockIndentation)
+    ];
+}
+
+function declareNewDependencies(
+    block: ts.Block,
+    toAdd: ConstructorParam[],
+    path: string,
+    indentation?: string
+) {
+    // children of the block are the opening {  the block content (SyntaxList) and the closing }
+    // we want to update the SyntaxList
+    const setupBlockContent = block.getChildAt(1);
+    const position = setupBlockContent.getStart();
+    return toAdd.map(
+        p =>
+            // if we are 'mocking' a simple/native type - let c: string; / let c: Object; - leave the instantiation till later
+            // if it's a complex type -> const c = autoSpy(Service);
+            new InsertChange(
+                path,
+                position,
+                p.type === 'string' ||
+                p.type === 'number' ||
+                p.type === 'any' ||
+                p.type === 'unknown' ||
+                p.type === 'Object'
+                    ? `let ${p.name}: ${p.type};${EOL}${indentation}`
+                    : `const ${p.name} = autoSpy(${p.type});${EOL}${indentation}`
+            )
+    );
+}
+
+function exposeNewDependencies(
+    block: ts.Block,
+    toAdd: ConstructorParam[],
+    path: string,
+    indentation?: string
+) {
+    const builderDeclaration = findNodes(block, ts.SyntaxKind.VariableDeclaration).find(v =>
+        (v as ts.VariableDeclaration).name.getFullText().includes('builder')
+    );
+    const builderObjectLiteral = findNodes(
+        builderDeclaration!,
+        ts.SyntaxKind.ObjectLiteralExpression
+    )[0];
+    if (builderDeclaration == null || builderObjectLiteral == null) {
+        throw new Error('Could not find the builder declaration or its object literal.');
+    }
+    const positionToAdd = builderObjectLiteral.getChildAt(0).getEnd();
+
+    return toAdd.map(a => new InsertChange(path, positionToAdd, `${EOL}${indentation}${a.name},`));
 }
 
 //@ts-ignore

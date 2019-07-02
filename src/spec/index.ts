@@ -58,23 +58,40 @@ export function spec(options: SpecOptions): Rule {
         const existingSpecFile = tree.get(newFileNormalizedName + '.spec' + ext);
         // if a spec exists we'll update it
         if (existingSpecFile) {
-            const changes = update(
+            const removeChanges = update(
                 existingSpecFile.path,
                 existingSpecFile.content.toString('utf8'),
                 params,
-                className
+                className,
+                'remove'
             );
 
-            const recorder = tree.beginUpdate(existingSpecFile.path);
-            changes.forEach((change: Change) => {
-                if (change instanceof InsertChange) {
-                    recorder.insertLeft(change.pos, change.toAdd);
-                }
+            // first pass - remove
+            const removeRecorder = tree.beginUpdate(existingSpecFile.path);
+            removeChanges.forEach((change: Change) => {
                 if (change instanceof RemoveChange) {
-                    recorder.remove(change.order, change.toRemove.length);
+                    removeRecorder.remove(change.order, change.toRemove.length);
                 }
             });
-            tree.commitUpdate(recorder);
+            tree.commitUpdate(removeRecorder);
+
+            // now we need to redo the update on the new file contents
+            const changesToAdd = update(
+                existingSpecFile.path,
+                tree.read(existingSpecFile.path)!.toString('utf8'),
+                params,
+                className,
+                'add'
+            );
+
+             // first pass - add
+             const addRecorder = tree.beginUpdate(existingSpecFile.path);
+             changesToAdd.forEach((change: Change) => {
+                 if (change instanceof InsertChange) {
+                    addRecorder.insertLeft(change.order, change.toAdd);
+                 }
+             });
+             tree.commitUpdate(addRecorder);
 
             return tree;
         } else {

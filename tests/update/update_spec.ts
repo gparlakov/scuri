@@ -28,7 +28,8 @@ function setup() {
     return builder;
 }`,
             [],
-            'ExampleComponent'
+            'ExampleComponent',
+            'remove'
         );
 
         const removes = result.filter(r => r instanceof RemoveChange);
