@@ -257,8 +257,7 @@ describe('spec', () => {
             );
             // assert
             const contents = result.readContent('to-update.spec.ts');
-            // TODO
-            return contents;
+            expect(contents).toMatch(/return new ToUpdate\(anotherStr,\s*anotherService\)/);
         });
     });
 });

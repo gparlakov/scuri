@@ -26,7 +26,7 @@ export function update(
 
     return action === 'remove'
         ? remove(paramsToRemove, setupFunctionNode, path)
-        : add(paramsToAdd, setupFunctionNode, path);
+        : add(paramsToAdd, setupFunctionNode, path, classUnderTestName);
 }
 
 function readSetupFunction(source: ts.Node) {
@@ -105,7 +105,8 @@ function getTextPlusCommaIfNextCharIsComma(i: ts.Node) {
 function add(
     toAdd: ConstructorParam[],
     setupFunction: ts.FunctionDeclaration,
-    path: string
+    path: string,
+    classUnderTestName: string
 ): Change[] {
     // children of the setup include the block - that's what we want to change
     const block = setupFunction.getChildren().find(c => c.kind === ts.SyntaxKind.Block) as ts.Block;
@@ -117,7 +118,8 @@ function add(
 
     return [
         ...declareNewDependencies(block, toAdd, path, blockIndentation),
-        ...exposeNewDependencies(block, toAdd, path, blockIndentation)
+        ...exposeNewDependencies(block, toAdd, path, blockIndentation),
+        ...useNewDependenciesInConstructor(block, toAdd, path, classUnderTestName)
     ];
 }
 
@@ -168,6 +170,26 @@ function exposeNewDependencies(
     const positionToAdd = builderObjectLiteral.getChildAt(0).getEnd();
 
     return toAdd.map(a => new InsertChange(path, positionToAdd, `${EOL}${indentation}${a.name},`));
+}
+
+function useNewDependenciesInConstructor(
+    block: ts.Block,
+    _toAdd: ConstructorParam[],
+    _path: string,
+    classUnderTestName: string,
+    _indentation?: string
+) {
+    const classUnderTestConstruction = findNodes(block, ts.SyntaxKind.NewExpression).find(
+        (n: ts.NewExpression) => n.getText().includes(classUnderTestName)
+    );
+    if (classUnderTestConstruction == null) {
+        throw new Error(
+            `Could not find the new ${classUnderTestName}() expression. Can not update spec.`
+        );
+    }
+    return [
+        new InsertChange(_path, classUnderTestConstruction.end - 1, _toAdd.map(p => p.name).join(', '))
+    ];
 }
 
 //@ts-ignore
