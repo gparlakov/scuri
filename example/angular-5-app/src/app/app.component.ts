@@ -1,20 +1,21 @@
-import { Component } from "@angular/core";
+import { Component } from '@angular/core';
+import { HttpClient } from 'selenium-webdriver/http';
 
 @Component({
-  selector: "app-root",
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"]
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  constructor(dep: string) {}
-  title = "app";
-  publicMethod() {}
+    constructor(service: Object, rest: HttpClient) {}
+    title = 'app';
+    publicMethod() {}
 
-  public explicitPublicMethod() {}
+    public explicitPublicMethod() {}
 
-  async asyncPublicMethod() {}
+    async asyncPublicMethod() {}
 
-  private privateMethod() {}
+    private privateMethod() {}
 
-  protected protectedMethod() {}
+    protected protectedMethod() {}
 }
