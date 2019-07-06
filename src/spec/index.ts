@@ -96,11 +96,7 @@ function updateExistingSpec(
     return tree;
 }
 
-function createNewSpec(
-    name: string,
-    content: Buffer,
-    path?: string
-) {
+function createNewSpec(name: string, content: Buffer, path?: string) {
     // we aim at creating or updating a spec from the class under test (name)
     // for the spec name we'll need to parse the base file name and its extension and calculate the path
 
