@@ -160,14 +160,14 @@ describe('spec', () => {
         let treeWithASpec = Tree.empty();
         beforeEach(() => {
             treeWithASpec = Tree.empty();
-            // a class with anotherStr and anotherSer as constructor parameters
+            // a class with anotherStr and anotherService as constructor parameters
             treeWithASpec.create(
                 'to-update.ts',
                 `export class ToUpdate {
-                    constructor(anotherStr: string, anotherSer: Service) {}
+                    constructor(anotherStr: string, anotherService: Service) {}
                 }`
             );
-            // create a .spec file next to to-update.ts with the anotherStr and anotherServ as constructor parameters
+            // create a .spec file next to to-update.ts with the anotherStr and anotherService as constructor parameters
             treeWithASpec.create(
                 'to-update.spec.ts',
                 `import { ToUpdate } from "./to-update";
@@ -224,7 +224,7 @@ describe('spec', () => {
             const contents = result.readContent('to-update.spec.ts');
 
             expect(contents.includes('let anotherStr: string;')).toBe(true);
-            expect(contents.includes('const anotherSer = autoSpy(Service);')).toBe(true);
+            expect(contents.includes('const anotherService = autoSpy(Service);')).toBe(true);
         });
 
         it('adds the added dependencies to builder `exports`', () => {
@@ -241,7 +241,7 @@ describe('spec', () => {
             // assert
             const contents = result.readContent('to-update.spec.ts');
             expect(contents.includes(' anotherStr,')).toBe(true);
-            expect(contents.includes(' anotherSer,')).toBe(true);
+            expect(contents.includes(' anotherService,')).toBe(true);
         });
 
         it('adds the added dependencies to the class-under-test construction', () => {

@@ -37,11 +37,9 @@ export function spec({ name, update: up }: SpecOptions): Rule {
         // for import { ExampleComponent } from "./example/example.component"
         const normalizedName = fileName.slice(0, fileName.length - extname(fileName).length);
         // the new spec full file name
-
         const specFileFullName = `${normalizedName}.spec.ts`;
 
         const existingSpecFile = tree.get(specFileFullName);
-
         // if a spec exists we'll try to update it
         if (existingSpecFile) {
             return updateExistingSpec(up, name, content, existingSpecFile, tree);
