@@ -1,11 +1,13 @@
 {
-	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"path": "C:\\Users\\gparl\\projects\\angular\\angular-cli"
-		}
-	],
-	"settings": {}
+    "folders": [
+        {
+            "path": "."
+        },
+        {
+            "path": "..\\angular\\angular-cli"
+        }
+    ],
+    "settings": {
+        "git.ignoredRepositories": ["..\\angular\\angular-cli"]
+    }
 }
