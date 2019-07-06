@@ -18,10 +18,9 @@ import { update } from '../update/update';
 class SpecOptions {
     name: string;
     update?: boolean;
-    path?: string;
 }
 
-export function spec({ name, update: up, path }: SpecOptions): Rule {
+export function spec({ name, update: up }: SpecOptions): Rule {
     return (tree: Tree, context: SchematicContext) => {
         // @ts-ignore
         const logger = context.logger.createChild('scuri.index');
@@ -39,7 +38,7 @@ export function spec({ name, update: up, path }: SpecOptions): Rule {
             return updateExistingSpec(up, name, content, existingSpecFile, tree);
         } else {
             // spec file does not exist
-            return createNewSpec(name, content, tree, context, path);
+            return createNewSpec(name, content);
         }
     };
 }
@@ -100,8 +99,6 @@ function updateExistingSpec(
 function createNewSpec(
     name: string,
     content: Buffer,
-    _tree: Tree,
-    _context: SchematicContext,
     path?: string
 ) {
     // we aim at creating or updating a spec from the class under test (name)
