@@ -1,22 +1,8 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
-import { readdirSync, statSync, readFileSync } from 'fs';
 
 const collectionPath = path.join(__dirname, '../../src/collection.json');
-
-function file(name: string) {
-    return path.join(__dirname, 'files', name);
-}
-
-// @ts-ignore
-function treeFromFiles(): Tree {
-    const tree = Tree.empty();
-    readdirSync(file(''))
-        .filter(f => statSync(file(f)).isFile)
-        .forEach(f => tree.create(file(f), readFileSync(file(f))));
-    return tree;
-}
 
 describe('spec', () => {
     let tree: Tree;
@@ -57,6 +43,25 @@ describe('spec', () => {
             expect(contents).toMatch(/function setup\(\) {/);
             expect(contents).toMatch(/const builder = {/);
             expect(contents).toMatch(/return new EmptyClass\(\);/);
+        });
+    });
+
+    describe('targeting a nested path file', () => {
+        let tree: Tree;
+        beforeEach(() => {
+            tree = Tree.empty();
+            tree.create('./a-folder/with/an/empty-class.ts', 'export class EmptyClass {}');
+        });
+
+        it('creates a file in the same path depth as the name passed in', () => {
+            const runner = new SchematicTestRunner('schematics', collectionPath);
+            const result = runner.runSchematic(
+                'spec',
+                { name: './a-folder/with/an/empty-class.ts' },
+                tree
+            );
+            expect(result.files.length).toBe(2); // the empty class + the new spec file
+            expect(result.files[1]).toMatch('/a-folder/with/an/empty-class.spec.ts');
         });
     });
 

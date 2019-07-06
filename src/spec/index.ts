@@ -1,14 +1,14 @@
 import { basename, extname, normalize } from '@angular-devkit/core';
 import {
     apply,
-    branchAndMerge,
+    applyTemplates,
+    FileEntry,
     mergeWith,
+    move,
     Rule,
     SchematicContext,
-    template,
     Tree,
-    url,
-    FileEntry
+    url
 } from '@angular-devkit/schematics';
 import { EOL } from 'os';
 import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
@@ -17,41 +17,41 @@ import { update } from '../update/update';
 
 class SpecOptions {
     name: string;
-    update: boolean;
+    update?: boolean;
+    path?: string;
 }
 
-export function spec({ name, update: up }: SpecOptions): Rule {
+export function spec({ name, update: up, path }: SpecOptions): Rule {
     return (tree: Tree, context: SchematicContext) => {
+        // @ts-ignore
+        const logger = context.logger.createChild('scuri.index');
+        logger.info(`running with name: ${name} update: ${up}`);
+
         const content = tree.read(name);
         if (content == null) {
             throw new Error(`The file ${name} is missing or empty.`);
         }
 
-        // we aim at creating or updating a spec from the class under test (name)
-        // for the spec name we'll need to parse the base file name and its extension and calculate the path
-
-        // normalize the / and \ according to local OS
-        // --name = ./example/example.component.ts -> example.component.ts
-        const fileName = basename(normalize(name));
-        // --name = ./example/example.component.ts -> ./example/example.component and the ext name -> .ts
-        // for import { ExampleComponent } from "./example/example.component"
-        const normalizedName = fileName.slice(0, fileName.length - extname(fileName).length);
-        // the new spec full file name
-        const specFileFullName = `${normalizedName}.spec.ts`;
-
-        const existingSpecFile = tree.get(specFileFullName);
+        // the new spec full file name contents - null if file not exist
+        const existingSpecFile = tree.get(getSpecFileName(name));
         // if a spec exists we'll try to update it
         if (existingSpecFile) {
             return updateExistingSpec(up, name, content, existingSpecFile, tree);
         } else {
             // spec file does not exist
-            return createNewSpec(name, content, specFileFullName, normalizedName, tree, context);
+            return createNewSpec(name, content, tree, context, path);
         }
     };
 }
+function getSpecFileName(name: string) {
+    const normalizedName = normalize(name);
+    const ext = extname(basename(normalizedName));
+
+    return name.split(ext)[0] + '.spec' + ext;
+}
 
 function updateExistingSpec(
-    up: boolean,
+    up: boolean | undefined,
     name: string,
     content: Buffer,
     existingSpecFile: FileEntry,
@@ -100,25 +100,46 @@ function updateExistingSpec(
 function createNewSpec(
     name: string,
     content: Buffer,
-    specFileFullName: string,
-    normalizedName: string,
-    tree: Tree,
-    context: SchematicContext
+    _tree: Tree,
+    _context: SchematicContext,
+    path?: string
 ) {
+    // we aim at creating or updating a spec from the class under test (name)
+    // for the spec name we'll need to parse the base file name and its extension and calculate the path
+
+    // normalize the / and \ according to local OS
+    // --name = ./example/example.component.ts -> example.component.ts
+    const fileName = basename(normalize(name));
+    // --name = ./example/example.component.ts -> ./example/example.component and the ext name -> .ts
+    // for import { ExampleComponent } from "./example/example.component"
+    const normalizedName = fileName.slice(0, fileName.length - extname(fileName).length);
+
+    // the new spec file name
+    const specFileName = `${normalizedName}.spec.ts`;
+
+    path = path || name.split(fileName)[0]; // split on the filename - so we get only an array of one item
+
     const { params, className, publicMethods } = parseClassUnderTestFile(name, content);
     const templateSource = apply(url('../files'), [
-        template({
+        applyTemplates({
             // the name of the new spec file
-            specFileFullName,
+            specFileName,
             normalizedName: normalizedName,
             className: className,
             publicMethods,
             declaration: toDeclaration(),
             builderExports: toBuilderExports(),
             constructorParams: toConstructorParams()
-        })
+        }),
+        move(path)
     ]);
-    return branchAndMerge(mergeWith(templateSource))(tree, context);
+
+    return mergeWith(templateSource);
+    /**
+     * End of the create function
+     * Below are the in-scope functions
+     */
+
     // functions defined in the scope of the else to use params and such
     // for getting called in the template - todo - just call the functions and get the result
     function toConstructorParams() {
