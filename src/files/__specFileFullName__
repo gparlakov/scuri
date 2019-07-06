@@ -16,14 +16,14 @@ describe('<%= className %>', () => {
 });
 
 function setup() {
-  <%= toDeclaration() %>
+  <%= declaration %>
   const builder = {
-    <%= toBuilderExports() %>
+    <%= builderExports %>
     default() {
       return builder;
     },
     build() {
-      return new <%= className %>(<%= toConstructorParams() %>);
+      return new <%= className %>(<%= constructorParams %>);
     }
   };
 

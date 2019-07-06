@@ -11,6 +11,12 @@
         "$source": "argv",
         "index": 0
       }
+    },
+    "update": {
+      "type": "boolean",
+      "default": false,
+      "alias": "u",
+      "description": "Whether or not to update a pre-existing spec file."
     }
   },
   "required": ["name"]

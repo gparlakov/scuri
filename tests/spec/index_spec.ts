@@ -199,7 +199,7 @@ describe('spec', () => {
 
             // act
             // ToUpdate class has new deps - so we need to update the existing spec file
-            const result = runner.runSchematic('spec', { name: 'to-update.ts' }, treeWithASpec);
+            const result = runner.runSchematic('spec', { name: 'to-update.ts', update: true }, treeWithASpec);
             // assert
             const contents = result.readContent('to-update.spec.ts');
             expect(contents.includes('ToUpdate(stringDependency, service)')).toBe(false);
@@ -211,7 +211,7 @@ describe('spec', () => {
 
             // act
             // ToUpdate class has new deps - so we need to update the existing spec file
-            const result = runner.runSchematic('spec', { name: 'to-update.ts' }, treeWithASpec);
+            const result = runner.runSchematic('spec', { name: 'to-update.ts', update: true }, treeWithASpec);
             // assert
             const contents = result.readContent('to-update.spec.ts');
 
@@ -225,7 +225,7 @@ describe('spec', () => {
 
             // act
             // ToUpdate class has new deps - so we need to update the existing spec file
-            const result = runner.runSchematic('spec', { name: 'to-update.ts' }, treeWithASpec);
+            const result = runner.runSchematic('spec', { name: 'to-update.ts', update: true }, treeWithASpec);
             // assert
             const contents = result.readContent('to-update.spec.ts');
             expect(contents.includes(' anotherStr,')).toBe(true);
@@ -238,10 +238,11 @@ describe('spec', () => {
 
             // act
             // ToUpdate class has new deps - so we need to update the existing spec file
-            const result = runner.runSchematic('spec', { name: 'to-update.ts' }, treeWithASpec);
+            const result = runner.runSchematic('spec', { name: 'to-update.ts', update: true }, treeWithASpec);
             // assert
             const contents = result.readContent('to-update.spec.ts');
             // TODO
+            return contents;
         });
     });
 });
