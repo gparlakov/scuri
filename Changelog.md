@@ -1,3 +1,7 @@
+0.3.1 Fix bug where the generated file was not getting moved next to the class-under-test file.
+We can't support ng5 because using the `move` rule is not compatible with the legacy wat of returning the result vs returning
+a function (Rule) that the cli (ng cli or schematics) should deal with
+
 0.3.0 Support updating SCURI generated spec files (ones with a function setup() and a builder in it)
 
 0.2.3 Have the generated `it` method call the class-under-test public method

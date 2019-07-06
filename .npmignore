@@ -12,3 +12,4 @@ tsconfig.json
 tsconfig.test.json
 tslint.json
 tests
+scuri_angular_cli.code-workspace
