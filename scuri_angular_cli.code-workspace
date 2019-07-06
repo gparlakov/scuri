@@ -8,6 +8,6 @@
         }
     ],
     "settings": {
-        "git.ignoredRepositories": ["..\\angular\\angular-cli"]
+        "git.ignoredRepositories": ["..\\angular\\angular-cli", "..\\angular\\angular-cli\\.git"]
     }
 }
