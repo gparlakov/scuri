@@ -188,7 +188,11 @@ function useNewDependenciesInConstructor(
         );
     }
     return [
-        new InsertChange(_path, classUnderTestConstruction.end - 1, _toAdd.map(p => p.name).join(', '))
+        new InsertChange(
+            _path,
+            classUnderTestConstruction.end - 1,
+            _toAdd.map(p => p.name).join(', ')
+        )
     ];
 }
 
