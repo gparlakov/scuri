@@ -19,7 +19,7 @@
   "keywords": [
     "schematics"
   ],
-  "author": "",
+  "author": "gparlakov@gmail.com",
   "license": "MIT",
   "schematics": "./src/collection.json",
   "repository": "https://github.com/gparlakov/scuri",
