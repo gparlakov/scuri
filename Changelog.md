@@ -1,3 +1,4 @@
+0.3.0 Support updating SCURI generated spec files (ones with a function setup() and a builder in it)
 
 0.2.3 Have the generated `it` method call the class-under-test public method
 0.2.2 Update docs for easy start and contributor guide.
