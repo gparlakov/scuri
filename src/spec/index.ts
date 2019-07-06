@@ -145,7 +145,6 @@ function createNewSpec(
     }
 }
 
-
 function parseClassUnderTestFile(name: string, fileContents: Buffer) {
     const classDescriptions = readClassNamesAndConstructorParams(
         name,
