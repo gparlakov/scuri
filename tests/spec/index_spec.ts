@@ -264,5 +264,20 @@ describe('spec', () => {
             const contents = result.readContent('to-update.spec.ts');
             expect(contents).toMatch(/return new ToUpdate\(anotherStr,\s*anotherService\)/);
         });
+
+        it('Errors if the update flag is not passed in', () => {
+            // arrange
+            const runner = new SchematicTestRunner('schematics', collectionPath);
+            treeWithASpec.overwrite('to-update.spec.ts', `Some other content`);
+
+            // act
+            // assert
+            expect(() => { runner.runSchematic(
+                'spec',
+                { name: 'to-update.ts' },
+                treeWithASpec
+            );
+            }).toThrow();
+        })
     });
 });

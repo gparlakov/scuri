@@ -1,3 +1,4 @@
+0.4.0 Change behavior to rely on flags to decide if we should update. If --update is passed in we always try to update. If not we always try to create new spec file. From there on the schematics cli will make the decision based on --force if we'll overwrite or not.
 0.3.1 Fix bug where the generated file was not getting moved next to the class-under-test file.
 We can't support ng5 because using the `move` rule is not compatible with the legacy wat of returning the result vs returning
 a function (Rule) that the cli (ng cli or schematics) should deal with

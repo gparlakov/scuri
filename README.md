@@ -7,9 +7,36 @@ After a component has been created it is boring and tedious to do the tests. Scu
 ## Getting started
 ```
 npm install -D scuri
-ng g scuri:spec --name src/app/app.component
+ng g scuri:spec --name src/app/app.component.ts
 ```
 If you gen error of the `Error: Invalid rule result: Function().` see the [troubleshooting section below](#rule-result-function).
+
+## Update existing spec
+
+```
+ng g scuri:spec --name src/app/app.component.ts --update
+```
+or
+```
+npx schematics scuri:spec --name src/app/app.component.ts --update
+```
+
+## Troubleshooting
+
+### Rule result Function
+To workaround the `Error: Invalid rule result: Function().` install schematics separately and call `scuri` with that.
+```
+npm install -D scuri
+npm i -g @angular-devkit/schematics-cli
+schematics scuri:spec --name src/app/app.component.ts
+```
+or if you don't want to install the `schematics` cli globally and have `npm version 6 and above` you can
+```
+npm install -D scuri @angular-devkit/schematics-cli
+npx schematics scuri:spec --name src/app/app.component.ts
+```
+
+
 
 ## Contributing
 
@@ -61,13 +88,3 @@ npm run watch.test
 ```
 Will do the same as above but will also watch for file changes and re-run the tests.
 
-
-## Troubleshooting
-
-### Rule result Function
-To workaround the `Error: Invalid rule result: Function().` install schematics separately and call `scuri` with that.
-```
-npm install -D scuri
-npm i @angular-devkit/schematics-cli
-schematics scuri:spec --name src/app/app.component.ts
-```
