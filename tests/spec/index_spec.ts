@@ -272,12 +272,9 @@ describe('spec', () => {
 
             // act
             // assert
-            expect(() => { runner.runSchematic(
-                'spec',
-                { name: 'to-update.ts' },
-                treeWithASpec
-            );
+            expect(() => {
+                runner.runSchematic('spec', { name: 'to-update.ts' }, treeWithASpec);
             }).toThrow();
-        })
+        });
     });
 });
