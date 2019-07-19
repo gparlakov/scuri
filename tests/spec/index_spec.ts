@@ -377,15 +377,15 @@ describe('spec', () => {
             let treeWithASpecAndOnlyDescribe: Tree;
             beforeEach(() => {
                 treeWithASpecAndOnlyDescribe = Tree.empty();
-            // a class with anotherStr and anotherService as constructor parameters
-            treeWithASpecAndOnlyDescribe.create(
-                'to-update.ts',
-                `
+                // a class with anotherStr and anotherService as constructor parameters
+                treeWithASpecAndOnlyDescribe.create(
+                    'to-update.ts',
+                    `
 export class ToUpdate {
     constructor() {}
     method() {}
 }`
-            );
+                );
                 treeWithASpecAndOnlyDescribe.create(
                     'to-update.spec.ts',
                     `

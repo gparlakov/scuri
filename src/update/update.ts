@@ -27,7 +27,10 @@ export function update(
 
     return action === 'remove'
         ? remove(paramsToRemove, setupFunctionNode, path)
-        : [...add(paramsToAdd, setupFunctionNode, path, classUnderTestName), ...addMethods(publicMethods, path, fileContent, source)];
+        : [
+              ...add(paramsToAdd, setupFunctionNode, path, classUnderTestName),
+              ...addMethods(publicMethods, path, fileContent, source)
+          ];
 }
 
 function readSetupFunction(source: ts.Node) {
@@ -214,12 +217,14 @@ function addMethods(
         // then their parent - the expression (it has the body with the curly brackets)
         .map(c => c.parent)
         // then we flat the arrays of all close brace tokens from those bodies
-        .reduce((acc, c) => [...acc,...findNodes(c, ts.SyntaxKind.CloseBraceToken)], [] as ts.Node[])
+        .reduce(
+            (acc, c) => [...acc, ...findNodes(c, ts.SyntaxKind.CloseBraceToken)],
+            [] as ts.Node[]
+        )
         // finally get the last brace position
         .reduce((lastClosingBracket, n) => {
             return n.pos > lastClosingBracket ? n.pos : lastClosingBracket;
         }, 0);
-
 
     return methodsThatHaveNoTests.map(
         m =>
