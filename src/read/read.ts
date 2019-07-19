@@ -1,5 +1,25 @@
 import * as ts from '../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 
+/**
+ * Will read the Abstract Syntax Tree of the `fileContents` and extract from that:
+ *  * the names and types of all constructors' parameters
+ *  * the names of all public method
+ * @example
+ * class Test {
+ *  constructor(service: MyService, param: string) { }
+ *
+ *  async future() {}
+ *  now() {}
+ * }
+ * // result would be
+ * {
+ *  name: 'Test',
+ *  constructorParams: [{name: 'service', type:'MyService'}, {name: 'param', type:'string'}],
+ *  publicMethods: ['future', 'now']
+ * }
+ * @param fileName the name of the file (required by ts API)
+ * @param fileContents contents of the file
+ */
 export function readClassNamesAndConstructorParams(
     fileName: string,
     fileContents: string
