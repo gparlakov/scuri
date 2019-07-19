@@ -183,14 +183,14 @@ describe('spec', () => {
                     let stringDependency: string;
                     const service = autoSpy(Object);
                     const builder = {
-                    stringDependency,
-                    service,
-                    default() {
-                        return builder;
-                    },
-                    build() {
-                        return new ToUpdate(stringDependency, service);
-                    }
+                        stringDependency,
+                        service,
+                        default() {
+                            return builder;
+                        },
+                        build() {
+                            return new ToUpdate(stringDependency, service);
+                        }
                     };
 
                     return builder;
@@ -275,6 +275,158 @@ describe('spec', () => {
             expect(() => {
                 runner.runSchematic('spec', { name: 'to-update.ts' }, treeWithASpec);
             }).toThrow();
+        });
+    });
+
+    describe('with pre-existing spec (UPDATE Methods)', () => {
+        let treeWithASpec = Tree.empty();
+        beforeEach(() => {
+            treeWithASpec = Tree.empty();
+            // a class with anotherStr and anotherService as constructor parameters
+            treeWithASpec.create(
+                'to-update.ts',
+                `export class ToUpdate {
+                    constructor() {}
+                    oldMethod() {}
+                    newMethod() {}
+                }`
+            );
+            // create a .spec file next to to-update.ts with the anotherStr and anotherService as constructor parameters
+            // it already has
+            treeWithASpec.create(
+                'to-update.spec.ts',
+                `import { ToUpdate } from "./to-update";
+
+                describe('ToUpdate', () => {
+                    it('when oldMethod is called it should', () => {});
+                });
+
+                function setup() {
+                    const builder = {
+                        default() {
+                            return builder;
+                        },
+                        build() {
+                            return new ToUpdate(stringDependency, service);
+                        }
+                    };
+
+                    return builder;
+                }`
+            );
+        });
+
+        it('adds the missing public method tests', () => {
+            // arrange
+            const runner = new SchematicTestRunner('schematics', collectionPath);
+
+            // act
+            // ToUpdate class has new deps - so we need to update the existing spec file
+            const result = runner.runSchematic(
+                'spec',
+                { name: 'to-update.ts', update: true },
+                treeWithASpec
+            );
+            // assert
+            const contents = result.readContent('to-update.spec.ts');
+            expect(contents.includes('when newMethod is called it should')).toBe(true);
+        });
+
+        it('does not add (would duplicate) the existing public method tests', () => {
+            // arrange
+            const runner = new SchematicTestRunner('schematics', collectionPath);
+
+            // act
+            // ToUpdate class has new deps - so we need to update the existing spec file
+            const result = runner.runSchematic(
+                'spec',
+                { name: 'to-update.ts', update: true },
+                treeWithASpec
+            );
+            // assert
+            const contents = result.readContent('to-update.spec.ts');
+            // splitting by the expected it description  - if there is one such it -
+            // then we'll get 2 results otherwise - 1, 3 or more
+            expect(contents.split('when oldMethod is called it should').length).toBe(
+                2,
+                "We expect to see 2 results because when splitting by the expected it description  - if there is one such it method - then we'll get 2 results otherwise - 1, 3 or more"
+            );
+        });
+
+        it('adds the it at the correct location after the last it', () => {
+            // arrange
+            const runner = new SchematicTestRunner('schematics', collectionPath);
+
+            // act
+            // ToUpdate class has new deps - so we need to update the existing spec file
+            const result = runner.runSchematic(
+                'spec',
+                { name: 'to-update.ts', update: true },
+                treeWithASpec
+            );
+            // assert
+            const contents = result.readContent('to-update.spec.ts');
+            // splitting by the expected it description  - if there is one such it -
+            // then we'll get 2 results otherwise - 1, 3 or more
+            expect(contents).toMatch(
+                /it\('when oldMethod is called it should', \(\) => \{\}\);\n\s*it\('when newMethod is called it should/
+            );
+        });
+
+        describe('with no it methods', () => {
+            let treeWithASpecAndOnlyDescribe: Tree;
+            beforeEach(() => {
+                treeWithASpecAndOnlyDescribe = Tree.empty();
+            // a class with anotherStr and anotherService as constructor parameters
+            treeWithASpecAndOnlyDescribe.create(
+                'to-update.ts',
+                `
+export class ToUpdate {
+    constructor() {}
+    method() {}
+}`
+            );
+                treeWithASpecAndOnlyDescribe.create(
+                    'to-update.spec.ts',
+                    `
+import { ToUpdate } from "./to-update";
+describe('ToUpdate', () => {
+
+});
+
+function setup() {
+    const builder = {
+        default() {
+            return builder;
+        },
+        build() {
+            return new ToUpdate(stringDependency, service);
+        }
+    };
+
+    return builder;
+}`
+                );
+            });
+            it('adds the it at the correct location after the last describe', () => {
+                // arrange
+                const runner = new SchematicTestRunner('schematics', collectionPath);
+
+                // act
+                // ToUpdate class has new deps - so we need to update the existing spec file
+                const result = runner.runSchematic(
+                    'spec',
+                    { name: 'to-update.ts', update: true },
+                    treeWithASpecAndOnlyDescribe
+                );
+                // assert
+                const contents = result.readContent('to-update.spec.ts');
+                // splitting by the expected it description  - if there is one such it -
+                // then we'll get 2 results otherwise - 1, 3 or more
+                expect(contents).toMatch(
+                    /describe\('ToUpdate', \(\) => \{\n\s*it\('when method is called it should/
+                );
+            });
         });
     });
 });

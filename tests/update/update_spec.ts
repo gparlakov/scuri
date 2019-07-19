@@ -29,7 +29,8 @@ function setup() {
 }`,
             [],
             'ExampleComponent',
-            'remove'
+            'remove',
+            []
         );
 
         const removes = result.filter(r => r instanceof RemoveChange);

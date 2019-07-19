@@ -54,13 +54,14 @@ function updateExistingSpec(name: string, tree: Tree, logger: Logger) {
             );
         } else {
             // if a spec exists we'll try to update it
-            const { params, className } = parseClassUnderTestFile(name, content);
+            const { params, className, publicMethods } = parseClassUnderTestFile(name, content);
             const removeChanges = updateFunc(
                 existingSpecFile.path,
                 existingSpecFile.content.toString('utf8'),
                 params,
                 className,
-                'remove'
+                'remove',
+                publicMethods
             );
             // first pass - remove
             const removeRecorder = tree.beginUpdate(existingSpecFile.path);
@@ -76,7 +77,8 @@ function updateExistingSpec(name: string, tree: Tree, logger: Logger) {
                 tree.read(existingSpecFile.path)!.toString('utf8'),
                 params,
                 className,
-                'add'
+                'add',
+                publicMethods
             );
             // first pass - add
             const addRecorder = tree.beginUpdate(existingSpecFile.path);
