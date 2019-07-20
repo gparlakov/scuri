@@ -54,7 +54,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run pretty-quick"
+      "pre-commit": "npm run pretty-quick && npm run lint"
     }
   }
 }

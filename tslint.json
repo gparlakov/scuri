@@ -1,11 +1,11 @@
 {
   "defaultSeverity": "error",
-  //   "extends": ["tslint:recommended"],
   "jsRules": {},
   "rules": {
     "quotemark": [true, "single", "avoid-escape"],
     "ban": [true, ["fit"], ["fdescribe"]],
     "no-console": true
   },
-  "rulesDirectory": []
+  "rulesDirectory": [],
+  "linterOptions": { "exclude": ["./example", "./example/angular-5-app"] }
 }
