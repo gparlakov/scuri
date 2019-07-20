@@ -428,5 +428,45 @@ function setup() {
                 );
             });
         });
+
+        describe('when there are existing deps in the class-under-test constructor', () => {
+            let treeForComma = Tree.empty();
+            beforeEach(() => {
+                treeForComma = Tree.empty();
+                treeForComma.create(
+                    't.ts',
+                    `
+class T {
+    constructor(a: string, b:string) {}
+}`
+                );
+                treeForComma.create(
+                    't.spec.ts',
+                    `
+describe('existing spec', () => {
+});
+    function setup() {
+        let a: string;
+        const builder = {
+            a,
+            build() {
+                return new T(a);
+            }
+        }
+    }
+`
+                );
+            });
+
+            it('should add a comma at the start of the deps list', () => {
+                // arrange
+                let runner = new SchematicTestRunner('schematics', collectionPath);
+                // act
+                const result = runner.runSchematic('spec', { name: 't.ts', update: true }, treeForComma);
+                // assert
+                const content = result.readContent('t.spec.ts');
+                expect(content).toMatch(/return new T\(a,b\);/)
+            });
+        });
     });
 });

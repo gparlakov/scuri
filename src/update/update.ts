@@ -178,10 +178,9 @@ function exposeNewDependencies(
 
 function useNewDependenciesInConstructor(
     block: ts.Block,
-    _toAdd: ConstructorParam[],
-    _path: string,
-    classUnderTestName: string,
-    _indentation?: string
+    toAdd: ConstructorParam[],
+    path: string,
+    classUnderTestName: string
 ) {
     const classUnderTestConstruction = findNodes(block, ts.SyntaxKind.NewExpression).find(
         (n: ts.NewExpression) => n.getText().includes(classUnderTestName)
@@ -191,11 +190,13 @@ function useNewDependenciesInConstructor(
             `Could not find the new ${classUnderTestName}() expression. Can not update spec.`
         );
     }
+    const constrParams = findNodes(classUnderTestConstruction, ts.SyntaxKind.SyntaxList)[0];
+    const hasOtherParams = constrParams.getChildCount() > 0;
     return [
         new InsertChange(
-            _path,
+            path,
             classUnderTestConstruction.end - 1,
-            _toAdd.map(p => p.name).join(', ')
+            (hasOtherParams ? ',' : '') + toAdd.map(p => p.name).join(', ')
         )
     ];
 }
