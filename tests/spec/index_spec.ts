@@ -462,10 +462,14 @@ describe('existing spec', () => {
                 // arrange
                 let runner = new SchematicTestRunner('schematics', collectionPath);
                 // act
-                const result = runner.runSchematic('spec', { name: 't.ts', update: true }, treeForComma);
+                const result = runner.runSchematic(
+                    'spec',
+                    { name: 't.ts', update: true },
+                    treeForComma
+                );
                 // assert
                 const content = result.readContent('t.spec.ts');
-                expect(content).toMatch(/return new T\(a,b\);/)
+                expect(content).toMatch(/return new T\(a,b\);/);
             });
         });
     });
