@@ -1,3 +1,5 @@
+0.6.1 Actually have all required deps and build the js...
+
 0.6.0 Make all unneeded dependencies devDependencies to avoid clashing and breaking users. All we need is the devkit core and the rest is dev-time dependency only
 
 0.5.0 Support for updating the spec to test out the new methods part of the class. Case - add one more method to the class - run scuri update (via [scuri-code](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code) or the command line)

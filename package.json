@@ -1,6 +1,6 @@
 {
   "name": "scuri",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "A spec generator schematic - Spec Create Update Read (class - component, service, directive and dependencies) Incorporate (them in the result)",
   "scripts": {
     "s": "schematics",
@@ -24,7 +24,8 @@
   "schematics": "./src/collection.json",
   "repository": "https://github.com/gparlakov/scuri",
   "dependencies": {
-    "@angular-devkit/core": "^7.3.9"
+    "@angular-devkit/core": "7.3.9",
+    "@angular-devkit/schematics": "7.3.9"
   },
   "devDependencies": {
     "@angular-devkit/schematics-cli": "^0.800.1",
