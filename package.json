@@ -1,6 +1,6 @@
 {
   "name": "scuri",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "A spec generator schematic - Spec Create Update Read (class - component, service, directive and dependencies) Incorporate (them in the result)",
   "scripts": {
     "s": "schematics",
@@ -24,20 +24,20 @@
   "schematics": "./src/collection.json",
   "repository": "https://github.com/gparlakov/scuri",
   "dependencies": {
-    "@angular-devkit/core": "^7.3.9",
-    "@angular-devkit/schematics": "^7.3.9",
+    "@angular-devkit/core": "^7.3.9"
+  },
+  "devDependencies": {
     "@angular-devkit/schematics-cli": "^0.800.1",
     "@types/jasmine": "^3.3.13",
     "@types/node": "^8.0.31",
-    "jasmine": "^3.0.0",
-    "husky": "^2.7.0",
-    "typescript": "~3.2.2"
-  },
-  "devDependencies": {
     "chokidar-cli": "^1.2.2",
+    "husky": "^2.7.0",
+    "jasmine": "^3.0.0",
+    "lodash": "^4.17.15",
     "prettier": "^1.18.2",
     "pretty-quick": "^1.11.1",
-    "tslint": "^5.18.0"
+    "tslint": "^5.18.0",
+    "typescript": "~3.2.2"
   },
   "prettier": {
     "printWidth": 100,
