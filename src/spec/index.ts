@@ -26,11 +26,20 @@ export function spec({ name, update }: SpecOptions): Rule {
         const logger = context.logger.createChild('scuri.index');
         logger.info(`Params: name: ${name} update: ${update}`);
 
-        if (update) {
-            return updateExistingSpec(name, tree, logger);
-        } else {
-            // spec file does not exist
-            return createNewSpec(name, tree, logger);
+        try {
+            if (update) {
+                return updateExistingSpec(name, tree, logger);
+            } else {
+                // spec file does not exist
+                return createNewSpec(name, tree, logger);
+            }
+        } catch (e) {
+            e = e || {};
+            logger.error(e.message || 'An error occurred');
+            logger.debug(
+                `---Error--- ${EOL}${e.message || 'Empty error message'} ${e.stack ||
+                    'Empty stack.'}`
+            );
         }
     };
 }
@@ -50,7 +59,7 @@ function updateExistingSpec(name: string, tree: Tree, logger: Logger) {
         const existingSpecFile = tree.get(getSpecFileName(name));
         if (existingSpecFile == null) {
             logger.error(
-                `Can not update ${existingSpecFile} since it does not exist. Try running without the --update flag.`
+                `Can not update spec (for ${name}) since it does not exist. Try running without the --update flag.`
             );
         } else {
             // if a spec exists we'll try to update it

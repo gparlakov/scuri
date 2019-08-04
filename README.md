@@ -1,6 +1,6 @@
-# SCURI
+# SCuri
 
-A spec generator schematic - Spec Create Update Read (class - component, service, directive and dependencies) Incorporate (them in the result)
+A spec generator schematic - **S**pec **C**reate **U**pdate **R**ead (class - component, service, directive and dependencies) **I**ncorporate (them in the result)
 
 ## Use case
 
