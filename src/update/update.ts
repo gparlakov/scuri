@@ -29,7 +29,9 @@ export function update(
         ? remove(paramsToRemove, setupFunctionNode, path)
         : [
               ...add(paramsToAdd, setupFunctionNode, path, classUnderTestName),
-              ...addMethods(publicMethods, path, fileContent, source)
+              ...addMethods(publicMethods, path, fileContent, source).concat(
+                  addMissingImports(dependencies, fileContent, path)
+              )
           ];
 }
 
@@ -245,6 +247,19 @@ it('when ${m} is called it should', () => {
 `
             )
     );
+}
+
+function addMissingImports(dependencies: ConstructorParam[], fileContent: string, path: string) {
+    console.log('enter');
+    const missingImports = dependencies.filter(d => {
+        const matchImport = new RegExp(`import.*${d.type}`);
+        return fileContent.match(matchImport) == null;
+    });
+    console.log(missingImports);
+    const addImports = missingImports.map(
+        i => new InsertChange(path, 0, `import { ${i.type} } from '${i.importPath}'`)
+    );
+    return addImports;
 }
 
 //@ts-ignore

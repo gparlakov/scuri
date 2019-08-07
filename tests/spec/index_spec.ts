@@ -162,11 +162,11 @@ describe('spec', () => {
     });
 
     describe('targeting a class with imports', () => {
-        let exampleComponentTree: Tree;
+        let treeImports: Tree;
         beforeEach(() => {
-            exampleComponentTree = Tree.empty();
+            treeImports = Tree.empty();
 
-            exampleComponentTree.create(
+            treeImports.create(
                 'with-imports.component.ts',
                 `import { Router } from '@angular/core';
                 import { ADep} from '../../deps/a-dep.ts';
@@ -193,7 +193,7 @@ describe('spec', () => {
             const result = runner.runSchematic(
                 'spec',
                 { name: 'with-imports.component.ts' },
-                exampleComponentTree
+                treeImports
             );
             // assert
             const contents = result.readContent('with-imports.component.spec.ts');
@@ -204,6 +204,43 @@ describe('spec', () => {
             );
             expect(contents).toMatch(`import { local } from './local.ts';`);
             expect(contents).not.toMatch(`import { Object } from ''`);
+        });
+
+
+        fit('adds the imports for the dependencies when updating', () => {
+            // arrange
+            const runner = new SchematicTestRunner('schematics', collectionPath);
+            // act
+            treeImports.create('with-imports.component.spec.ts', `
+                describe("WithImports", () => {});
+                function setup() {
+                    const builder = {
+                        default() {
+                            return builder;
+                        },
+                        build() {
+                            return new WithImports();
+                        }
+                    };
+                    return builder;
+                }
+            `)
+            const result = runner.runSchematic(
+                'spec',
+                { name: 'with-imports.component.ts', update: true },
+                treeImports
+            );
+            // assert
+            const contents = result.readContent('with-imports.component.spec.ts');
+
+            console.log(contents);
+            // expect(contents).toMatch(`import { Router } from '@angular/core';`);
+            // expect(contents).toMatch(`import { ADep } from '../../deps/a-dep.ts';`);
+            // expect(contents).toMatch(
+            //     `import { AnotherDep } from './local-deps/a-depth.service.ts';`
+            // );
+            // expect(contents).toMatch(`import { local } from './local.ts';`);
+            // expect(contents).not.toMatch(`import { Object } from ''`);
         });
     });
 
