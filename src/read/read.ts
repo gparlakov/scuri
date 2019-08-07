@@ -4,6 +4,7 @@ import * as ts from '../../lib/third_party/github.com/Microsoft/TypeScript/lib/t
  * Will read the Abstract Syntax Tree of the `fileContents` and extract from that:
  *  * the names and types of all constructors' parameters
  *  * the names of all public method
+ *  * the path to the dependencies
  * @example
  * class Test {
  *  constructor(service: MyService, param: string) { }
@@ -14,7 +15,7 @@ import * as ts from '../../lib/third_party/github.com/Microsoft/TypeScript/lib/t
  * // result would be
  * {
  *  name: 'Test',
- *  constructorParams: [{name: 'service', type:'MyService'}, {name: 'param', type:'string'}],
+ *  constructorParams: [{name: 'service', type:'MyService', importPath:'../../my.service.ts'}, {name: 'param', type:'string', importPath: '-----no-import-path----'}],
  *  publicMethods: ['future', 'now']
  * }
  * @param fileName the name of the file (required by ts API)
@@ -26,7 +27,12 @@ export function readClassNamesAndConstructorParams(
 ): ClassDescription[] {
     const sourceFile = ts.createSourceFile(fileName, fileContents, ts.ScriptTarget.ES2015, true);
 
-    return read(sourceFile);
+    const res = read(sourceFile);
+    const enrichedRes = res.map(r => ({
+        ...r,
+        constructorParams: addImportPaths(r.constructorParams, fileContents)
+    }));
+    return enrichedRes;
 }
 
 function read(node: ts.Node) {
@@ -91,6 +97,13 @@ function methodIsPublic(methodNode: ts.MethodDeclaration) {
         (flags & ts.ModifierFlags.Protected) !== ts.ModifierFlags.Protected
     );
 }
+
+function addImportPaths(params: ConstructorParam[], fullText: string) {
+    return params.map(p => {
+        const match = fullText.match(new RegExp(`import.*${p.type}.*from.*('|")(.*)('|")`)) || [];
+        return { ...p, importPath: match[2] }; // take the 2 match     1-st^^^  ^^2-nd
+    });
+}
 export type ClassDescription = {
     name: string;
     constructorParams: ConstructorParam[];
@@ -100,4 +113,5 @@ export type ClassDescription = {
 export type ConstructorParam = {
     name: string;
     type: string;
+    importPath?: string;
 };
