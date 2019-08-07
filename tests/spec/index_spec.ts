@@ -161,6 +161,52 @@ describe('spec', () => {
         });
     });
 
+    describe('targeting a class with imports', () => {
+        let exampleComponentTree: Tree;
+        beforeEach(() => {
+            exampleComponentTree = Tree.empty();
+
+            exampleComponentTree.create(
+                'with-imports.component.ts',
+                `import { Router } from '@angular/core';
+                import { ADep} from '../../deps/a-dep.ts';
+                import {local} from './local.ts'
+                import * as AnotherDep from './local-deps/a-depth.service.ts';
+
+                export class WithImportsComponent {
+
+                    constructor(
+                      private router: Router,
+                      private aDep: ADep,
+                      private anoter: AnotherDep,
+                      local: local,
+                      simple: Object
+                    ) {}
+                }`
+            );
+        });
+
+        it('adds the imports for the dependencies', () => {
+            // arrange
+            const runner = new SchematicTestRunner('schematics', collectionPath);
+            // act
+            const result = runner.runSchematic(
+                'spec',
+                { name: 'with-imports.component.ts' },
+                exampleComponentTree
+            );
+            // assert
+            const contents = result.readContent('with-imports.component.spec.ts');
+            expect(contents).toMatch(`import { Router } from '@angular/core';`);
+            expect(contents).toMatch(`import { ADep } from '../../deps/a-dep.ts';`);
+            expect(contents).toMatch(
+                `import { AnotherDep } from './local-deps/a-depth.service.ts';`
+            );
+            expect(contents).toMatch(`import { local } from './local.ts';`);
+            expect(contents).not.toMatch(`import { Object } from ''`);
+        });
+    });
+
     describe('with pre-exising spec (UPDATE)', () => {
         let treeWithASpec = Tree.empty();
         beforeEach(() => {

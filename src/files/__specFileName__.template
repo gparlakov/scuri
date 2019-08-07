@@ -1,5 +1,6 @@
+<% params.forEach(p => { if(p.importPath) {%>import { <%= p.type %> } from '<%= p.importPath %>';
+<% }}) %>import { <%= className %> } from './<%= normalizedName %>';
 import { autoSpy } from 'autoSpy';
-import { <%= className %> } from './<%= normalizedName %>';
 
 describe('<%= className %>', () => {
   <% publicMethods.forEach(meth=> { %>it('when <%= meth %> is called it should', () => {

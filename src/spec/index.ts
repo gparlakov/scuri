@@ -132,7 +132,8 @@ function createNewSpec(name: string, tree: Tree, logger: Logger) {
                 publicMethods,
                 declaration: toDeclaration(),
                 builderExports: toBuilderExports(),
-                constructorParams: toConstructorParams()
+                constructorParams: toConstructorParams(),
+                params
             }),
             move(path)
         ]);
