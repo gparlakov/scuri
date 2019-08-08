@@ -34,6 +34,7 @@
     "src/read/example",
     "tests",
     "lib/third_party",
-    "lib/utility/*_spec.ts"
+    "lib/utility/*_spec.ts",
+    "**/files/"
   ]
 }

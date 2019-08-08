@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "id": "AutoSpySchema",
+  "title": "AutoSpy options",
+  "type": "object",
+  "properties": {
+    "for": {
+      "type": "string",
+      "description": "The name of component we create a spec for",
+      "default": "jasmine",
+      "enum": ["jasmine", "jest"]
+    },
+    "legacy": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

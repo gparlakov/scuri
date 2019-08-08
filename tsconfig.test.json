@@ -20,5 +20,5 @@
     "types": ["jasmine", "node"]
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "lib/**/*.ts"],
-  "exclude": ["src/files/**/*.*", "tests/spec/files/**/*.*", "example/**/*.*"]
+  "exclude": ["src/files/**/*.*", "tests/spec/files/**/*.*", "example/**/*.*", "**/files/"]
 }

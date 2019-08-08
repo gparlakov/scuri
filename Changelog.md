@@ -1,3 +1,5 @@
+0.7.0 (and 0.6.2) Import dependencies when including them in the spec-s. Both for Create and Update
+
 0.6.1 Actually have all required deps and build the js...
 0.6.0 Make all unneeded dependencies devDependencies to avoid clashing and breaking users. All we need is the devkit core and the rest is dev-time dependency only
 

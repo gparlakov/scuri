@@ -1,6 +1,6 @@
 {
   "name": "scuri",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "description": "A spec generator schematic - Spec Create Update Read (class - component, service, directive and dependencies) Incorporate (them in the result)",
   "scripts": {
     "s": "schematics",
@@ -14,7 +14,8 @@
     "watch.test": "chokidar \"src/**/*.ts\" \"tests/**/*.ts\" -c \"npm test\" --initial --ignore \"src/**/*.d.ts\" --ignore \"tests/**/*.d.ts\"",
     "tslint": "tslint",
     "lint": "npm run tslint -- -p tsconfig.test.json -c tslint.json",
-    "pretty-quick": "pretty-quick"
+    "pretty-quick": "pretty-quick",
+    "prepublish": "npm run build"
   },
   "keywords": [
     "schematics"
