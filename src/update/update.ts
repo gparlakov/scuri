@@ -29,7 +29,8 @@ export function update(
         ? remove(paramsToRemove, setupFunctionNode, path)
         : [
               ...add(paramsToAdd, setupFunctionNode, path, classUnderTestName),
-              ...addMethods(publicMethods, path, fileContent, source)
+              ...addMethods(publicMethods, path, fileContent, source),
+              ...addMissingImports(dependencies, fileContent, path)
           ];
 }
 
@@ -172,7 +173,6 @@ function exposeNewDependencies(
         throw new Error('Could not find the builder declaration or its object literal.');
     }
     const positionToAdd = builderObjectLiteral.getChildAt(0).getEnd();
-
     return toAdd.map(a => new InsertChange(path, positionToAdd, `${EOL}${indentation}${a.name},`));
 }
 
@@ -245,6 +245,17 @@ it('when ${m} is called it should', () => {
 `
             )
     );
+}
+
+function addMissingImports(dependencies: ConstructorParam[], fileContent: string, path: string) {
+    const missingImports = dependencies.filter(d => {
+        const matchImport = new RegExp(`import.*${d.type}`);
+        return fileContent.match(matchImport) == null;
+    });
+    const addImports = missingImports.map(
+        i => new InsertChange(path, 0, `import { ${i.type} } from '${i.importPath}';${EOL}`)
+    );
+    return addImports;
 }
 
 //@ts-ignore

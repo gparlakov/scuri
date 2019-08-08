@@ -1,5 +1,6 @@
-import { autoSpy } from 'autoSpy';
+import { Router } from '@angular/core';
 import { MyComComponent } from './my-com.component';
+import { autoSpy } from 'autoSpy';
 
 describe('MyComComponent', () => {
     it('when ngOnInit is called it should', () => {
@@ -14,12 +15,14 @@ describe('MyComComponent', () => {
 });
 
 function setup() {
+    const router = autoSpy(Router);
     const builder = {
+        router,
         default() {
             return builder;
         },
         build() {
-            return new MyComComponent();
+            return new MyComComponent(router);
         }
     };
 
