@@ -28,7 +28,7 @@
  *
  */
 type SpyOf<T> = {
-    [k in keyof T]: T[k] extends (...args: any[]) => infer R ? T[k] & jest.Mock<R> : T[k]
+    [k in keyof T]: T[k] extends (...args: any[]) => infer R ? T[k] & jest.Mock<R> : T[k];
 };
 
 /** Create an object with methods that are autoSpy-ed to use as mock dependency */

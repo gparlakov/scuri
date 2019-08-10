@@ -10,8 +10,6 @@ export class AppComponent {
     title = 'angular6app';
 
     constructor(private s: Service) {
-      this.title = s.method() ? this.title + s.method() : this.title;
+        this.title = s.method() ? this.title + s.method() : this.title;
     }
 }
-
-

@@ -1,6 +1,6 @@
 export class Service {
-  property: string;
-  method() {
-    return 'true';
-  }
+    property: string;
+    method() {
+        return 'true';
+    }
 }
