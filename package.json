@@ -54,8 +54,8 @@
     ]
   },
   "husky": {
-    "Mhooks": {
-      "pre-commit": "npm run pretty-quick && npm run lint"
+    "mhooks": {
+      "pre-commit": "node_modules\\.bin\\pretty-quick && npm run lint"
     }
   }
 }
