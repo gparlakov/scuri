@@ -5,7 +5,7 @@ type SpyOf<T> = Partial<
     T;
 
 /** Create an object with methods that are autoSpy-ed to use as mock dependency */
-function autoSpy<T>(obj: new (...args: any[]) => T): SpyOf<T> {
+export function autoSpy<T>(obj: new (...args: any[]) => T): SpyOf<T> {
     const res: SpyOf<T> = {} as any;
 
     Object.keys(obj.prototype).forEach(key => {

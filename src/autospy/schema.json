@@ -6,13 +6,14 @@
   "properties": {
     "for": {
       "type": "string",
-      "description": "The name of component we create a spec for",
+      "description": "Generate AutoSpy compatible with either 'jest' or 'jasmine'. Default: 'jasmine'",
       "default": "jasmine",
       "enum": ["jasmine", "jest"]
     },
     "legacy": {
       "type": "boolean",
-      "default": false
+      "default": false,
+      "description": "For generating autoSpy compatible with using older than typescript 2.8 (for conditional types. Details: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-8.html) "
     }
   }
 }

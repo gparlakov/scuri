@@ -1,6 +1,6 @@
 {
   "name": "scuri",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "A spec generator schematic - Spec Create Update Read (class - component, service, directive and dependencies) Incorporate (them in the result)",
   "scripts": {
     "s": "schematics",
@@ -54,7 +54,7 @@
     ]
   },
   "husky": {
-    "hooks": {
+    "Mhooks": {
       "pre-commit": "npm run pretty-quick && npm run lint"
     }
   }

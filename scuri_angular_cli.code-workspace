@@ -8,6 +8,9 @@
         }
     ],
     "settings": {
-        "git.ignoredRepositories": ["c:\\Users\\gparl\\projects\\angular\\angular-cli"]
+        "git.ignoredRepositories": [
+            "c:\\Users\\gparl\\projects\\angular\\angular-cli"
+        ],
+        "typescript.tsdk": "scuri\\node_modules\\typescript\\lib"
     }
 }
