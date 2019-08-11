@@ -1,9 +1,3 @@
-/** Keeps the types of properties of a type but assigns type of Spy to the methods */
-type SpyOf<T> = Partial<
-    { [k in keyof T]: T[k] extends (...args: any[]) => any ? jasmine.Spy : T[k] }
-> &
-    T;
-
 /** Create an object with methods that are autoSpy-ed to use as mock dependency */
 export function autoSpy<T>(obj: new (...args: any[]) => T): SpyOf<T> {
     const res: SpyOf<T> = {} as any;
@@ -14,3 +8,9 @@ export function autoSpy<T>(obj: new (...args: any[]) => T): SpyOf<T> {
 
     return res;
 }
+
+/** Keeps the types of properties of a type but assigns type of Spy to the methods */
+type SpyOf<T> = Partial<
+    { [k in keyof T]: T[k] extends (...args: any[]) => any ? jasmine.Spy : T[k] }
+> &
+    T;

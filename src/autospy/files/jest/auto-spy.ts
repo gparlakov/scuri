@@ -1,3 +1,14 @@
+/** Create an object with methods that are autoSpy-ed to use as mock dependency */
+export function autoSpy<T>(obj: new (...args: any[]) => T): SpyOf<T> {
+    const res: SpyOf<T> = {} as any;
+
+    Object.keys(obj.prototype).forEach(key => {
+        res[key] = jest.fn();
+    });
+
+    return res;
+}
+
 /**
  * Keeps the types of properties of a type but assigns type of jest.Mock to the methods.
  * That way the methods can be mocked and examined for calls.
@@ -30,14 +41,3 @@
 type SpyOf<T> = {
     [k in keyof T]: T[k] extends (...args: any[]) => infer R ? T[k] & jest.Mock<R> : T[k];
 };
-
-/** Create an object with methods that are autoSpy-ed to use as mock dependency */
-export function autoSpy<T>(obj: new (...args: any[]) => T): SpyOf<T> {
-    const res: SpyOf<T> = {} as any;
-
-    Object.keys(obj.prototype).forEach(key => {
-        res[key] = jest.fn();
-    });
-
-    return res;
-}
