@@ -6,7 +6,6 @@ export class AutoSpyOptions {
 }
 
 export default function(_options: AutoSpyOptions): Rule {
-    console.log(_options.for === 'jasmine' ? './files/jasmine' : './files/jest');
     return (_tree: Tree, _context: SchematicContext) => {
         const source = url(_options.for === 'jasmine' ? './files/jasmine' : './files/jest');
         return mergeWith(source);
