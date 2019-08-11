@@ -5,9 +5,13 @@ export class AutoSpyOptions {
     legacy?: boolean = false;
 }
 
-export default function(_options: AutoSpyOptions): Rule {
+export default function(options: AutoSpyOptions): Rule {
     return (_tree: Tree, _context: SchematicContext) => {
-        const source = url(_options.for === 'jasmine' ? './files/jasmine' : './files/jest');
+
+        const runner = options.for;
+        const v = options.legacy ? '-ts-2.7' : '';
+
+        const source = url(`./files/${runner}${v}`);
         return mergeWith(source);
     };
 }
