@@ -1,12 +1,15 @@
+import { HttpClient } from '@angular/common/http';
 import { TestBed, async } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { autoSpy } from './auto-spy';
 
 describe('AppComponent', () => {
     beforeEach(async(() => {
-        const { dep } = setup().default();
+        const { rest } = setup().default();
 
         TestBed.configureTestingModule({
-            declarations: [AppComponent]
+            declarations: [AppComponent],
+            providers: [{ provide: HttpClient, useValue: rest }]
         }).compileComponents();
     }));
     it('should create the app', async(() => {
@@ -28,16 +31,15 @@ describe('AppComponent', () => {
 });
 
 function setup() {
-    let service: Object;
     const rest = autoSpy(HttpClient);
+
     const builder = {
-        service,
         rest,
         default() {
             return builder;
         },
         build() {
-            return new AppComponent(service, rest);
+            return new AppComponent(rest);
         }
     };
 

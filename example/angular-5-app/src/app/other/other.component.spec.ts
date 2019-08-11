@@ -35,13 +35,13 @@ describe('OtherComponent', () => {
         const comp = new OtherComponent(ser1);
 
         // assert
-        expect(comp.title).toBe('angular6app some value');
+        expect(comp.title).toBe('otherComponent some value');
     });
 
     it('should carry the types (only methods should be mocked)', () => {
         // arrange
         const ser1 = autoSpy(Service);
-        ser1.method.and.returnValue(' some value');
+        ser1.method.and.returnValue('test');
         // act
         const res = ser1.method();
 

@@ -1,6 +1,6 @@
-import { Router } from '@angular/core';
+import { Router } from '@angular/router';
 import { MyComComponent } from './my-com.component';
-import { autoSpy } from 'autoSpy';
+import { autoSpy } from '../auto-spy';
 
 describe('MyComComponent', () => {
     it('when ngOnInit is called it should', () => {

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { HttpClient } from 'selenium-webdriver/http';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
     selector: 'app-root',
@@ -7,7 +7,7 @@ import { HttpClient } from 'selenium-webdriver/http';
     styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-    constructor(service: Object, rest: HttpClient) {}
+    constructor(rest: HttpClient) {}
     title = 'app';
     publicMethod() {}
 
