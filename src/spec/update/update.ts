@@ -1,7 +1,7 @@
-import { Change, RemoveChange, InsertChange } from '../../lib/utility/change';
-import * as ts from '../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
+import { Change, RemoveChange, InsertChange } from '../../../lib/utility/change';
+import * as ts from '../../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 import { ConstructorParam } from '../read/read';
-import { findNodes, insertAfterLastOccurrence } from '../../lib/utility/ast-utils';
+import { findNodes, insertAfterLastOccurrence } from '../../../lib/utility/ast-utils';
 import { EOL } from 'os';
 export const i = insertAfterLastOccurrence;
 export function update(
