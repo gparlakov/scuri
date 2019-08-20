@@ -1,3 +1,10 @@
+0.8.0 AutoSpy create schematic. Support for jasmine and jest. As well as ts 2.8 and previous(legacy). To use:
+``` schematics scuri:autospy ``` - for angular 5 and previous
+``` ng g scuri:autospy ``` for angular 6 and up
+Both cases requires `npm i scuri` (or `npm i -g scuri`) and the first requires `npm i -g @angular-devkit/schematics-cli`.
+
+0.7.0 (and 0.6.2) Import dependencies when including them in the spec-s. Both for Create and Update
+
 0.6.1 Actually have all required deps and build the js...
 0.6.0 Make all unneeded dependencies devDependencies to avoid clashing and breaking users. All we need is the devkit core and the rest is dev-time dependency only
 

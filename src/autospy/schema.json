@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "id": "AutoSpySchema",
+  "title": "AutoSpy options",
+  "type": "object",
+  "properties": {
+    "for": {
+      "type": "string",
+      "description": "Generate AutoSpy compatible with either 'jest' or 'jasmine'. Default: 'jasmine'",
+      "default": "jasmine",
+      "enum": ["jasmine", "jest"]
+    },
+    "legacy": {
+      "type": "boolean",
+      "default": false,
+      "description": "For generating autoSpy compatible with using older than typescript 2.8 (for conditional types. Details: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-8.html) "
+    }
+  }
+}

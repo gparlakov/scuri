@@ -27,6 +27,21 @@ or
 npx schematics scuri:spec --name src/app/app.component.ts --update
 ```
 
+## AutoSpy
+
+To generate an `auto-spy.ts` file with the type and function which can be used for automating mock creation, use:
+ - ``` schematics scuri:autospy ``` - for angular 5 and previous
+ - ``` ng g scuri:autospy ``` for angular 6 and up
+Both cases requires `npm i scuri` (or `npm i -g scuri`) and the first requires `npm i -g @angular-devkit/schematics-cli`.
+
+It supports the following flags:
+ - `--for` with accepted values `jest` and `jasmine` (default is `jasmine`)
+ - `--legacy` for generating a type compatible with typescript < 2.8 (namely the conditional types feature)
+
+Examples:
+`ng g scuri:autospy --for jest --legacy` would generate a ts<2.8 jest compatible `autoSpy` type and function
+`ng g scuri:autospy` would generate a ts>2.8 jasmine compatible `autoSpy` type and function
+
 ## Troubleshooting
 
 ### Rule result Function
