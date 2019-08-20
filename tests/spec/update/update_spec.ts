@@ -1,5 +1,5 @@
-import { update } from '../../src/update/update';
-import { RemoveChange } from '../../lib/utility/change';
+import { update } from '../../../src/spec/update/update';
+import { RemoveChange } from '../../../lib/utility/change';
 
 describe('Update a spec', () => {
     it('should return a remove list', () => {

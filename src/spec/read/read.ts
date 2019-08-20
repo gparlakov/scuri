@@ -1,4 +1,4 @@
-import * as ts from '../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
+import * as ts from '../../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 
 /**
  * Will read the Abstract Syntax Tree of the `fileContents` and extract from that:

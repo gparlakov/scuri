@@ -11,8 +11,8 @@ import {
 } from '@angular-devkit/schematics';
 import { EOL } from 'os';
 import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
-import { readClassNamesAndConstructorParams } from '../read/read';
-import { update as updateFunc } from '../update/update';
+import { readClassNamesAndConstructorParams } from './read/read';
+import { update as updateFunc } from './update/update';
 import { Logger } from '@angular-devkit/core/src/logger';
 
 class SpecOptions {
@@ -123,7 +123,7 @@ function createNewSpec(name: string, tree: Tree, logger: Logger) {
         const path = name.split(fileName)[0]; // split on the filename - so we get only an array of one item
 
         const { params, className, publicMethods } = parseClassUnderTestFile(name, content);
-        const templateSource = apply(url('../files'), [
+        const templateSource = apply(url('./files'), [
             applyTemplates({
                 // the name of the new spec file
                 specFileName,
