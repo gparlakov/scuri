@@ -1,4 +1,4 @@
-0.8.0 AutoSpy create schematic. Support for jasmine and jest. As wel las ts 2.8 and legacy
+0.8.0 AutoSpy create schematic. Support for jasmine and jest. As well as ts 2.8 and previous(legacy)
 
 0.7.0 (and 0.6.2) Import dependencies when including them in the spec-s. Both for Create and Update
 
