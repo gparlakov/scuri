@@ -27,7 +27,7 @@
  * })
  *
  */
-type SpyOf<T> = {
+type SpyOf<T> = T & {
     [k in keyof T]: T[k] extends (...args: any[]) => infer R ? T[k] & jest.Mock<R> : T[k];
 };
 

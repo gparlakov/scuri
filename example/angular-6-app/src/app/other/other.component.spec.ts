@@ -29,7 +29,7 @@ describe('OtherComponent', () => {
     it('should carry the types (only methods should be mocked)', () => {
         // arrange
         const ser1 = autoSpy(Service);
-        ser1.method.and.returnValue(' some value');
+        ser1.method.mockReturnValue(' some value');
 
         // act
         const comp = new OtherComponent(ser1);
@@ -41,7 +41,7 @@ describe('OtherComponent', () => {
     it('should mock methods', () => {
         // arrange
         const ser1 = autoSpy(Service);
-        ser1.method.and.returnValue('test');
+        ser1.method.mockReturnValue('test');
         // act
         const res = ser1.method();
 

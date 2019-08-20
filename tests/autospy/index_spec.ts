@@ -69,7 +69,7 @@ describe('spec', () => {
 
         it('creates jest-style auto-spy with `--for jest` without using conditional types', () => {
             const runner = new SchematicTestRunner('schematics', collectionPath);
-            const res = runner.runSchematic('autospy', { for: 'jasmine', legacy: true }, tree);
+            const res = runner.runSchematic('autospy', { for: 'jest', legacy: true }, tree);
             const generatedContent = res.readContent('/auto-spy.ts');
             expect(generatedContent).toMatch('jest.fn');
             expect(generatedContent).not.toMatch('jasmine.Spy');
