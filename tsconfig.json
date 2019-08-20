@@ -23,10 +23,10 @@
   "exclude": [
     "src/**/files/**/*",
     "src/**/*_spec.ts",
-    "src/spec/read/example",
     "tests",
     "lib/third_party",
     "lib/utility/*_spec.ts",
-    "**/files/"
+    "**/files/",
+    "example"
   ]
 }
