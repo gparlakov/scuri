@@ -2,12 +2,32 @@
 
 A spec generator schematic - **S**pec **C**reate **U**pdate **R**ead (class - component, service, directive and dependencies) **I**ncorporate (them in the result)
 
-## Use case
+It generates/updates tests for Angular components/services/directives..
+
+# Features
+## Create test from scratch
+
+![missing create spec video](./docs/new.gif)
+
+The video shows how to use `schematics scuri:spec --name src\app\my-com\my-com.component.ts` to create a spec from scratch (if already created see **update** or use **--force** to overwrite)
+
+## Update existing test
+![missing update spec video](./docs/update.gif)
+
+Shows how we begin with an outdated test:
+ - missing `it` test case for one of the public methods (`getData`)
+ - missing dependency `HttpClient` to instantiate the component
+
+And after `schematics scuri:spec --name src\app\my-com\my-com.component.ts --update` command we get the updated test - dependency and a scaffold test case added
+
+## AutoSpy
+![missing autospy video](./docs/autospy.gif)
+
+# Use case
 
 After a component has been created it is boring and tedious to do the tests. Scuri tries to jump start that by walking the components constructor and dependencies and creating mocks for each dependency.
 
-## Getting started
-
+# Getting started / Setup
 ```
 npm install -D scuri
 ng g scuri:spec --name src/app/app.component.ts
@@ -15,6 +35,8 @@ ng g scuri:spec --name src/app/app.component.ts
 
 If you gen error of the `Error: Invalid rule result: Function().` see the [troubleshooting section below](#rule-result-function).
 
+
+# Details
 ## Update existing spec
 
 ```
