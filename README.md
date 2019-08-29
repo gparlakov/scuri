@@ -1,33 +1,43 @@
-# SCuri
+# [#](title) [SCuri](#scuri-name)
 
-A spec generator schematic - **S**pec **C**reate **U**pdate **R**ead (class - component, service, directive and dependencies) **I**ncorporate (them in the result)
+>It creates/updates unit tests for Angular components/services/directives/etc.
 
-It generates/updates tests for Angular components/services/directives..
+_Powered by [Schematics](https://www.google.com/search?q=angular+schematics&rlz=1C1GCEA_enBG796BG796&oq=angular+schematics&aqs=chrome..69i57j0l4j69i60.6527j0j7&sourceid=chrome&ie=UTF-8) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_
 
-# Features
-## Create test from scratch
+## [#](rationale) Why?
+
+**After** a component has been **created** it is **boring and tedious** to do the tests - and we often **don't**. [SCuri](#scuri-name) tries to jump start that by walking the components constructor and dependencies and creating mocks for each dependency and then including them in the spec.
+
+## [#](features) Features
+
+### [#](feature-create) Create test from scratch
 
 ![missing create spec video](./docs/new.gif)
 
-The video shows how to use `schematics scuri:spec --name src\app\my-com\my-com.component.ts` to create a spec from scratch (if already created see **update** or use **--force** to overwrite)
+The video shows how to use `schematics scuri:spec --name src\app\my-com\my-com.component.ts` to create a spec from scratch (if already created see **update** or use **--force** to overwrite).
 
-## Update existing test
+>For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts` could be used instead.
+
+### [#](feature-update) Update existing test
+
 ![missing update spec video](./docs/update.gif)
 
 Shows how we begin with an outdated test:
- - missing `it` test case for one of the public methods (`getData`)
- - missing dependency `HttpClient` to instantiate the component
 
-And after `schematics scuri:spec --name src\app\my-com\my-com.component.ts --update` command we get the updated test - dependency and a scaffold test case added
+-   missing `it` test case for one of the public methods (`getData`)
+-   missing dependency `HttpClient` to instantiate the component
 
-## AutoSpy
+And after `schematics scuri:spec --name src\app\my-com\my-com.component.ts --update` command we get the updated test - dependency and a scaffold test case added.
+
+>For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts --update` could be used instead.
+
+### [#](feature-autospy) AutoSpy
+
 ![missing autospy video](./docs/autospy.gif)
+Generates an `autoSpy` function that takes a type and returns an object with the same type plus all its methods are mocked i.e. `jasmine.spy()` or `jest.fn()`.
 
-# Use case
+## [#](setup) Getting started / Setup
 
-After a component has been created it is boring and tedious to do the tests. Scuri tries to jump start that by walking the components constructor and dependencies and creating mocks for each dependency.
-
-# Getting started / Setup
 ```
 npm install -D scuri
 ng g scuri:spec --name src/app/app.component.ts
@@ -35,9 +45,39 @@ ng g scuri:spec --name src/app/app.component.ts
 
 If you gen error of the `Error: Invalid rule result: Function().` see the [troubleshooting section below](#rule-result-function).
 
+## [#](details) Details
 
-# Details
-## Update existing spec
+### [#](create) Create spec from scratch
+
+```
+ng g scuri:spec --name src/app/app.component.ts
+```
+
+or
+
+```
+npx schematics scuri:spec --name src/app/app.component.ts
+```
+
+Requires `--name` - an existing `.ts` file with one `class` (Component/Service/Directive/etc.) and NONE existing `.spec.ts` file.
+
+### [#](overwrite) Overwrite existing spec
+
+```
+ng g scuri:spec --name src/app/app.component.ts --force
+```
+
+or
+
+```
+npx schematics scuri:spec --name src/app/app.component.ts --force
+```
+
+Requires `--name` - an existing `.ts` file with one `class` (Component/Service/Directive/etc.). Will overwrite any existing `.spec.ts` file.
+
+> This might be useful in certain more complex cases. Using a diff tool one could easily combine the preexisting and newly created (overwritten) content - just like a merge conflict is resolved.
+
+### [#](update) Update existing spec
 
 ```
 ng g scuri:spec --name src/app/app.component.ts --update
@@ -49,22 +89,64 @@ or
 npx schematics scuri:spec --name src/app/app.component.ts --update
 ```
 
-## AutoSpy
+Requires `--name` - an existing `.ts` file with one `class` (Component/Service/Directive/etc.) and one existing `.spec.ts` file where the update will happen.
+
+### [#](autospy) AutoSpy
 
 To generate an `auto-spy.ts` file with the type and function which can be used for automating mock creation, use:
- - ``` schematics scuri:autospy ``` - for angular 5 and previous
- - ``` ng g scuri:autospy ``` for angular 6 and up
-Both cases requires `npm i scuri` (or `npm i -g scuri`) and the first requires `npm i -g @angular-devkit/schematics-cli`.
+
+-   `schematics scuri:autospy` - for angular 5 and previous
+-   `ng g scuri:autospy` for angular 6 and up
+    Both cases requires `npm i scuri` (or `npm i -g scuri`) and the first requires `npm i -g @angular-devkit/schematics-cli`.
 
 It supports the following flags:
- - `--for` with accepted values `jest` and `jasmine` (default is `jasmine`)
- - `--legacy` for generating a type compatible with typescript < 2.8 (namely the conditional types feature)
+
+-   `--for` with accepted values `jest` and `jasmine` (default is `jasmine`)
+-   `--legacy` for generating a type compatible with typescript < 2.8 (namely the conditional types feature)
 
 Examples:
 `ng g scuri:autospy --for jest --legacy` would generate a ts<2.8 jest compatible `autoSpy` type and function
 `ng g scuri:autospy` would generate a ts>2.8 jasmine compatible `autoSpy` type and function
 
-## Troubleshooting
+### [#](autospy-path) Autospy path in `tsconfig.json`
+
+After creating the `auto-spy.ts` file as result of the `scuri:autospy` schematic invocation we need to make sure its properly imported in our tests. To that end and keeping in mind that `autoSpy` is being imported in the created tests as `import { autoSpy } from 'autoSpy';`. To make that an actual import one could add this line to `tsconfig.json`:
+
+```json
+{
+    "compilerOptions": {
+        "baseUrl": ".", // This must be specified if "paths" is.
+        "paths": {
+            "autospy": ["./src/auto-spy"] // This mapping is relative to "baseUrl"
+        }
+    }
+}
+```
+
+This is assuming `auto-spy.ts` was created inside `./src` folder. Edit as appropriate for your specific case.
+
+See [here](https://www.typescriptlang.org/docs/handbook/module-resolution.html#path-mapping) for **path** details
+
+## [🛣](road-map) Road map
+
+-   [x] Create spec from scratch (or overwrite existing with `--force`)
+-   [x] Update existing spec - add/remove dependencies
+-   [x] Create one scaffold `it` test case for each public method
+-   [x] On Update add `it`-s for newly added public methods
+-   [x] Generate autoSpy by `scuri:autospy` (support jest, jasmine and ts with and w/o conditional types)
+-   [ ] Support traditional Angular cli generated tests (with `--update`)
+    -   [ ] Add `setup` function when missing
+    -   [ ] Update dependencies
+-   [ ] Import `autoSpy` function automatically - now imported as `import { autoSpy } from 'autoSpy';`.
+
+
+## [#](scuri-name) S.C.u.r.i.
+What's with the name?
+
+A spec generator schematic - **S**pec **C**reate **U**pdate **R**ead (class - component, service, directive and dependencies) **I**ncorporate (them in the spec generated/updated)
+
+
+## [🐱‍💻](troubleshooting)Troubleshooting
 
 ### Rule result Function
 
