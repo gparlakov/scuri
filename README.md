@@ -2,11 +2,11 @@
 
 >It creates/updates unit tests for Angular components/services/directives/etc.
 
-_Powered by [Schematics](https://www.google.com/search?q=angular+schematics&rlz=1C1GCEA_enBG796BG796&oq=angular+schematics&aqs=chrome..69i57j0l4j69i60.6527j0j7&sourceid=chrome&ie=UTF-8) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_
+_Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_
 
 ## Why?
 
-**After** a component has been **created** it is **boring and tedious** to do the tests - and we often **don't**. [SCuri](#scuri-name) tries to jump start that by walking the components constructor and dependencies and creating mocks for each dependency and then including them in the spec.
+**After** a component has been **created** it is **boring and tedious** to do the tests - and we often **don't**. SCuri[*](#scuri-1) tries to jump start that by walking the component's constructor, parsing the dependencies and creating mocks for each of them, and then including them in the spec.
 
 ## Features
 
@@ -17,6 +17,8 @@ _Powered by [Schematics](https://www.google.com/search?q=angular+schematics&rlz=
 The video shows how to use `schematics scuri:spec --name src\app\my-com\my-com.component.ts` to create a spec from scratch (if already created see **update** or use **--force** to overwrite).
 
 >For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts` could be used instead.
+
+See details [down here](#create-spec-from-scratch).
 
 ### Update existing test
 
@@ -31,10 +33,15 @@ And after `schematics scuri:spec --name src\app\my-com\my-com.component.ts --upd
 
 >For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts --update` could be used instead.
 
+See details [down here](#update-existing-spec)
+
 ### AutoSpy
 
 ![missing autospy video](./docs/autospy.gif)
 Generates an `autoSpy` function that takes a type and returns an object with the same type plus all its methods are mocked i.e. `jasmine.spy()` or `jest.fn()`.
+
+See details [down here](#autospy-1).
+Needs tsconfig path setup -> [there](#autospy-path-in-tsconfigjson).
 
 ## Getting started / Setup
 
@@ -137,7 +144,7 @@ See [here](https://www.typescriptlang.org/docs/handbook/module-resolution.html#p
 -   [ ] Support traditional Angular cli generated tests (with `--update`)
     -   [ ] Add `setup` function when missing
     -   [ ] Update dependencies
--   [ ] Import `autoSpy` function automatically - now imported as `import { autoSpy } from 'autoSpy';`.
+-   [ ] ([workaround](#autospy-path-in-tsconfigjson)) Import `autoSpy` function automatically - now imported as `import { autoSpy } from 'autoSpy';`
 
 
 ## S.C.u.r.i.
