@@ -1,4 +1,4 @@
-# [SCuri](#-scuri-name)
+# SCuri[*](#scuri-1)
 
 >It creates/updates unit tests for Angular components/services/directives/etc.
 
