@@ -4,7 +4,7 @@
 
 _Powered by [Schematics](https://www.google.com/search?q=angular+schematics&rlz=1C1GCEA_enBG796BG796&oq=angular+schematics&aqs=chrome..69i57j0l4j69i60.6527j0j7&sourceid=chrome&ie=UTF-8) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_
 
-## [#](rationale) Why?
+## [#](#rationale) Why?
 
 **After** a component has been **created** it is **boring and tedious** to do the tests - and we often **don't**. [SCuri](#scuri-name) tries to jump start that by walking the components constructor and dependencies and creating mocks for each dependency and then including them in the spec.
 
