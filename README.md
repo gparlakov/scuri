@@ -1,16 +1,16 @@
-# [#](title) [SCuri](#scuri-name)
+# [SCuri](#-scuri-name)
 
 >It creates/updates unit tests for Angular components/services/directives/etc.
 
 _Powered by [Schematics](https://www.google.com/search?q=angular+schematics&rlz=1C1GCEA_enBG796BG796&oq=angular+schematics&aqs=chrome..69i57j0l4j69i60.6527j0j7&sourceid=chrome&ie=UTF-8) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_
 
-## [#](#rationale) Why?
+## Why?
 
 **After** a component has been **created** it is **boring and tedious** to do the tests - and we often **don't**. [SCuri](#scuri-name) tries to jump start that by walking the components constructor and dependencies and creating mocks for each dependency and then including them in the spec.
 
-## [#](features) Features
+## Features
 
-### [#](feature-create) Create test from scratch
+### Create test from scratch
 
 ![missing create spec video](./docs/new.gif)
 
@@ -18,7 +18,7 @@ The video shows how to use `schematics scuri:spec --name src\app\my-com\my-com.c
 
 >For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts` could be used instead.
 
-### [#](feature-update) Update existing test
+### Update existing test
 
 ![missing update spec video](./docs/update.gif)
 
@@ -31,12 +31,12 @@ And after `schematics scuri:spec --name src\app\my-com\my-com.component.ts --upd
 
 >For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts --update` could be used instead.
 
-### [#](feature-autospy) AutoSpy
+### AutoSpy
 
 ![missing autospy video](./docs/autospy.gif)
 Generates an `autoSpy` function that takes a type and returns an object with the same type plus all its methods are mocked i.e. `jasmine.spy()` or `jest.fn()`.
 
-## [#](setup) Getting started / Setup
+## Getting started / Setup
 
 ```
 npm install -D scuri
@@ -45,9 +45,9 @@ ng g scuri:spec --name src/app/app.component.ts
 
 If you gen error of the `Error: Invalid rule result: Function().` see the [troubleshooting section below](#rule-result-function).
 
-## [#](details) Details
+## Details
 
-### [#](create) Create spec from scratch
+### Create spec from scratch
 
 ```
 ng g scuri:spec --name src/app/app.component.ts
@@ -61,7 +61,7 @@ npx schematics scuri:spec --name src/app/app.component.ts
 
 Requires `--name` - an existing `.ts` file with one `class` (Component/Service/Directive/etc.) and NONE existing `.spec.ts` file.
 
-### [#](overwrite) Overwrite existing spec
+### Overwrite existing spec
 
 ```
 ng g scuri:spec --name src/app/app.component.ts --force
@@ -77,7 +77,7 @@ Requires `--name` - an existing `.ts` file with one `class` (Component/Service/D
 
 > This might be useful in certain more complex cases. Using a diff tool one could easily combine the preexisting and newly created (overwritten) content - just like a merge conflict is resolved.
 
-### [#](update) Update existing spec
+### Update existing spec
 
 ```
 ng g scuri:spec --name src/app/app.component.ts --update
@@ -91,7 +91,7 @@ npx schematics scuri:spec --name src/app/app.component.ts --update
 
 Requires `--name` - an existing `.ts` file with one `class` (Component/Service/Directive/etc.) and one existing `.spec.ts` file where the update will happen.
 
-### [#](autospy) AutoSpy
+### AutoSpy
 
 To generate an `auto-spy.ts` file with the type and function which can be used for automating mock creation, use:
 
@@ -108,7 +108,7 @@ Examples:
 `ng g scuri:autospy --for jest --legacy` would generate a ts<2.8 jest compatible `autoSpy` type and function
 `ng g scuri:autospy` would generate a ts>2.8 jasmine compatible `autoSpy` type and function
 
-### [#](autospy-path) Autospy path in `tsconfig.json`
+### Autospy path in `tsconfig.json`
 
 After creating the `auto-spy.ts` file as result of the `scuri:autospy` schematic invocation we need to make sure its properly imported in our tests. To that end and keeping in mind that `autoSpy` is being imported in the created tests as `import { autoSpy } from 'autoSpy';`. To make that an actual import one could add this line to `tsconfig.json`:
 
@@ -140,13 +140,13 @@ See [here](https://www.typescriptlang.org/docs/handbook/module-resolution.html#p
 -   [ ] Import `autoSpy` function automatically - now imported as `import { autoSpy } from 'autoSpy';`.
 
 
-## [#](scuri-name) S.C.u.r.i.
+## S.C.u.r.i.
 What's with the name?
 
 A spec generator schematic - **S**pec **C**reate **U**pdate **R**ead (class - component, service, directive and dependencies) **I**ncorporate (them in the spec generated/updated)
 
 
-## [🐱‍💻](troubleshooting)Troubleshooting
+## 🐱‍💻 Troubleshooting
 
 ### Rule result Function
 
