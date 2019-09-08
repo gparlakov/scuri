@@ -1,4 +1,4 @@
-import { mergeWith, Rule, SchematicContext, Tree, url } from '@angular-devkit/schematics';
+import { apply, applyTemplates, mergeWith, Rule, SchematicContext, Tree, url } from '@angular-devkit/schematics';
 
 export class AutoSpyOptions {
     for: 'jasmine' | 'jest' = 'jasmine';
@@ -7,11 +7,10 @@ export class AutoSpyOptions {
 
 export default function(options: AutoSpyOptions): Rule {
     return (_tree: Tree, _context: SchematicContext) => {
-
         const runner = options.for;
         const v = options.legacy ? '-ts-2.7' : '';
 
-        const source = url(`./files/${runner}${v}`);
+        const source = apply(url(`./files/${runner}${v}`), [applyTemplates({})]);
         return mergeWith(source);
     };
 }
