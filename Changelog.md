@@ -1,3 +1,4 @@
+0.8.3 Fix the missing autospy files
 0.8.2 Release with only doc changes - no other changes. Required to update the doc on https://www.npmjs.com/package/scuri site.
 0.8.1 Release with only doc changes - no other changes. Required to update the doc on https://www.npmjs.com/package/scuri site.
 0.8.0 AutoSpy create schematic. Support for jasmine and jest. As well as ts 2.8 and previous(legacy). To use:
