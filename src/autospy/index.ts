@@ -1,8 +1,18 @@
-import { apply, applyTemplates, mergeWith, Rule, SchematicContext, Tree, url } from '@angular-devkit/schematics';
+import {
+    apply,
+    applyTemplates,
+    mergeWith,
+    Rule,
+    SchematicContext,
+    Tree,
+    url,
+    move
+} from '@angular-devkit/schematics';
 
 export class AutoSpyOptions {
     for: 'jasmine' | 'jest' = 'jasmine';
     legacy?: boolean = false;
+    path: string = '.';
 }
 
 export default function(options: AutoSpyOptions): Rule {
@@ -10,7 +20,7 @@ export default function(options: AutoSpyOptions): Rule {
         const runner = options.for;
         const v = options.legacy ? '-ts-2.7' : '';
 
-        const source = apply(url(`./files/${runner}${v}`), [applyTemplates({})]);
+        const source = apply(url(`./files/${runner}${v}`), [applyTemplates({}), move(options.path)]);
         return mergeWith(source);
     };
 }
