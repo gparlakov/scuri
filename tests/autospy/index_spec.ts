@@ -18,6 +18,13 @@ describe('spec', () => {
         expect(res.files[0]).toEqual('/auto-spy.ts');
     });
 
+    it('creates one file at given path - auto-spy.ts', () => {
+        const runner = new SchematicTestRunner('schematics', collectionPath);
+        const res = runner.runSchematic('autospy', { path: './folder/' }, tree);
+        expect(res.files.length).toBe(1);
+        expect(res.files[0]).toEqual('/folder/auto-spy.ts');
+    });
+
     it('creates jasmine-style auto-spy by default', () => {
         const runner = new SchematicTestRunner('schematics', collectionPath);
         const res = runner.runSchematic('autospy', {}, tree);
@@ -65,7 +72,6 @@ describe('spec', () => {
             expect(generatedContent).not.toMatch('T[k] extends');
             expect(generatedContent).toMatch('export function autoSpy');
         });
-
 
         it('creates jest-style auto-spy with `--for jest` without using conditional types', () => {
             const runner = new SchematicTestRunner('schematics', collectionPath);

@@ -1,6 +1,6 @@
 {
   "name": "scuri",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "A spec generator schematic - Spec Create Update Read (class - component, service, directive and dependencies) Incorporate (them in the result)",
   "scripts": {
     "s": "schematics",
@@ -8,10 +8,10 @@
     "build": "tsc -p tsconfig.json",
     "build.test": "tsc -p tsconfig.test.json",
     "test": "npm run build.test && jasmine tests/**/*_spec.js",
+    "test.watch": "chokidar \"src/**/*.ts\" \"tests/**/*.ts\" -c \"npm test\" --initial --ignore \"src/**/*.d.ts\" --ignore \"tests/**/*.d.ts\"",
     "build.run": "npm run build && npm run s .:spec -- --name ./example/example.component.ts",
-    "watch": "chokidar \"src/**/*.ts\" -c \"npm start\" --initial --ignore \"src/**/*.d.ts\"",
-    "watch.build.run": "chokidar \"src/**/*.ts\" -c \"npm run build.run\" --initial --ignore \"src/**/*.d.ts\"",
-    "watch.test": "chokidar \"src/**/*.ts\" \"tests/**/*.ts\" -c \"npm test\" --initial --ignore \"src/**/*.d.ts\" --ignore \"tests/**/*.d.ts\"",
+    "start.watch": "chokidar \"src/**/*.ts\" -c \"npm start\" --initial --ignore \"src/**/*.d.ts\"",
+    "build.run.watch": "chokidar \"src/**/*.ts\" -c \"npm run build.run\" --initial --ignore \"src/**/*.d.ts\"",
     "tslint": "tslint",
     "lint": "npm run tslint -- -p tsconfig.test.json -c tslint.json",
     "pretty-quick": "pretty-quick",
