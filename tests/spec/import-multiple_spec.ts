@@ -24,7 +24,7 @@ export class WithImportsComponent {
     treeWithMultipleImports.create(
         'with-imports.component.spec.ts',
         `import { ADep } from '../my/relative/path';
-import { DDep } from @angular/router';
+import { DDep } from '@angular/router';
 import { WithImportsComponent } from './with-imports.component';
 import { autoSpy } from 'autoSpy';
 
@@ -63,8 +63,8 @@ function setup() {
         const contents = result.readContent('with-imports.component.spec.ts');
         expect(contents).toMatch(`import { ADep } from '../my/relative/path';`);
         expect(contents).toMatch(`import { BDep } from '../my/relative/path';`);
-        expect(contents).toMatch(`import { Router } from '@angular/router';`);
-        expect(contents).toMatch(`import { DDep } from '@angular/router';`);
+        expect(contents).toContain(`import { Router } from '@angular/router';`);
+        expect(contents).toContain(`import { DDep } from '@angular/router';`);
     });
 
     it('create should import all required', () => {
@@ -81,7 +81,7 @@ function setup() {
         const contents = result.readContent('with-imports.component.spec.ts');
         expect(contents).toMatch(`import { ADep } from '../my/relative/path';`);
         expect(contents).toMatch(`import { BDep } from '../my/relative/path';`);
-        expect(contents).toMatch(`import { Router } from '@angular/router';`);
-        expect(contents).toMatch(`import { DDep } from '@angular/router';`);
+        expect(contents).toContain(`import { Router } from '@angular/router';`);
+        expect(contents).toContain(`import { DDep } from '@angular/router';`);
     });
 });
