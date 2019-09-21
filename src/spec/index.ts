@@ -25,7 +25,6 @@ export function spec({ name, update }: SpecOptions): Rule {
         // @ts-ignore
         const logger = context.logger.createChild('scuri.index');
         logger.info(`Params: name: ${name} update: ${update}`);
-
         try {
             if (update) {
                 return updateExistingSpec(name, tree, logger);
@@ -64,6 +63,7 @@ function updateExistingSpec(name: string, tree: Tree, logger: Logger) {
         } else {
             // if a spec exists we'll try to update it
             const { params, className, publicMethods } = parseClassUnderTestFile(name, content);
+            logger.debug(`Class name ${className} ${EOL}Constructor(${params}) {${publicMethods}}`);
             const removeChanges = updateFunc(
                 existingSpecFile.path,
                 existingSpecFile.content.toString('utf8'),

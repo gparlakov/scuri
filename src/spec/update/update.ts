@@ -36,17 +36,10 @@ export function update(
 
 function readSetupFunction(source: ts.Node) {
     // FunctionDeclaration -> function setup () {/*body*/ }
-    let setupFunctionNode: ts.FunctionDeclaration | null = null;
-    ts.forEachChild(source, node => {
-        if (node.kind === ts.SyntaxKind.FunctionDeclaration) {
-            const name = (node as ts.FunctionDeclaration).name;
-            if (name != null && name.text.startsWith('setup')) {
-                setupFunctionNode = node as ts.FunctionDeclaration;
-                return true; // finish the forEachChild - we found what we are looking for
-            }
-        }
-    });
-    return setupFunctionNode;
+    return (findNodes(source, ts.SyntaxKind.FunctionDeclaration) as ts.FunctionDeclaration[])
+    .find(
+        n => n.name != null && n.name.text.startsWith('setup')
+    );
 }
 
 function readCurrentParameterNames(
