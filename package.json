@@ -1,6 +1,6 @@
 {
   "name": "scuri",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "description": "A spec generator schematic - Spec Create Update Read (class - component, service, directive and dependencies) Incorporate (them in the result)",
   "scripts": {
     "s": "schematics",

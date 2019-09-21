@@ -1,3 +1,5 @@
+0.8.5 Fix [issue #34](https://github.com/gparlakov/scuri/issues/34) - update should be able to handle nested setup function
+
 0.8.4 Fix [issue #30](https://github.com/gparlakov/scuri/issues/30) - autospy schematic accepts `path` to tell it where to __place__ the created file
 
 0.8.3 Fix the missing autospy files
