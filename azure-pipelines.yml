@@ -16,5 +16,9 @@ steps:
 - script: npm i
   displayName: 'Install deps'
 
+- script: npm run lint
+  displayName: 'Run the tests'
+
+
 - script: npm run test
   displayName: 'Run the tests'
