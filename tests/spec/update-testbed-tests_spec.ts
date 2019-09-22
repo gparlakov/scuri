@@ -66,7 +66,9 @@ function setup() {
         const contents = result.readContent('c.spec.ts');
         // assert
         expect(contents).toContain('const a = setup().default();\n        TestBed');
-        expect(contents).toContain(`.configureTestingModule({ providers: [{ provide: bDep, useValue: a.bDep },`);
+        expect(contents).toContain(
+            `.configureTestingModule({ providers: [{ provide: bDep, useValue: a.bDep },`
+        );
         expect(contents).toContain(`{ provide: LogService, useValue: a.logger }] })`);
     });
 
@@ -115,8 +117,60 @@ function setup() {
         const result = runner.runSchematic('spec', { name: './c.ts', update: true }, tree);
         const contents = result.readContent('c.spec.ts');
         // assert
-        expect(contents).toContain(`.configureTestingModule({ providers: [{ provide: bDep, useValue: setupInstance.bDep },`);
+        expect(contents).toContain(
+            `.configureTestingModule({ providers: [{ provide: bDep, useValue: setupInstance.bDep },`
+        );
         expect(contents).toContain(`{ provide: LogService, useValue: setupInstance.logger }] })`);
+    });
+
+    it('when one of the providers is already provided and the other is not it should add the other provider to configureTestingModule providers', () => {
+        // arrange
+        tree.overwrite(
+            'c.spec.ts',
+            `
+import { bDep } from '@angular/core';
+
+describe('C', () => {
+    beforeEach(async(() => {
+        const a = setup().default();
+        // does this appear
+        TestBed
+        // somewhere
+        .configureCompiler()
+        .configureTestingModule({
+            declarations: [AppComponent],
+            providers: [{ provide: bDep, useValue: a.bDep }]
+        }).compileComponents();
+    }));
+});
+
+function setup() {
+    const bDep = autoSpy(bDep);
+    const logger = autoSpy(LogService);
+    const builder = {
+        bDep,
+        logger,
+        default() {
+            return builder;
+        },
+        build() {
+            return new C(bDep, logger);
+        }
+    }
+    return builder;
+}
+        `
+        );
+
+        const runner = new SchematicTestRunner('schematics', collectionPath);
+        // act
+
+        const result = runner.runSchematic('spec', { name: './c.ts', update: true }, tree);
+        const contents = result.readContent('c.spec.ts');
+        // assert
+        expect(contents).toContain(
+            `.configureTestingModule({ providers: [{ provide: LogService, useValue: a.logger }] })`
+        );
     });
 
     it('when setup function call existing is destructured it should add a new call to setup and use that for the providers', () => {
@@ -165,7 +219,9 @@ function setup() {
         const contents = result.readContent('c.spec.ts');
         // assert
         expect(contents).toContain('const a = setup().default();');
-        expect(contents).toContain(`.configureTestingModule({ providers: [{ provide: bDep, useValue: a.bDep },`);
+        expect(contents).toContain(
+            `.configureTestingModule({ providers: [{ provide: bDep, useValue: a.bDep },`
+        );
         expect(contents).toContain(`{ provide: LogService, useValue: a.logger }] })`);
     });
 });
