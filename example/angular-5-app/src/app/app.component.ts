@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Service } from './service';
 
 @Component({
     selector: 'app-root',
@@ -7,7 +8,7 @@ import { HttpClient } from '@angular/common/http';
     styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-    constructor(rest: HttpClient) {}
+    constructor(rest: HttpClient, oneMore: Service) {}
     title = 'app';
     publicMethod() {}
 

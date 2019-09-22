@@ -10,7 +10,8 @@ describe('AppComponent', () => {
         TestBed.configureTestingModule({
             declarations: [AppComponent],
             providers: [{ provide: HttpClient, useValue: rest }]
-        }).compileComponents();
+        })
+        .compileComponents();
     }));
     it('should create the app', async(() => {
         const fixture = TestBed.createComponent(AppComponent);
