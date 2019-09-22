@@ -551,7 +551,7 @@ describe('existing spec', () => {
                 );
                 // assert
                 const content = result.readContent('t.spec.ts');
-                expect(content).toMatch(/return new T\(a,b\);/);
+                expect(content).toMatch(/return new T\(a, b\);/);
             });
         });
     });

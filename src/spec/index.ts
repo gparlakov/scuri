@@ -1,4 +1,5 @@
 import { basename, extname, normalize } from '@angular-devkit/core';
+import { Logger } from '@angular-devkit/core/src/logger';
 import {
     apply,
     applyTemplates,
@@ -12,8 +13,7 @@ import {
 import { EOL } from 'os';
 import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
 import { readClassNamesAndConstructorParams } from './read/read';
-import { update as updateFunc } from './update/update';
-import { Logger } from '@angular-devkit/core/src/logger';
+import { addMissing, update as updateFunc } from './update/update';
 
 class SpecOptions {
     name: string;
@@ -61,45 +61,65 @@ function updateExistingSpec(name: string, tree: Tree, logger: Logger) {
                 `Can not update spec (for ${name}) since it does not exist. Try running without the --update flag.`
             );
         } else {
+            const specFilePath = existingSpecFile.path;
             // if a spec exists we'll try to update it
             const { params, className, publicMethods } = parseClassUnderTestFile(name, content);
             logger.debug(`Class name ${className} ${EOL}Constructor(${params}) {${publicMethods}}`);
+
+            // start by adding missing things (like the setup function)
+            const addMissingChanges = addMissing(
+                specFilePath,
+                tree.read(specFilePath)!.toString('utf8'),
+                params,
+                className
+            );
+            applyChanges(tree, specFilePath, addMissingChanges, 'add');
+
+            // then on the resulting tree - remove unneeded deps
             const removeChanges = updateFunc(
-                existingSpecFile.path,
-                existingSpecFile.content.toString('utf8'),
+                specFilePath,
+                tree.read(specFilePath)!.toString('utf8'),
                 params,
                 className,
                 'remove',
                 publicMethods
             );
-            // first pass - remove
-            const removeRecorder = tree.beginUpdate(existingSpecFile.path);
-            removeChanges.forEach((change: Change) => {
-                if (change instanceof RemoveChange) {
-                    removeRecorder.remove(change.order, change.toRemove.length);
-                }
-            });
-            tree.commitUpdate(removeRecorder);
-            // now we need to redo the update on the new file contents
+            applyChanges(tree, specFilePath, removeChanges, 'remove');
+
+            // then add what needs to be added (new deps in the instantiation, 'it' for new methods, etc.)
             const changesToAdd = updateFunc(
-                existingSpecFile.path,
-                tree.read(existingSpecFile.path)!.toString('utf8'),
+                specFilePath,
+                tree.read(specFilePath)!.toString('utf8'),
                 params,
                 className,
                 'add',
                 publicMethods
             );
-            // first pass - add
-            const addRecorder = tree.beginUpdate(existingSpecFile.path);
-            changesToAdd.forEach((change: Change) => {
-                if (change instanceof InsertChange) {
-                    addRecorder.insertLeft(change.order, change.toAdd);
-                }
-            });
-            tree.commitUpdate(addRecorder);
+            applyChanges(tree, specFilePath, changesToAdd, 'add');
+            // console.log(tree.read('c.spec.ts')!.toString());
             return tree;
         }
     }
+}
+
+function applyChanges(tree: Tree, specFilePath: string, changes: Change[], act: 'add' | 'remove') {
+    const recorder = tree.beginUpdate(specFilePath);
+
+    if (act === 'add') {
+        changes
+            .filter(c => c instanceof InsertChange)
+            .forEach((change: InsertChange) => {
+                recorder.insertLeft(change.order, change.toAdd);
+            });
+    } else {
+        changes
+            .filter(c => c instanceof RemoveChange)
+            .forEach((change: RemoveChange) => {
+                recorder.remove(change.order, change.toRemove.length);
+            });
+    }
+
+    tree.commitUpdate(recorder);
 }
 
 function createNewSpec(name: string, tree: Tree, logger: Logger) {
