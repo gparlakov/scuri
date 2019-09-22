@@ -1,8 +1,8 @@
-import { Change, RemoveChange, InsertChange } from '../../../lib/utility/change';
-import * as ts from '../../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
-import { ConstructorParam } from '../read/read';
-import { findNodes, insertAfterLastOccurrence } from '../../../lib/utility/ast-utils';
 import { EOL } from 'os';
+import * as ts from '../../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
+import { findNodes, insertAfterLastOccurrence } from '../../../lib/utility/ast-utils';
+import { Change, InsertChange, RemoveChange } from '../../../lib/utility/change';
+import { ConstructorParam } from '../read/read';
 export const i = insertAfterLastOccurrence;
 
 export function addMissing(
@@ -64,7 +64,13 @@ export function update(
         : [
               ...add(paramsToAdd, setupFunctionNode, path, classUnderTestName),
               ...addMethods(publicMethods, path, fileContent, source),
-              ...addMissingImports(dependencies, fileContent, path)
+              ...addMissingImports(dependencies, fileContent, path),
+              ...addProviders(
+                  source,
+                  paramsToAdd,
+                  setupFunctionNode.name!.getText() || 'setup',
+                  path
+              )
           ];
 }
 
@@ -284,6 +290,38 @@ function addMissingImports(dependencies: ConstructorParam[], fileContent: string
         i => new InsertChange(path, 0, `import { ${i.type} } from '${i.importPath}';${EOL}`)
     );
     return addImports;
+}
+
+function addProviders(
+    _source: ts.SourceFile,
+    _paramsToAdd: ConstructorParam[],
+    _setupFunctionName: string,
+    _path: string
+) {
+    const configureTestingModuleCall = findNodes(_source, ts.SyntaxKind.CallExpression)
+        // reverse to find the innermost callExpression (the configureTestingModule)
+        .reverse()
+        .find(n => {
+            const text = n.getText();
+            return text.includes('configureTestingModule') && text.includes('TestBed')
+        }) as ts.CallExpression | null;
+
+    // this is apparently not using TestBed.configureTestingModule() so nothing to do here
+    if (configureTestingModuleCall == null) {
+        return [];
+    } else {
+        // find the parent that holds the TestBed call and its beginning ? or just setup()?
+        // if a setup is already called take the name (standard builder)
+        // else call const builder = setup(); and name is 'builder'
+        const params = configureTestingModuleCall.getChildren().find(p => p.getText().match(/providers\s*:/) != null);
+        // params is the { declarations: [AppComponent], providers: [Service, anotherService]}
+
+        // case - when no providers - create
+        // case when providers - the end position -1 (to include the new providers there)
+        // for every parameter that has a type which is not part of the already  provided add a {provide: ${p.type}, useValue: ${builder}.${p.name}}
+        _printKindAndText(params as any);
+        return [];
+    }
 }
 
 //@ts-ignore
