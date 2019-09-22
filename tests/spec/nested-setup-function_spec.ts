@@ -53,7 +53,7 @@ describe('Nested setup functions should not break', () => {
         const contents = result.readContent('./c.spec.ts');
         // update should add LogService to imports, to construct params and create a spy for it
         expect(contents).toContain("import { LogService } from '@angular/core';");
-        expect(contents).toContain('C(bDep,logger)');
+        expect(contents).toContain('C(bDep, logger)');
         expect(contents).toContain(`const logger = autoSpy(LogService);`);
     });
 });

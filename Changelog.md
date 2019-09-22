@@ -1,6 +1,8 @@
+0.8.6 Start on [issue #40](https://github.com/gparlakov/scuri/issues/40) - update on spec with missing `setup` function should create it. Plus fixed a small issue where `update` would add a comma when no new constructor params are added.
+
 0.8.5 Fix [issue #34](https://github.com/gparlakov/scuri/issues/34) - update should be able to handle nested setup function
 
-0.8.4 Fix [issue #30](https://github.com/gparlakov/scuri/issues/30) - autospy schematic accepts `path` to tell it where to __place__ the created file
+0.8.4 Fix [issue #30](https://github.com/gparlakov/scuri/issues/30) - autospy schematic accepts `path` to tell it where to **place** the created file
 
 0.8.3 Fix the missing autospy files
 
@@ -9,8 +11,8 @@
 0.8.1 Release with only doc changes - no other changes. Required to update the doc on https://www.npmjs.com/package/scuri site.
 
 0.8.0 AutoSpy create schematic. Support for jasmine and jest. As well as ts 2.8 and previous(legacy). To use:
-``` schematics scuri:autospy ``` - for angular 5 and previous
-``` ng g scuri:autospy ``` for angular 6 and up
+`schematics scuri:autospy` - for angular 5 and previous
+`ng g scuri:autospy` for angular 6 and up
 Both cases requires `npm i scuri` (or `npm i -g scuri`) and the first requires `npm i -g @angular-devkit/schematics-cli`.
 
 0.7.0 (and 0.6.2) Import dependencies when including them in the spec-s. Both for Create and Update

@@ -4,6 +4,41 @@ import { ConstructorParam } from '../read/read';
 import { findNodes, insertAfterLastOccurrence } from '../../../lib/utility/ast-utils';
 import { EOL } from 'os';
 export const i = insertAfterLastOccurrence;
+
+export function addMissing(
+    path: string,
+    fileContent: string,
+    _dependencies: ConstructorParam[],
+    _classUnderTestName: string
+) {
+    const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
+
+    const setupFunctionNode = readSetupFunction(source);
+
+    let missingThings: Change[] = [];
+    if (setupFunctionNode == null) {
+        missingThings.push(
+            new InsertChange(
+                path,
+                source.end,
+                `
+function setup() {
+    const builder = {
+        default() {
+            return builder;
+        },
+        build() {
+            return new ${_classUnderTestName}();
+        }
+    }
+    return builder;
+}`
+            )
+        );
+    }
+    return missingThings;
+}
+
 export function update(
     path: string,
     fileContent: string,
@@ -15,7 +50,6 @@ export function update(
     const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
 
     const setupFunctionNode = readSetupFunction(source);
-
     if (setupFunctionNode == null) {
         throw new Error("There is no setup function in the source file. We can't update that.");
     }
@@ -36,8 +70,7 @@ export function update(
 
 function readSetupFunction(source: ts.Node) {
     // FunctionDeclaration -> function setup () {/*body*/ }
-    return (findNodes(source, ts.SyntaxKind.FunctionDeclaration) as ts.FunctionDeclaration[])
-    .find(
+    return (findNodes(source, ts.SyntaxKind.FunctionDeclaration) as ts.FunctionDeclaration[]).find(
         n => n.name != null && n.name.text.startsWith('setup')
     );
 }
@@ -185,13 +218,15 @@ function useNewDependenciesInConstructor(
     }
     const constrParams = findNodes(classUnderTestConstruction, ts.SyntaxKind.SyntaxList)[0];
     const hasOtherParams = constrParams.getChildCount() > 0;
-    return [
-        new InsertChange(
-            path,
-            classUnderTestConstruction.end - 1,
-            (hasOtherParams ? ',' : '') + toAdd.map(p => p.name).join(', ')
-        )
-    ];
+    return toAdd && toAdd.length > 0
+        ? [
+              new InsertChange(
+                  path,
+                  classUnderTestConstruction.end - 1,
+                  (hasOtherParams ? ', ' : '') + toAdd.map(p => p.name).join(', ')
+              )
+          ]
+        : []; // dont add params in constructor if no need to
 }
 
 function addMethods(
