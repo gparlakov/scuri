@@ -67,7 +67,7 @@ export function update(
               ...addMissingImports(dependencies, fileContent, path),
               ...addProviders(
                   source,
-                  paramsToAdd,
+                  dependencies,
                   setupFunctionNode.name!.getText() || 'setup',
                   path
               )
@@ -292,40 +292,128 @@ function addMissingImports(dependencies: ConstructorParam[], fileContent: string
     return addImports;
 }
 
+/**
+ * Should look around for the TestBed configure and update that.
+ * If there is no setup call (or there is but it's destructured) it will add a `const a = setup().default()`
+ * For each missing provider it will add `.overrideProvider(type, {useValue: a.[name]})`
+ * (easier that way instead of picking through the vast number of combinations of the configure testing module)
+ *
+ * @param source the source created from the file text
+ * @param params the constructor parameters of the class-under-test
+ * @param setupFunctionName what's the setup function name (default setup)
+ * @param path the path to the file
+ */
 function addProviders(
-    _source: ts.SourceFile,
-    _paramsToAdd: ConstructorParam[],
-    _setupFunctionName: string,
-    _path: string
+    source: ts.SourceFile,
+    params: ConstructorParam[],
+    setupFunctionName: string,
+    path: string
 ) {
-    const configureTestingModuleCall = findNodes(_source, ts.SyntaxKind.CallExpression)
+    const configureTestingModuleCall = findNodes(source, ts.SyntaxKind.CallExpression)
         // reverse to find the innermost callExpression (the configureTestingModule)
         .reverse()
         .find(n => {
             const text = n.getText();
-            return text.includes('configureTestingModule') && text.includes('TestBed')
+            return text.includes('configureTestingModule') && text.includes('TestBed');
         }) as ts.CallExpression | null;
 
-    // this is apparently not using TestBed.configureTestingModule() so nothing to do here
     if (configureTestingModuleCall == null) {
+        // this is apparently not using TestBed.configureTestingModule() so nothing to do here
         return [];
     } else {
-        // find the parent that holds the TestBed call and its beginning ? or just setup()?
-        // if a setup is already called take the name (standard builder)
-        // else call const builder = setup(); and name is 'builder'
-        const params = configureTestingModuleCall.getChildren().find(p => p.getText().match(/providers\s*:/) != null);
-        // params is the { declarations: [AppComponent], providers: [Service, anotherService]}
+        // find the block of the method that declared TestBed (usually beforeEach)
+        const block = findTheParentBlock(configureTestingModuleCall) as ts.Block;
+        // as well as the position right at the end of the first brace (so we could insert setup call if necessary)
+        const openingBracketPosition = block.getChildAt(0)!.end;
 
-        // case - when no providers - create
-        // case when providers - the end position -1 (to include the new providers there)
-        // for every parameter that has a type which is not part of the already  provided add a {provide: ${p.type}, useValue: ${builder}.${p.name}}
-        _printKindAndText(params as any);
-        return [];
+        // if setup function is called - take the name
+        const setupInstance = findNodes(block, ts.SyntaxKind.VariableDeclaration).find(n =>
+            n.getText().includes('setup')
+        );
+
+        const hasANamedSetupInstance =
+            setupInstance != null &&
+            (setupInstance as ts.VariableDeclaration).name.kind === ts.SyntaxKind.Identifier;
+
+        // if the setup is not called or its value is not assigned to a variable (e.g. is destructured)
+        const a = hasANamedSetupInstance
+            ? (setupInstance as ts.VariableDeclaration).name.getText()
+            : 'a';
+        // insert a call to setup function
+        const inserts: InsertChange[] = !hasANamedSetupInstance
+            ? [
+                  new InsertChange(
+                      path,
+                      openingBracketPosition,
+                      `
+const ${a} = ${setupFunctionName}().default();`
+                  )
+              ]
+            : [];
+
+        // calculate which dependencies we need to add
+        const configureText = configureTestingModuleCall.getText();
+        const depsToAdd = params.filter(p => !configureText.includes(p.type));
+
+        // and then add all missing deps in one configureTestingModule call with providers only
+        if (depsToAdd.length > 0) {
+            const newProviders = depsToAdd
+                .map(d => `{ provide: ${d.type}, useValue: ${a}.${d.name} }`)
+                .join(',' + EOL + '            ');
+            inserts.push(
+                new InsertChange(
+                    path,
+                    configureTestingModuleCall.end,
+                    `.configureTestingModule({ providers: [${newProviders}] })`
+                )
+            );
+        }
+
+        return inserts;
+    }
+}
+
+function findTheParentBlock(node: ts.Node): ts.Node {
+    if (node == null || node.kind === ts.SyntaxKind.Block) {
+        return node;
+    } else {
+        return findTheParentBlock(node.parent);
     }
 }
 
 //@ts-ignore
-function _printKindAndText(node: ts.Node) {
-    // tslint:disable-next-line:no-console
-    console.log(ts.SyntaxKind[node.kind], node.getText(), EOL);
+function _printKindAndText(node?: ts.Node[] | ts.Node | null) {
+    if (node != null) {
+        if (Array.isArray(node)) {
+            node.forEach(_printKindAndText);
+        } else {
+            // tslint:disable-next-line:no-console
+            console.log(ts.SyntaxKind[node.kind], node.getText(), EOL);
+        }
+    } else {
+        // tslint:disable-next-line:no-console
+        console.log('this is empty');
+    }
+}
+
+let depth = 1;
+//@ts-ignore
+function _printKindAndTextRecursive(node?: ts.Node[] | ts.Node | null) {
+    if (node != null) {
+        if (Array.isArray(node)) {
+            node.forEach(_printKindAndTextRecursive);
+        } else {
+            // tslint:disable-next-line:no-console
+            console.log(ts.SyntaxKind[node.kind], node.getText(), depth, EOL);
+            depth += 1;
+            const children = node.getChildren();
+            if (Array.isArray(children) && depth < 6) {
+                _printKindAndTextRecursive(children);
+            }
+            depth -= 1;
+        }
+    } else {
+        // tslint:disable-next-line:no-console
+        console.log('this is empty');
+    }
 }
