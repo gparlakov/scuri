@@ -1,4 +1,4 @@
-0.8.6 Start on [issue #40](https://github.com/gparlakov/scuri/issues/40) - update on spec with missing `setup` function should create it. Plus fixed a small issue where `update` would add a comma when no new constructor params are added.
+0.9.0 Start on [issue #40](https://github.com/gparlakov/scuri/issues/40) - update on spec with missing `setup` function should create it. Plus fixed a small issue where `update` would add a comma when no new constructor params are added.
 
 0.8.5 Fix [issue #34](https://github.com/gparlakov/scuri/issues/34) - update should be able to handle nested setup function
 
