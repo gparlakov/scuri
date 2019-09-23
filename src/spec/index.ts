@@ -50,12 +50,11 @@ function getSpecFileName(name: string) {
 }
 
 function sliceSpecFromFileName(path: string) {
-    if(path.includes(".spec")) {
+    if (path.includes('.spec')) {
         return path.replace('.spec', '');
     } else {
-        return path
+        return path;
     }
-
 }
 
 function updateExistingSpec(name: string, tree: Tree, logger: Logger) {
