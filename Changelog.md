@@ -1,3 +1,5 @@
+0.9.3 Allow update to take the name of the spec (`--update c.spec.ts` will now work instead of throwing)
+
 0.9.2 Update the Readme [roadmap](./readme.md#road-map)
 
 0.9.1 Finish [issue #40](https://github.com/gparlakov/scuri/issues/40) - update on spec created by the ng CLI - add missing providers by using the setup function
