@@ -49,7 +49,16 @@ function getSpecFileName(name: string) {
     return name.split(ext)[0] + '.spec' + ext;
 }
 
+function sliceSpecFromFileName(path: string) {
+    if (path.includes('.spec')) {
+        return path.replace('.spec', '');
+    } else {
+        return path;
+    }
+}
+
 function updateExistingSpec(name: string, tree: Tree, logger: Logger) {
+    name = sliceSpecFromFileName(name);
     const content = tree.read(name);
     if (content == null) {
         logger.error(`The file ${name} is missing or empty.`);
