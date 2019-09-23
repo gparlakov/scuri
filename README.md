@@ -1,4 +1,4 @@
-# SCuri[*](#scuri-1)
+# SCuri[*](#scuri-name)
 
 >It creates/updates unit tests for Angular components/services/directives/etc.
 
@@ -6,7 +6,7 @@ _Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript co
 
 ## Why?
 
-**After** a component has been **created** it is **boring and tedious** to do the tests - and we often **don't**. SCuri[*](#scuri-1) tries to jump start that by walking the component's constructor, parsing the dependencies and creating mocks for each of them, and then including them in the spec.
+**After** a component has been **created** it is **boring and tedious** to do the tests - and we often **don't**. SCuri[*](#scuri-name) tries to jump start that by walking the component's constructor, parsing the dependencies and creating mocks for each of them, and then including them in the spec.
 
 ## Features
 
@@ -134,20 +134,21 @@ This is assuming `auto-spy.ts` was created inside `./src` folder. Edit as approp
 
 See [here](https://www.typescriptlang.org/docs/handbook/module-resolution.html#path-mapping) for **path** details
 
-## [🛣](road-map) Road map
+## 🛣 Road map <a id="road-map" href="#road-map">~</a>
 
 -   [x] Create spec from scratch (or overwrite existing with `--force`)
 -   [x] Update existing spec - add/remove dependencies
 -   [x] Create one scaffold `it` test case for each public method
 -   [x] On Update add `it`-s for newly added public methods
 -   [x] Generate autoSpy by `scuri:autospy` (support jest, jasmine and ts with and w/o conditional types)
--   [ ] Support traditional Angular cli generated tests (with `--update`)
-    -   [ ] Add `setup` function when missing
-    -   [ ] Update dependencies
+-   [x] Support traditional Angular cli generated tests (with `--update`)
+    -   [x] Add `setup` function when missing
+    -   [x] Update dependencies
+-   [ ] Allow configuration via file (.scuri.json)
 -   [ ] ([workaround](#autospy-path-in-tsconfigjson)) Import `autoSpy` function automatically - now imported as `import { autoSpy } from 'autoSpy';`
 
 
-## S.C.u.r.i.
+## S.C.u.r.i. <a id="scuri-name" href="#scuri-name">*</a>
 What's with the name?
 
 A spec generator schematic - **S**pec **C**reate **U**pdate **R**ead (class - component, service, directive and dependencies) **I**ncorporate (them in the spec generated/updated)
@@ -187,14 +188,10 @@ npm run build
 schematics .:spec --name example/example.component.ts
 ```
 
-Or use the package.json/scripts I'm using in the day-to-day development to speed things up instead of the last three lines from above example.
-
-```
-npm run build.run -- --force --dry-run false
-```
+Or use the package.json/scripts setup for the day-to-day development to speed things up instead of the **last three lines** from above example: `npm run build.run -- --force --dry-run false`
 
 -   `--force` is required because there is already an example.component.spec.ts file
--   `--dry-run false` is required because by default when running local schematics they are run in --dry-run mode - which only shows the expected actions and outcomes but does not actually modify the files on the filesystem
+-   `--dry-run false` is required because by default when running local schematics they are run in --debug mode (which implies _--dry-run_). That only shows the expected actions and outcomes but does not actually modify the files on the filesystem.
 
 ### Use in an Angular app
 
@@ -222,7 +219,7 @@ Single run:
 npm run test
 ```
 
-Runs the unit tests, using Jasmine as a runner and test framework. It builds the spec schematic, then builds the test in `/tests` and runs them.
+Runs the **unit tests**, using Jasmine as a runner and test framework. It builds the spec schematic, then builds the test in `/tests` and runs them.
 
 Or watch and run:
 
@@ -230,4 +227,4 @@ Or watch and run:
 npm run watch.test
 ```
 
-Will do the same as above but will also watch for file changes and re-run the tests.
+Will do the same as above but will also **watch** for file changes and **re-run** the tests.

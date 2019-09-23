@@ -1,3 +1,5 @@
+0.9.2 Update the Readme [roadmap](./readme.md#road-map)
+
 0.9.1 Finish [issue #40](https://github.com/gparlakov/scuri/issues/40) - update on spec created by the ng CLI - add missing providers by using the setup function
 
 0.9.0 Start on [issue #40](https://github.com/gparlakov/scuri/issues/40) - update on spec with missing `setup` function should create it. Plus fixed a small issue where `update` would add a comma when no new constructor params are added.
