@@ -2,8 +2,10 @@
 
 >It creates/updates unit tests for Angular components/services/directives/etc.
 
-_Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_
 
+_Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_. 
+
+[**VS Code extension**](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code) available!
 ## Why?
 
 **After** a component has been **created** it is **boring and tedious** to do the tests - and we often **don't**. SCuri[*](#scuri-name) tries to jump start that by walking the component's constructor, parsing the dependencies and creating mocks for each of them, and then including them in the spec.
