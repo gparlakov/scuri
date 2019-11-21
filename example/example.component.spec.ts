@@ -1,5 +1,5 @@
-import { autoSpy } from 'autoSpy';
 import { ExampleComponent } from './example.component';
+import { autoSpy } from 'autoSpy';
 
 describe('ExampleComponent', () => {
   it('when aMethod is called it should', () => {
@@ -7,7 +7,7 @@ describe('ExampleComponent', () => {
     const { build } = setup().default();
     const c = build();
     // act
-    // c.act
+    c.aMethod();
     // assert
     // expect(c).toEqual
   });
@@ -17,7 +17,7 @@ describe('ExampleComponent', () => {
     const { build } = setup().default();
     const c = build();
     // act
-    // c.act
+    c.anotherMethod();
     // assert
     // expect(c).toEqual
   });
@@ -27,7 +27,7 @@ describe('ExampleComponent', () => {
     const { build } = setup().default();
     const c = build();
     // act
-    // c.act
+    c.fourth();
     // assert
     // expect(c).toEqual
   });
@@ -36,16 +36,16 @@ describe('ExampleComponent', () => {
 });
 
 function setup() {
-  let dep:string;
-const service = autoSpy(Object);
+  let mep:string;
+const service1: Object = autoSpy<Object>(Object, 'Object');
   const builder = {
-    dep,
-service,
+    mep,
+service1,
     default() {
       return builder;
     },
     build() {
-      return new ExampleComponent(dep,service);
+      return new ExampleComponent(mep,service1);
     }
   };
 

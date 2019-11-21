@@ -18,19 +18,20 @@ import { addMissing, update as updateFunc } from './update/update';
 class SpecOptions {
     name: string;
     update?: boolean;
+    type?: string;
 }
 
-export function spec({ name, update }: SpecOptions): Rule {
+export function spec({ name, update, type }: SpecOptions): Rule {
     return (tree: Tree, context: SchematicContext) => {
         // @ts-ignore
         const logger = context.logger.createChild('scuri.index');
-        logger.info(`Params: name: ${name} update: ${update}`);
+        logger.info(`Params: name: ${name} update: ${update} for type : ${type}`);
         try {
             if (update) {
                 return updateExistingSpec(name, tree, logger);
             } else {
                 // spec file does not exist
-                return createNewSpec(name, tree, logger);
+                return createNewSpec(name, tree, logger, type);
             }
         } catch (e) {
             e = e || {};
@@ -131,8 +132,10 @@ function applyChanges(tree: Tree, specFilePath: string, changes: Change[], act: 
     tree.commitUpdate(recorder);
 }
 
-function createNewSpec(name: string, tree: Tree, logger: Logger) {
+function createNewSpec(name: string, tree: Tree, logger: Logger, type: string = 'scuri') {
     const content = tree.read(name);
+    logger.info('Create file ' + name);
+    logger.info('' + content);
     if (content == null) {
         logger.error(`The file ${name} is missing or empty.`);
     } else {
@@ -152,7 +155,7 @@ function createNewSpec(name: string, tree: Tree, logger: Logger) {
         const path = name.split(fileName)[0]; // split on the filename - so we get only an array of one item
 
         const { params, className, publicMethods } = parseClassUnderTestFile(name, content);
-        const templateSource = apply(url('./files'), [
+        const templateSource = apply(url(`./files/${type}`), [
             applyTemplates({
                 // the name of the new spec file
                 specFileName,
@@ -183,7 +186,7 @@ function createNewSpec(name: string, tree: Tree, logger: Logger) {
                 .map(p =>
                     p.type === 'string' || p.type === 'number'
                         ? `let ${p.name}:${p.type};`
-                        : `const ${p.name} = autoSpy(${p.type});`
+                        : `const ${p.name}: ${p.type} = autoSpy<${p.type}>(${p.type}, '${p.type}');`
                 )
                 .join(EOL);
         }

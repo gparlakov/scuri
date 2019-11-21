@@ -11,6 +11,9 @@
         "git.ignoredRepositories": [
             "c:\\Users\\gparl\\projects\\angular\\angular-cli"
         ],
-        "typescript.tsdk": "scuri\\node_modules\\typescript\\lib"
+        "typescript.tsdk": "scuri\\node_modules\\typescript\\lib",
+        "files.associations": {
+            "*.template": "javascript"
+        }
     }
 }

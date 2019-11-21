@@ -17,6 +17,13 @@
       "default": false,
       "alias": "u",
       "description": "Whether or not to update a pre-existing spec file."
+    },
+    "type": {
+      "type": "string",
+      "description": "Generate spec with this methode",
+      "alias": "t",
+      "default": "scuri",
+      "enum": ["scuri", "testbed", "spectator"]
     }
   },
   "required": ["name"]

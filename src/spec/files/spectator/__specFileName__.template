@@ -1,0 +1,62 @@
+<% params.forEach(p => { if(p.importPath) {%>import { <%= p.type %> } from '<%= p.importPath %>';
+<% }}) %>import { <%= className %> } from './<%= normalizedName %>';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { autoSpy } from 'autoSpy';
+
+/**
+ * Test with Spectator  -
+ */
+describe('<%= className %>', () => {
+
+    let component: <%= className %>;
+    let fixture: ComponentFixture<<%= className %>>;
+
+    beforeEach(async(() => {
+        const ser = autoSpy(Service);
+        TestBed.configureTestingModule({
+            declarations: [<%= className %>],
+            providers: [{ provide: Service, useValue: ser }]
+        }).compileComponents();
+    }));
+
+    beforeEach(() => {
+        fixture = TestBed.createComponent(OtherComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
+
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
+
+    
+
+
+
+  <% publicMethods.forEach(meth=> { %>it('when <%= meth %> is called it should', () => {
+    // GIVEN - arrange
+    const { build } = setup().default();
+    const component = build();
+    // WHEN - act
+    component.<%= meth %>();
+    // THEN - assert
+    // expect(component).toEqual
+  });
+
+  <% }) %>
+});
+
+function setup() {
+  <%= declaration %>
+  const builder = {
+    <%= builderExports %>
+    default() {
+      return builder;
+    },
+    build() {
+      return new <%= className %>(<%= constructorParams %>);
+    }
+  };
+
+  return builder;
+}
