@@ -9,7 +9,7 @@
     "build.test": "tsc -p tsconfig.test.json",
     "test": "npm run build.test && jasmine tests/**/*_spec.js",
     "test.watch": "chokidar \"src/**/*.ts\" \"tests/**/*.ts\" -c \"npm test\" --initial --ignore \"src/**/*.d.ts\" --ignore \"tests/**/*.d.ts\"",
-    "build.run": "npm run build && npm run s .:spec -- --name ./example/example.component.ts --force --dry-run false",
+    "build.run": "npm run build && npm run s .:spec -- --name ./example/example.component.ts --force --dry-run false --type testbed",
     "start.watch": "chokidar \"src/**/*.ts\" -c \"npm start\" --initial --ignore \"src/**/*.d.ts\"",
     "build.run.watch": "chokidar \"src/**/*.ts\" -c \"npm run build.run\" --initial --ignore \"src/**/*.d.ts\"",
     "tslint": "tslint",

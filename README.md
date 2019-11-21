@@ -1,14 +1,14 @@
-# SCuri[*](#scuri-name)
+# SCuri[\*](#scuri-name)
 
->It creates/updates unit tests for Angular components/services/directives/etc.
+> It creates/updates unit tests for Angular components/services/directives/etc.
 
-
-_Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_. 
+_Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_.
 
 [**VS Code extension**](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code) available!
+
 ## Why?
 
-**After** a component has been **created** it is **boring and tedious** to do the tests - and we often **don't**. SCuri[*](#scuri-name) tries to jump start that by walking the component's constructor, parsing the dependencies and creating mocks for each of them, and then including them in the spec.
+**After** a component has been **created** it is **boring and tedious** to do the tests - and we often **don't**. SCuri[\*](#scuri-name) tries to jump start that by walking the component's constructor, parsing the dependencies and creating mocks for each of them, and then including them in the spec.
 
 ## Features
 
@@ -18,7 +18,7 @@ _Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript co
 
 The video shows how to use `schematics scuri:spec --name src\app\my-com\my-com.component.ts` to create a spec from scratch (if already created see **update** or use **--force** to overwrite).
 
->For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts` could be used instead.
+> For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts` could be used instead.
 
 See details [down here](#create-spec-from-scratch).
 
@@ -33,7 +33,7 @@ Shows how we begin with an outdated test:
 
 And after `schematics scuri:spec --name src\app\my-com\my-com.component.ts --update` command we get the updated test - dependency and a scaffold test case added.
 
->For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts --update` could be used instead.
+> For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts --update` could be used instead.
 
 See details [down here](#update-existing-spec)
 
@@ -149,12 +149,11 @@ See [here](https://www.typescriptlang.org/docs/handbook/module-resolution.html#p
 -   [ ] Allow configuration via file (.scuri.json)
 -   [ ] ([workaround](#autospy-path-in-tsconfigjson)) Import `autoSpy` function automatically - now imported as `import { autoSpy } from 'autoSpy';`
 
+## S.C.u.r.i. <a id="scuri-name" href="#scuri-name">\*</a>
 
-## S.C.u.r.i. <a id="scuri-name" href="#scuri-name">*</a>
 What's with the name?
 
 A spec generator schematic - **S**pec **C**reate **U**pdate **R**ead (class - component, service, directive and dependencies) **I**ncorporate (them in the spec generated/updated)
-
 
 ## 🐱‍💻 Troubleshooting
 
@@ -212,6 +211,8 @@ ng g scuri:spec --name src/app/app.component.ts --force
 -   `cd example\angular-5-app` or any real angular application
 -   `npm link scuri` # links scuri to the current folder/packages - as if - you've installed it like npm i -D scuri
 -   `ng g scuri:spec --name src/app/app.component.ts --force` # force to overwrite the current spec
+
+`yarn run s .:spec --name example/angular-6-app-jest/src/app/app.component.ts --force --dry-run false --type testbedD`
 
 ### Unit Testing
 

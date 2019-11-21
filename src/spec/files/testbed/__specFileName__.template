@@ -8,39 +8,28 @@ import { autoSpy } from 'autoSpy';
  */
 describe('<%= className %>', () => {
 
-    let component: <%= className %>;
-    let fixture: ComponentFixture<<%= className %>>;
-
-    beforeEach(async(() => {
-        const ser = autoSpy(Service);
-        TestBed.configureTestingModule({
-            declarations: [<%= className %>],
-            providers: [{ provide: Service, useValue: ser }]
-        }).compileComponents();
-    }));
-
-    beforeEach(() => {
-        fixture = TestBed.createComponent(OtherComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
-    });
-
     it('should create', () => {
+        // GIVEN - arrange
+        const { build } = setup().default();
+        const component = build();
+
+        // WHEN - act
+
+        // THEN - assert
         expect(component).toBeTruthy();
-    });
-
-    
-
-
+    }); 
 
   <% publicMethods.forEach(meth=> { %>it('when <%= meth %> is called it should', () => {
     // GIVEN - arrange
     const { build } = setup().default();
     const component = build();
+
     // WHEN - act
-    component.<%= meth %>();
+    const <%= meth %> = component.<%= meth %>();
+
     // THEN - assert
-    // expect(component).toEqual
+    // const <%= meth %>Expected = {};
+    // expect(<%= meth %>).toEqual(<%= meth %>Expected);
   });
 
   <% }) %>
@@ -48,13 +37,26 @@ describe('<%= className %>', () => {
 
 function setup() {
   <%= declaration %>
+    let component: <%= className %>;
+    let fixture: ComponentFixture<<%= className %>>;
   const builder = {
     <%= builderExports %>
+    component,
+    fixture,
     default() {
+        TestBed.configureTestingModule({
+            declarations: [<%= className %>],
+            providers: [<%= provider %>]
+        }).compileComponents();
+
       return builder;
     },
     build() {
-      return new <%= className %>(<%= constructorParams %>);
+        fixture = TestBed.createComponent(<%= className %>);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+
+        return component;
     }
   };
 

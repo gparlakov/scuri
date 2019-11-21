@@ -3,4 +3,7 @@ export class Service {
     method() {
         return 'true';
     }
+    save() {
+        // todo Save
+    }
 }

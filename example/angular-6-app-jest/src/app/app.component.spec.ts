@@ -1,59 +1,74 @@
-import { TestBed, async } from '@angular/core/testing';
-import { AppComponent } from './app.component';
 import { Service } from './service';
-import { autoSpy } from './auto-spy';
+import { AppComponent } from './app.component';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { autoSpy } from 'autoSpy';
 
+/**
+ * Test with test Bed -
+ */
 describe('AppComponent', () => {
-    const ser = autoSpy(Service);
+    it('should create', () => {
+        // GIVEN - arrange
+        const { build } = setup().default();
+        const component = build();
 
-    beforeEach(async(() => {
-        TestBed.configureTestingModule({
-            declarations: [AppComponent],
-            providers: [{ provide: Service, useValue: ser }]
-        }).compileComponents();
-    }));
+        // WHEN - act
 
-    it('should create the app', () => {
-        const fixture = TestBed.createComponent(AppComponent);
-        const app = fixture.debugElement.componentInstance;
-        expect(app).toBeTruthy();
+        // THEN - assert
+        expect(component).toBeTruthy();
     });
 
-    it(`should have as title 'angular6app'`, () => {
-        const fixture = TestBed.createComponent(AppComponent);
-        const app = fixture.debugElement.componentInstance;
-        expect(app.title).toEqual('angular6app');
+    it('when getTitle is called it should', () => {
+        // GIVEN - arrange
+        const { build } = setup().default();
+        const component = build();
+
+        // WHEN - act
+        const getTitle = component.getTitle();
+
+        // THEN - assert
+        // const getTitleExpected = {};
+        // expect(getTitle).toEqual(getTitleExpected);
     });
 
-    it('should render title in a h1 tag', () => {
-        const fixture = TestBed.createComponent(AppComponent);
-        fixture.detectChanges();
-        const compiled = fixture.debugElement.nativeElement;
-        expect(compiled.querySelector('h1').textContent).toContain('Welcome to angular6app!');
-    });
+    it('when save is called it should', () => {
+        // GIVEN - arrange
+        const { build } = setup().default();
+        const component = build();
 
-    it('should carry the types (only methods should be mocked)', () => {
-        // arrange
-        const ser1 = autoSpy(Service);
-        ser1.method.mockReturnValue(' some value');
+        // WHEN - act
+        const save = component.save();
 
-        // act
-        const comp = new AppComponent(ser1);
-
-        // assert
-        expect(comp.title).toBe('angular6app some value');
-    });
-
-    it('should carry the types (only methods should be mocked)', () => {
-        // arrange
-        const ser1 = autoSpy(Service);
-        ser1.method.mockReturnValue('test');
-
-        // act
-        const res = ser1.method();
-
-        // assert
-        expect(ser1.method).toHaveBeenCalled();
-        expect(res).toBe('test');
+        // THEN - assert
+        // const saveExpected = {};
+        // expect(save).toEqual(saveExpected);
     });
 });
+
+function setup() {
+    const s: Service = autoSpy<Service>(Service, 'Service');
+    let component: AppComponent;
+    let fixture: ComponentFixture<AppComponent>;
+    const builder = {
+        s,
+        component,
+        fixture,
+        default() {
+            TestBed.configureTestingModule({
+                declarations: [AppComponent],
+                providers: [{ provide: Service, useValue: s }]
+            }).compileComponents();
+
+            return builder;
+        },
+        build() {
+            fixture = TestBed.createComponent(AppComponent);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+
+            return component;
+        }
+    };
+
+    return builder;
+}

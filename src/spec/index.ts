@@ -155,6 +155,8 @@ function createNewSpec(name: string, tree: Tree, logger: Logger, type: string = 
         const path = name.split(fileName)[0]; // split on the filename - so we get only an array of one item
 
         const { params, className, publicMethods } = parseClassUnderTestFile(name, content);
+        console.log('Params :', params);
+        console.log('' + publicMethods);
         const templateSource = apply(url(`./files/${type}`), [
             applyTemplates({
                 // the name of the new spec file
@@ -163,6 +165,7 @@ function createNewSpec(name: string, tree: Tree, logger: Logger, type: string = 
                 className: className,
                 publicMethods,
                 declaration: toDeclaration(),
+                provider: toProvider(),
                 builderExports: toBuilderExports(),
                 constructorParams: toConstructorParams(),
                 params
@@ -189,6 +192,15 @@ function createNewSpec(name: string, tree: Tree, logger: Logger, type: string = 
                         : `const ${p.name}: ${p.type} = autoSpy<${p.type}>(${p.type}, '${p.type}');`
                 )
                 .join(EOL);
+        }
+        function toProvider() {
+            return params
+                .map(p =>
+                    p.type === 'string' || p.type === 'number'
+                        ? ``
+                        : `{ provide: ${p.type}, useValue: ${p.name} }`
+                )
+                .join(', ' + EOL);
         }
         function toBuilderExports() {
             return params.length > 0
