@@ -1,5 +1,18 @@
 /** Create an object with methods that are autoSpy-ed to use as mock dependency */
-export function autoSpy<T>(obj: new (...args: any[]) => T): SpyOf<T> {
+export function autoSpy<T>(obj: any, type: string = ''): SpyOf<T> {   
+    switch (type) {
+        /** 
+        * Define here how to create specific type for your project. That every object could be stub or spy as you wants.
+        * @example : 
+        * case 'I18n' : 
+        *     return (data) => data.value;  
+        */
+        default:
+         return defaultSpy<T> (obj);
+    }    
+}
+
+function defaultSpy<T>(obj: new (...args: any[]) => T): SpyOf<T> {
     const res: SpyOf<T> = {} as any;
 
     Object.keys(obj.prototype).forEach(key => {
