@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-my-com',
@@ -7,7 +6,7 @@ import { Router } from '@angular/router';
     styleUrls: ['./my-com.component.css']
 })
 export class MyComComponent implements OnInit {
-    constructor(private router: Router) {}
+    constructor() {}
 
     ngOnInit() {}
 }

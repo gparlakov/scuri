@@ -1,14 +1,13 @@
-import { Service } from './service';
-import { AppComponent } from './app.component';
+import { MyComComponent } from './my-com.component';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { autoSpy } from 'autoSpy';
 
 /**
- * Test the AppComponent with test Bed -
+ * Test the MyComComponent with test Bed -
  */
-describe('AppComponent: ', () => {
+describe('MyComComponent: ', () => {
     describe('Test all class method :', () => {
-        let build, builder, component: AppComponent, actualValue, expectedValue;
+        let build, builder, component: MyComComponent, actualValue, expectedValue;
 
         beforeEach(() => {
             // GIVEN -
@@ -17,7 +16,7 @@ describe('AppComponent: ', () => {
             component = build();
         });
 
-        describe('when "getTitle()" is called', () => {
+        describe('when "ngOnInit()" is called', () => {
             beforeEach(() => {
                 // GIVEN -
                 // builder.SERVICE.and.callThrought();
@@ -27,7 +26,7 @@ describe('AppComponent: ', () => {
             describe('it should', () => {
                 it('Return VALUE', () => {
                     // WHEN - act
-                    actualValue = component.getTitle();
+                    actualValue = component.ngOnInit();
 
                     // THEN - assert
                     // expectedValue = {};
@@ -36,14 +35,14 @@ describe('AppComponent: ', () => {
                 });
 
                 /**
-                 * Add more test about method getTitle
+                 * Add more test about method ngOnInit
                  **/
-            }); // END - getTitle it should
+            }); // END - ngOnInit it should
 
             describe('it should failed', () => {
                 it('When given VALUE', () => {
                     // WHEN - act
-                    actualValue = component.getTitle();
+                    actualValue = component.ngOnInit();
 
                     // THEN - assert
                     // expectedValue = {};
@@ -52,54 +51,14 @@ describe('AppComponent: ', () => {
                 });
 
                 /**
-                 * Add more test about method getTitle when failed
+                 * Add more test about method ngOnInit when failed
                  **/
-            }); // END - getTitle it should failed
-        }); // END - test getTitle
-
-        describe('when "save()" is called', () => {
-            beforeEach(() => {
-                // GIVEN -
-                // builder.SERVICE.and.callThrought();
-                // builder.SERVICE.and.return({});
-            });
-
-            describe('it should', () => {
-                it('Return VALUE', () => {
-                    // WHEN - act
-                    actualValue = component.save();
-
-                    // THEN - assert
-                    // expectedValue = {};
-                    // expect(actualValue).toEqual(expectedValue);
-                    // expect(builder.SERVICE).toHaveBeenCalled();
-                });
-
-                /**
-                 * Add more test about method save
-                 **/
-            }); // END - save it should
-
-            describe('it should failed', () => {
-                it('When given VALUE', () => {
-                    // WHEN - act
-                    actualValue = component.save();
-
-                    // THEN - assert
-                    // expectedValue = {};
-                    // expect(actualValue).toEqual(expectedValue);
-                    // expect(builder.SERVICE).not.toHaveBeenCalled();
-                });
-
-                /**
-                 * Add more test about method save when failed
-                 **/
-            }); // END - save it should failed
-        }); // END - test save
+            }); // END - ngOnInit it should failed
+        }); // END - test ngOnInit
     }); // END - test all class method
 
     describe('Test with the dom :', () => {
-        let compile, builder, component: AppComponent;
+        let compile, builder, component: MyComComponent;
 
         beforeEach(() => {
             // GIVEN -
@@ -127,11 +86,9 @@ describe('AppComponent: ', () => {
  * Setup the test, will autospy all provider
  **/
 function setup() {
-    const s: Service = autoSpy<Service>(Service, 'Service');
-    let component: AppComponent;
-    let fixture: ComponentFixture<AppComponent>;
+    let component: MyComComponent;
+    let fixture: ComponentFixture<MyComComponent>;
     const builder = {
-        s,
         component,
         fixture,
         /**
@@ -140,7 +97,7 @@ function setup() {
 
         default() {
             TestBed.configureTestingModule({
-                providers: [AppComponent, { provide: Service, useValue: s }]
+                providers: [MyComComponent]
             });
 
             return builder;
@@ -150,7 +107,7 @@ function setup() {
          */
 
         build() {
-            component = TestBed.get(AppComponent);
+            component = TestBed.get(MyComComponent);
 
             if (component.ngOnInit) {
                 component.ngOnInit();
@@ -163,8 +120,8 @@ function setup() {
 
         compile() {
             TestBed.configureTestingModule({
-                declarations: [AppComponent],
-                providers: [{ provide: Service, useValue: s }]
+                declarations: [MyComComponent],
+                providers: []
             }).compileComponents();
 
             return builder;
@@ -174,7 +131,7 @@ function setup() {
          **/
 
         create() {
-            fixture = TestBed.createComponent(AppComponent);
+            fixture = TestBed.createComponent(MyComComponent);
             component = fixture.componentInstance;
             fixture.detectChanges();
 

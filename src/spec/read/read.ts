@@ -81,7 +81,6 @@ function readPublicMethods(node: ts.ClassDeclaration): string[] {
         if (node.kind === ts.SyntaxKind.MethodDeclaration) {
             const method = node as ts.MethodDeclaration;
 
-
             if (methodIsPublic(method)) {
                 publicMethods.push(method.name.getText());
             }

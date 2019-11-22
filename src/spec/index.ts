@@ -195,11 +195,12 @@ function createNewSpec(name: string, tree: Tree, logger: Logger, type: string = 
         }
         function toProvider() {
             return params
-                .map(p =>
-                    p.type === 'string' || p.type === 'number'
-                        ? ``
-                        : `{ provide: ${p.type}, useValue: ${p.name} }`
-                )
+                .reduce<string[]>((current, p) => {
+                    if (p.type != 'string' && p.type != 'number') {
+                        current.push(`{ provide: ${p.type}, useValue: ${p.name} }`);
+                    }
+                    return current;
+                }, [])
                 .join(', ' + EOL);
         }
         function toBuilderExports() {

@@ -3,63 +3,186 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { autoSpy } from 'autoSpy';
 
 /**
- * Test with test Bed -
+ * Test the ExampleComponent with test Bed -
  */
-describe('ExampleComponent', () => {
+describe('ExampleComponent: ', () => {
 
-    it('should create', () => {
-        // GIVEN - arrange
-        const { build } = setup().default();
-        const component = build();
+    describe('Test all class method :', () => {  
 
-        // WHEN - act
+        let build, builder, component: ExampleComponent, actualValue, expectedValue;
 
-        // THEN - assert
-        expect(component).toBeTruthy();
-    }); 
+        beforeEach(() => {
+            // GIVEN - 
+            builder = setup().default();
+            build = builder.build;
+            component = build();
+        });   
 
-  it('when aMethod is called it should', () => {
-    // GIVEN - arrange
-    const { build } = setup().default();
-    const component = build();
+        describe('when "aMethod()" is called', () => {
+                
+            beforeEach(() => {
+                // GIVEN - 
+                // builder.SERVICE.and.callThrought();
+                // builder.SERVICE.and.return({});
+            }); 
 
-    // WHEN - act
-    const aMethod = component.aMethod();
+            describe('it should', () => {                 
+        
+                it('Return VALUE', () => {
+                    // WHEN - act
+                    actualValue = component.aMethod();
 
-    // THEN - assert
-    // const aMethodExpected = {};
-    // expect(aMethod).toEqual(aMethodExpected);
-  });
+                    // THEN - assert
+                    // expectedValue = {};
+                    // expect(actualValue).toEqual(expectedValue);
+                    // expect(builder.SERVICE).toHaveBeenCalled();
+                });
 
-  it('when anotherMethod is called it should', () => {
-    // GIVEN - arrange
-    const { build } = setup().default();
-    const component = build();
+                /** 
+                * Add more test about method aMethod
+                **/
+            }); // END - aMethod it should 
 
-    // WHEN - act
-    const anotherMethod = component.anotherMethod();
+            describe('it should failed', () => { 
+        
+                it('When given VALUE', () => {
+                    // WHEN - act
+                    actualValue = component.aMethod();
 
-    // THEN - assert
-    // const anotherMethodExpected = {};
-    // expect(anotherMethod).toEqual(anotherMethodExpected);
-  });
+                    // THEN - assert
+                    // expectedValue = {};
+                    // expect(actualValue).toEqual(expectedValue);
+                    // expect(builder.SERVICE).not.toHaveBeenCalled();
+                });
 
-  it('when fourth is called it should', () => {
-    // GIVEN - arrange
-    const { build } = setup().default();
-    const component = build();
+                /** 
+                * Add more test about method aMethod when failed 
+                **/
+            }); // END - aMethod it should failed
+           
+        }); // END - test aMethod 
 
-    // WHEN - act
-    const fourth = component.fourth();
+        describe('when "anotherMethod()" is called', () => {
+                
+            beforeEach(() => {
+                // GIVEN - 
+                // builder.SERVICE.and.callThrought();
+                // builder.SERVICE.and.return({});
+            }); 
 
-    // THEN - assert
-    // const fourthExpected = {};
-    // expect(fourth).toEqual(fourthExpected);
-  });
+            describe('it should', () => {                 
+        
+                it('Return VALUE', () => {
+                    // WHEN - act
+                    actualValue = component.anotherMethod();
 
-  
-});
+                    // THEN - assert
+                    // expectedValue = {};
+                    // expect(actualValue).toEqual(expectedValue);
+                    // expect(builder.SERVICE).toHaveBeenCalled();
+                });
 
+                /** 
+                * Add more test about method anotherMethod
+                **/
+            }); // END - anotherMethod it should 
+
+            describe('it should failed', () => { 
+        
+                it('When given VALUE', () => {
+                    // WHEN - act
+                    actualValue = component.anotherMethod();
+
+                    // THEN - assert
+                    // expectedValue = {};
+                    // expect(actualValue).toEqual(expectedValue);
+                    // expect(builder.SERVICE).not.toHaveBeenCalled();
+                });
+
+                /** 
+                * Add more test about method anotherMethod when failed 
+                **/
+            }); // END - anotherMethod it should failed
+           
+        }); // END - test anotherMethod 
+
+        describe('when "fourth()" is called', () => {
+                
+            beforeEach(() => {
+                // GIVEN - 
+                // builder.SERVICE.and.callThrought();
+                // builder.SERVICE.and.return({});
+            }); 
+
+            describe('it should', () => {                 
+        
+                it('Return VALUE', () => {
+                    // WHEN - act
+                    actualValue = component.fourth();
+
+                    // THEN - assert
+                    // expectedValue = {};
+                    // expect(actualValue).toEqual(expectedValue);
+                    // expect(builder.SERVICE).toHaveBeenCalled();
+                });
+
+                /** 
+                * Add more test about method fourth
+                **/
+            }); // END - fourth it should 
+
+            describe('it should failed', () => { 
+        
+                it('When given VALUE', () => {
+                    // WHEN - act
+                    actualValue = component.fourth();
+
+                    // THEN - assert
+                    // expectedValue = {};
+                    // expect(actualValue).toEqual(expectedValue);
+                    // expect(builder.SERVICE).not.toHaveBeenCalled();
+                });
+
+                /** 
+                * Add more test about method fourth when failed 
+                **/
+            }); // END - fourth it should failed
+           
+        }); // END - test fourth 
+
+        
+    }); // END - test all class method 
+
+     describe('Test with the dom :', () => {
+
+        let compile, builder, component: ExampleComponent
+
+        beforeEach(() => {
+            // GIVEN - 
+            builder = setup().compile();
+            compile = builder.compile;
+        });
+
+         beforeEach(() => {
+            // WHEN -             
+            component = compile();
+        });
+
+        it('should create', () => {
+            // THEN - assert
+            expect(component).toBeTruthy();
+        }); 
+
+        /**
+        * Test here your DOM component
+        */
+        
+    }); // END - Test with the dom
+}); // END - test 
+
+/**
+* Setup the test, will autospy all provider 
+**/
 function setup() {
   let mep:string;
 const service1: Object = autoSpy<Object>(Object, 'Object');
@@ -67,25 +190,51 @@ const service1: Object = autoSpy<Object>(Object, 'Object');
     let fixture: ComponentFixture<ExampleComponent>;
   const builder = {
     mep,
-service1,,
+service1,
     component,
     fixture,
+    /** 
+    * Confirure class, to juste create class without Domm, usefull for test class methode
+    */ 
     default() {
         TestBed.configureTestingModule({
-            declarations: [ExampleComponent],
-            providers: [, 
-{ provide: Object, useValue: service1 }]
-        }).compileComponents();
-        
+            providers: [ExampleComponent, { provide: Object, useValue: service1 }]
+        });
+
       return builder;
     },
+    /**
+    * Build class to run without DOM. Will call ngOnInit if exist  
+    */ 
     build() {
+        component = TestBed.get(ExampleComponent);
+
+        if (component.ngOnInit) { 
+            component.ngOnInit();
+        }
+        return component;
+    },
+    /** 
+    * Configure component, and compile it with DOM, usefull for test with DOM 
+    **/ 
+    compile() {
+        TestBed.configureTestingModule({
+            declarations: [ExampleComponent],
+            providers: [{ provide: Object, useValue: service1 }]
+        }).compileComponents();
+
+      return builder;
+    },
+    /** 
+    * Create component, with DOM supports
+    **/     
+    create() {
         fixture = TestBed.createComponent(ExampleComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
 
         return component;
-    }
+    },
   };
 
   return builder;

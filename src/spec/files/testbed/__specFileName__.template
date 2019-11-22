@@ -4,37 +4,98 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { autoSpy } from 'autoSpy';
 
 /**
- * Test with test Bed -
+ * Test the <%= className %> with test Bed -
  */
-describe('<%= className %>', () => {
+describe('<%= className %>: ', () => {
 
-    it('should create', () => {
-        // GIVEN - arrange
-        const { build } = setup().default();
-        const component = build();
+    describe('Test all class method :', () => {  
 
-        // WHEN - act
+        let build, builder, component: <%= className %>, actualValue, expectedValue;
 
-        // THEN - assert
-        expect(component).toBeTruthy();
-    }); 
+        beforeEach(() => {
+            // GIVEN - 
+            builder = setup().default();
+            build = builder.build;
+            component = build();
+        });   
 
-  <% publicMethods.forEach(meth=> { %>it('when <%= meth %> is called it should', () => {
-    // GIVEN - arrange
-    const { build } = setup().default();
-    const component = build();
+        <% publicMethods.forEach(meth=> { %>describe('when "<%= meth %>()" is called', () => {
+                
+            beforeEach(() => {
+                // GIVEN - 
+                // builder.SERVICE.and.callThrought();
+                // builder.SERVICE.and.return({});
+            }); 
 
-    // WHEN - act
-    const <%= meth %> = component.<%= meth %>();
+            describe('it should', () => {                 
+        
+                it('Return VALUE', () => {
+                    // WHEN - act
+                    actualValue = component.<%= meth %>();
 
-    // THEN - assert
-    // const <%= meth %>Expected = {};
-    // expect(<%= meth %>).toEqual(<%= meth %>Expected);
-  });
+                    // THEN - assert
+                    // expectedValue = {};
+                    // expect(actualValue).toEqual(expectedValue);
+                    // expect(builder.SERVICE).toHaveBeenCalled();
+                });
 
-  <% }) %>
-});
+                /** 
+                * Add more test about method <%= meth %>
+                **/
+            }); // END - <%= meth %> it should 
 
+            describe('it should failed', () => { 
+        
+                it('When given VALUE', () => {
+                    // WHEN - act
+                    actualValue = component.<%= meth %>();
+
+                    // THEN - assert
+                    // expectedValue = {};
+                    // expect(actualValue).toEqual(expectedValue);
+                    // expect(builder.SERVICE).not.toHaveBeenCalled();
+                });
+
+                /** 
+                * Add more test about method <%= meth %> when failed 
+                **/
+            }); // END - <%= meth %> it should failed
+           
+        }); // END - test <%= meth %> 
+
+        <% }) %>
+    }); // END - test all class method 
+
+     describe('Test with the dom :', () => {
+
+        let compile, builder, component: <%= className %>
+
+        beforeEach(() => {
+            // GIVEN - 
+            builder = setup().compile();
+            compile = builder.compile;
+        });
+
+         beforeEach(() => {
+            // WHEN -             
+            component = compile();
+        });
+
+        it('should create', () => {
+            // THEN - assert
+            expect(component).toBeTruthy();
+        }); 
+
+        /**
+        * Test here your DOM component
+        */
+        
+    }); // END - Test with the dom
+}); // END - test 
+
+/**
+* Setup the test, will autospy all provider 
+**/
 function setup() {
   <%= declaration %>
     let component: <%= className %>;
@@ -43,7 +104,31 @@ function setup() {
     <%= builderExports %>
     component,
     fixture,
+    /** 
+    * Confirure class, to juste create class without Domm, usefull for test class methode
+    */ 
     default() {
+        TestBed.configureTestingModule({
+            providers: [<%= className %><% if (provider) {%>, <%= provider %><% } %>]
+        });
+
+      return builder;
+    },
+    /**
+    * Build class to run without DOM. Will call ngOnInit if exist  
+    */ 
+    build() {
+        component = TestBed.get(<%= className %>);
+
+        if (component.ngOnInit) { 
+            component.ngOnInit();
+        }
+        return component;
+    },
+    /** 
+    * Configure component, and compile it with DOM, usefull for test with DOM 
+    **/ 
+    compile() {
         TestBed.configureTestingModule({
             declarations: [<%= className %>],
             providers: [<%= provider %>]
@@ -51,13 +136,16 @@ function setup() {
 
       return builder;
     },
-    build() {
+    /** 
+    * Create component, with DOM supports
+    **/     
+    create() {
         fixture = TestBed.createComponent(<%= className %>);
         component = fixture.componentInstance;
         fixture.detectChanges();
 
         return component;
-    }
+    },
   };
 
   return builder;
