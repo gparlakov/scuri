@@ -1,6 +1,8 @@
+
 import { ExampleComponent } from './example.component';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { autoSpy } from 'autoSpy';
+import { stringify } from 'querystring'
 
 /**
  * Test the ExampleComponent with test Bed -
@@ -19,18 +21,25 @@ describe('ExampleComponent: ', () => {
         });   
 
         describe('when "aMethod()" is called', () => {
+            
                 
+             let dep: string;let service: Object;
+
             beforeEach(() => {
                 // GIVEN - 
                 // builder.SERVICE.and.callThrought();
                 // builder.SERVICE.and.return({});
+               
             }); 
 
             describe('it should', () => {                 
         
                 it('Return VALUE', () => {
+                    // GIVEN 
+                    dep = null;service = null;
+
                     // WHEN - act
-                    actualValue = component.aMethod();
+                    actualValue = component.aMethod(dep, service);
 
                     // THEN - assert
                     // expectedValue = {};
@@ -46,8 +55,15 @@ describe('ExampleComponent: ', () => {
             describe('it should failed', () => { 
         
                 it('When given VALUE', () => {
-                    // WHEN - act
-                    actualValue = component.aMethod();
+                    // GIVEN 
+                     
+                        dep = null; 
+                    
+                        service = null; 
+                    
+
+                    // WHEN - act                    
+                    actualValue = component.aMethod(dep, service);
 
                     // THEN - assert
                     // expectedValue = {};
@@ -63,18 +79,25 @@ describe('ExampleComponent: ', () => {
         }); // END - test aMethod 
 
         describe('when "anotherMethod()" is called', () => {
+            
                 
+             let param1: string;let parame2: Object;let param3: any;
+
             beforeEach(() => {
                 // GIVEN - 
                 // builder.SERVICE.and.callThrought();
                 // builder.SERVICE.and.return({});
+               
             }); 
 
             describe('it should', () => {                 
         
                 it('Return VALUE', () => {
+                    // GIVEN 
+                    param1 = null;parame2 = null;param3 = null;
+
                     // WHEN - act
-                    actualValue = component.anotherMethod();
+                    actualValue = component.anotherMethod(param1, parame2, param3);
 
                     // THEN - assert
                     // expectedValue = {};
@@ -90,8 +113,17 @@ describe('ExampleComponent: ', () => {
             describe('it should failed', () => { 
         
                 it('When given VALUE', () => {
-                    // WHEN - act
-                    actualValue = component.anotherMethod();
+                    // GIVEN 
+                     
+                        param1 = null; 
+                    
+                        parame2 = null; 
+                    
+                        param3 = null; 
+                    
+
+                    // WHEN - act                    
+                    actualValue = component.anotherMethod(param1, parame2, param3);
 
                     // THEN - assert
                     // expectedValue = {};
@@ -107,16 +139,23 @@ describe('ExampleComponent: ', () => {
         }); // END - test anotherMethod 
 
         describe('when "fourth()" is called', () => {
+            
                 
+             
+
             beforeEach(() => {
                 // GIVEN - 
                 // builder.SERVICE.and.callThrought();
                 // builder.SERVICE.and.return({});
+               
             }); 
 
             describe('it should', () => {                 
         
                 it('Return VALUE', () => {
+                    // GIVEN 
+                    
+
                     // WHEN - act
                     actualValue = component.fourth();
 
@@ -134,7 +173,10 @@ describe('ExampleComponent: ', () => {
             describe('it should failed', () => { 
         
                 it('When given VALUE', () => {
-                    // WHEN - act
+                    // GIVEN 
+                     
+
+                    // WHEN - act                    
                     actualValue = component.fourth();
 
                     // THEN - assert

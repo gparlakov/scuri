@@ -9,7 +9,7 @@ export class ExampleComponent {
     constructor(/** shows in full text and is hidden in text */mep: string, service1: Object) {}
 
     // a comment
-    async anotherMethod() {}
+    async anotherMethod(param1 : string, parame2: Object, param3: any) {}
     private third() {}
     public fourth() {}
   }

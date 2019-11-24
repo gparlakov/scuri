@@ -154,9 +154,8 @@ function createNewSpec(name: string, tree: Tree, logger: Logger, type: string = 
 
         const path = name.split(fileName)[0]; // split on the filename - so we get only an array of one item
 
-        const { params, className, publicMethods } = parseClassUnderTestFile(name, content);
-        console.log('Params :', params);
-        console.log('' + publicMethods);
+        const { params, className, publicMethods, methods } = parseClassUnderTestFile(name, content);
+        
         const templateSource = apply(url(`./files/${type}`), [
             applyTemplates({
                 // the name of the new spec file
@@ -164,6 +163,7 @@ function createNewSpec(name: string, tree: Tree, logger: Logger, type: string = 
                 normalizedName: normalizedName,
                 className: className,
                 publicMethods,
+                methods,
                 declaration: toDeclaration(),
                 provider: toProvider(),
                 builderExports: toBuilderExports(),
@@ -228,8 +228,9 @@ function parseClassUnderTestFile(name: string, fileContents: Buffer) {
     const {
         constructorParams: params,
         name: className,
-        publicMethods
+        publicMethods,
+        methods
     } = classWithConstructorParamsOrFirst;
 
-    return { params, className, publicMethods };
+    return { params, className, publicMethods, methods };
 }

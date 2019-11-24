@@ -1,7 +1,9 @@
+<% let callParam; %>
 <% params.forEach(p => { if(p.importPath) {%>import { <%= p.type %> } from '<%= p.importPath %>';
 <% }}) %>import { <%= className %> } from './<%= normalizedName %>';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { autoSpy } from 'autoSpy';
+import { stringify } from 'querystring'
 
 /**
  * Test the <%= className %> with test Bed -
@@ -19,19 +21,26 @@ describe('<%= className %>: ', () => {
             component = build();
         });   
 
-        <% publicMethods.forEach(meth=> { %>describe('when "<%= meth %>()" is called', () => {
+        <% methods.forEach(meth=> { %>describe('when "<%= meth.name %>()" is called', () => {
+            <% callParam = meth.params.map((param) => param.name).join(', '); %>
                 
+             <% meth.params.forEach(param => { %>let <%= param.name %>: <%= param.type %>;<% }); %>
+
             beforeEach(() => {
                 // GIVEN - 
                 // builder.SERVICE.and.callThrought();
                 // builder.SERVICE.and.return({});
+               
             }); 
 
             describe('it should', () => {                 
         
                 it('Return VALUE', () => {
+                    // GIVEN 
+                    <% meth.params.forEach(param => { %><%= param.name %> = null;<% }); %>
+
                     // WHEN - act
-                    actualValue = component.<%= meth %>();
+                    actualValue = component.<%= meth.name %>(<%= callParam %>);
 
                     // THEN - assert
                     // expectedValue = {};
@@ -40,15 +49,20 @@ describe('<%= className %>: ', () => {
                 });
 
                 /** 
-                * Add more test about method <%= meth %>
+                * Add more test about method <%= meth.name %>
                 **/
-            }); // END - <%= meth %> it should 
+            }); // END - <%= meth.name %> it should 
 
             describe('it should failed', () => { 
         
                 it('When given VALUE', () => {
-                    // WHEN - act
-                    actualValue = component.<%= meth %>();
+                    // GIVEN 
+                     <% meth.params.forEach(param => { %>
+                        <%= param.name %> = null; 
+                    <% }); %>
+
+                    // WHEN - act                    
+                    actualValue = component.<%= meth.name %>(<%= callParam %>);
 
                     // THEN - assert
                     // expectedValue = {};
@@ -57,11 +71,11 @@ describe('<%= className %>: ', () => {
                 });
 
                 /** 
-                * Add more test about method <%= meth %> when failed 
+                * Add more test about method <%= meth.name %> when failed 
                 **/
-            }); // END - <%= meth %> it should failed
+            }); // END - <%= meth.name %> it should failed
            
-        }); // END - test <%= meth %> 
+        }); // END - test <%= meth.name %> 
 
         <% }) %>
     }); // END - test all class method 

@@ -1,5 +1,7 @@
 import * as ts from '../../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 
+
+
 /**
  * Will read the Abstract Syntax Tree of the `fileContents` and extract from that:
  *  * the names and types of all constructors' parameters
@@ -39,13 +41,16 @@ function read(node: ts.Node) {
     let result: ClassDescription[] = [];
     if (node.kind === ts.SyntaxKind.ClassDeclaration) {
         const classDeclaration = node as ts.ClassDeclaration;
+        const methods = readPublicMethods(node as ts.ClassDeclaration);
         result = [
             {
                 name: classDeclaration.name != null ? classDeclaration.name.getText() : 'default',
                 constructorParams: readConstructorParams(node as ts.ClassDeclaration),
-                publicMethods: readPublicMethods(node as ts.ClassDeclaration)
+                publicMethods: methods.map<string>(m => m.name),
+                methods: methods
             }
         ];
+        console.log ('result : ', result); 
     }
 
     ts.forEachChild(node, n => {
@@ -54,6 +59,8 @@ function read(node: ts.Node) {
             result = result.concat(r);
         }
     });
+
+      
 
     return result;
 }
@@ -74,19 +81,48 @@ function readConstructorParams(node: ts.ClassDeclaration): ConstructorParam[] {
     return params;
 }
 
-function readPublicMethods(node: ts.ClassDeclaration): string[] {
-    let publicMethods: string[] = [];
+function readPublicMethods(node: ts.ClassDeclaration): methodeType[] {
+    let publicMethods: methodeType[] = [];
 
     ts.forEachChild(node, node => {
         if (node.kind === ts.SyntaxKind.MethodDeclaration) {
             const method = node as ts.MethodDeclaration;
 
+            const func = constructMethodType(method);
+
             if (methodIsPublic(method)) {
-                publicMethods.push(method.name.getText());
+                publicMethods.push(func);
             }
         }
     });
     return publicMethods;
+}
+
+function constructMethodType(methodNode: ts.MethodDeclaration): methodeType {
+
+    const method: methodeType = {name: methodNode.name.getText()};
+
+    method.params = methodNode.parameters.map<methodParams>(p => ({
+                name: p.name.getText(),
+                type: (p.type && p.type.getText()) || 'any' // the type of constructor param or any if not passe
+            }));
+    const flags = ts.getCombinedModifierFlags(methodNode);
+    // check if the private flag is part of this binary flag - if not means the method is public
+    if ((flags & ts.ModifierFlags.Private) === ts.ModifierFlags.Private) {
+      method.isPublic = false;
+      method.type = 'private';
+    } else if ((flags & ts.ModifierFlags.Protected) === ts.ModifierFlags.Protected) {
+      method.isPublic = false;
+      method.type = 'protected';
+    } else {
+      method.isPublic = true;
+      method.type = 'public';
+    }
+
+    console.log('methodType :', method);
+
+
+    return method;
 }
 
 function methodIsPublic(methodNode: ts.MethodDeclaration) {
@@ -98,7 +134,7 @@ function methodIsPublic(methodNode: ts.MethodDeclaration) {
     );
 }
 
-function addImportPaths(params: ConstructorParam[], fullText: string) {
+function addImportPaths(params: ConstructorParam[] | methodParams[], fullText: string): ConstructorParam[] | methodParams[] {
     return params.map(p => {
         const match = fullText.match(new RegExp(`import.*${p.type}.*from.*('|")(.*)('|")`)) || [];
         return { ...p, importPath: match[2] }; // take the 2 match     1-st^^^  ^^2-nd
@@ -108,6 +144,7 @@ export type ClassDescription = {
     name: string;
     constructorParams: ConstructorParam[];
     publicMethods: string[];
+    methods: methodeType[];
 };
 
 export type ConstructorParam = {
@@ -115,3 +152,18 @@ export type ConstructorParam = {
     type: string;
     importPath?: string;
 };
+
+export type methodeType = {
+    name: string;
+    isPublic?: boolean,
+    type?: 'public' | 'private' | 'protected',
+    body?: string,
+    params?: methodParams[], 
+    [key: string]: any;
+}
+
+export type methodParams = {
+    name: string;
+    type: string,    
+    importPath?: string;
+}
