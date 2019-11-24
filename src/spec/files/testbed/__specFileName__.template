@@ -24,7 +24,8 @@ describe('<%= className %>: ', () => {
         <% methods.forEach(meth=> { %>describe('when "<%= meth.name %>()" is called', () => {
             <% callParam = meth.params.map((param) => param.name).join(', '); %>
                 
-             <% meth.params.forEach(param => { %>let <%= param.name %>: <%= param.type %>;<% }); %>
+             <% meth.params.forEach(param => { %>let <%= param.name %>: <%= param.type %>;
+                <% }); %>
 
             beforeEach(() => {
                 // GIVEN - 
@@ -37,7 +38,8 @@ describe('<%= className %>: ', () => {
         
                 it('Return VALUE', () => {
                     // GIVEN 
-                    <% meth.params.forEach(param => { %><%= param.name %> = null;<% }); %>
+                    <% meth.params.forEach(param => { %><%= param.name %> = <%= param.defaultValue %>;
+                        <% }); %>
 
                     // WHEN - act
                     actualValue = component.<%= meth.name %>(<%= callParam %>);

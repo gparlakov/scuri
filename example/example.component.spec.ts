@@ -23,7 +23,9 @@ describe('ExampleComponent: ', () => {
         describe('when "aMethod()" is called', () => {
             
                 
-             let dep: string;let service: Object;
+             let dep: string;
+                let service: Object;
+                
 
             beforeEach(() => {
                 // GIVEN - 
@@ -36,7 +38,9 @@ describe('ExampleComponent: ', () => {
         
                 it('Return VALUE', () => {
                     // GIVEN 
-                    dep = null;service = null;
+                    dep = '';
+                        service = {};
+                        
 
                     // WHEN - act
                     actualValue = component.aMethod(dep, service);
@@ -81,7 +85,10 @@ describe('ExampleComponent: ', () => {
         describe('when "anotherMethod()" is called', () => {
             
                 
-             let param1: string;let parame2: Object;let param3: any;
+             let param1: string;
+                let parame2: Object;
+                let param3: any;
+                
 
             beforeEach(() => {
                 // GIVEN - 
@@ -94,7 +101,10 @@ describe('ExampleComponent: ', () => {
         
                 it('Return VALUE', () => {
                     // GIVEN 
-                    param1 = null;parame2 = null;param3 = null;
+                    param1 = '';
+                        parame2 = {};
+                        param3 = null;
+                        
 
                     // WHEN - act
                     actualValue = component.anotherMethod(param1, parame2, param3);

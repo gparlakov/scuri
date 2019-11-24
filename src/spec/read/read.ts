@@ -102,10 +102,7 @@ function constructMethodType(methodNode: ts.MethodDeclaration): methodeType {
 
     const method: methodeType = {name: methodNode.name.getText()};
 
-    method.params = methodNode.parameters.map<methodParams>(p => ({
-                name: p.name.getText(),
-                type: (p.type && p.type.getText()) || 'any' // the type of constructor param or any if not passe
-            }));
+    method.params = methodNode.parameters.map<methodParams>(constructMethodParams);
     const flags = ts.getCombinedModifierFlags(methodNode);
     // check if the private flag is part of this binary flag - if not means the method is public
     if ((flags & ts.ModifierFlags.Private) === ts.ModifierFlags.Private) {
@@ -118,11 +115,45 @@ function constructMethodType(methodNode: ts.MethodDeclaration): methodeType {
       method.isPublic = true;
       method.type = 'public';
     }
+    console.log('constructMethodType : ', methodNode.typeParameters, methodNode.type, flags);
 
     console.log('methodType :', method);
 
 
     return method;
+}
+
+function constructMethodParams(p: ts.ParameterDeclaration): methodParams {
+    let defaultValue: string;
+    const type: string = (p.type && p.type.getText()) || 'any';
+
+    switch(type) {
+        case 'string':
+            defaultValue = "''";
+            break;
+
+        case 'number':
+            defaultValue = '0';
+            break;
+
+        case 'boolean':
+            defaultValue = "false";
+            break;
+
+        case 'any':
+            defaultValue = "null";
+            break;
+
+        default: 
+            defaultValue = "{}";
+    }
+    console.log('constructMethodParams : ', type, defaultValue, p.type)
+
+    return {
+                name: p.name.getText(),
+                defaultValue,
+                type  // the type of constructor param or any if not passe
+            };
 }
 
 function methodIsPublic(methodNode: ts.MethodDeclaration) {
@@ -134,7 +165,7 @@ function methodIsPublic(methodNode: ts.MethodDeclaration) {
     );
 }
 
-function addImportPaths(params: ConstructorParam[] | methodParams[], fullText: string): ConstructorParam[] | methodParams[] {
+function addImportPaths(params: ConstructorParam[], fullText: string): ConstructorParam[] {
     return params.map(p => {
         const match = fullText.match(new RegExp(`import.*${p.type}.*from.*('|")(.*)('|")`)) || [];
         return { ...p, importPath: match[2] }; // take the 2 match     1-st^^^  ^^2-nd
@@ -166,4 +197,5 @@ export type methodParams = {
     name: string;
     type: string,    
     importPath?: string;
+    defaultValue?: any;
 }
