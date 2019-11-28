@@ -1,5 +1,7 @@
 import * as ts from '../../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
 
+let program;
+let typeChecker: ts.TypeChecker;
 
 
 /**
@@ -28,6 +30,11 @@ export function readClassNamesAndConstructorParams(
     fileContents: string
 ): ClassDescription[] {
     const sourceFile = ts.createSourceFile(fileName, fileContents, ts.ScriptTarget.ES2015, true);
+    // Build a program using the set of root file names in fileNames
+    program = ts.createProgram([fileName],{});
+
+    // Get the checker, we will use it to find more about classes
+    typeChecker = program.getTypeChecker();
 
     const res = read(sourceFile);
     const enrichedRes = res.map(r => ({
@@ -103,7 +110,46 @@ function constructMethodType(methodNode: ts.MethodDeclaration): methodeType {
     const method: methodeType = {name: methodNode.name.getText()};
 
     method.params = methodNode.parameters.map<methodParams>(constructMethodParams);
-    const flags = ts.getCombinedModifierFlags(methodNode);
+    const flags: ts.ModifierFlags = ts.getCombinedModifierFlags(methodNode);
+    // @ts-ignore
+    if (typeChecker) {
+        try {
+            const signature: ts.Signature | undefined = typeChecker.getSignatureFromDeclaration(methodNode);
+            let returnType = null;
+            if (signature) {
+                returnType = typeChecker.getReturnTypeOfSignature(signature);
+
+                switch (returnType.getFlags()) {
+                    case ts.TypeFlags.Any:
+                    case ts.TypeFlags.Unknown:
+                        method.returnType = 'any';
+                        method.hasReturn = true;
+                        break;
+                    case ts.TypeFlags.Void:
+                    case ts.TypeFlags.VoidLike:
+                    case ts.TypeFlags.Never:
+                        method.returnType = 'void';
+                        method.hasReturn = false;
+                        break;
+
+                    default:
+                        method.returnType = typeChecker.typeToString(returnType);
+                        method.hasReturn = true;
+                        break;
+                }
+            }
+
+            // const docs = methodNode.jsDoc? methodNode.jsDoc : null; // array of js docs
+
+        } catch (e) {
+            method.returnType = '';
+            method.hasReturn = false;
+        }
+    } else {
+        method.returnType = '';
+        method.hasReturn = false;
+    }
+
     // check if the private flag is part of this binary flag - if not means the method is public
     if ((flags & ts.ModifierFlags.Private) === ts.ModifierFlags.Private) {
       method.isPublic = false;
@@ -115,7 +161,6 @@ function constructMethodType(methodNode: ts.MethodDeclaration): methodeType {
       method.isPublic = true;
       method.type = 'public';
     }
-    console.log('constructMethodType : ', methodNode.typeParameters, methodNode.type, flags);
 
     console.log('methodType :', method);
 
@@ -137,17 +182,17 @@ function constructMethodParams(p: ts.ParameterDeclaration): methodParams {
             break;
 
         case 'boolean':
-            defaultValue = "false";
+            defaultValue = 'false';
             break;
 
         case 'any':
-            defaultValue = "null";
+            defaultValue = 'null';
             break;
 
         default: 
-            defaultValue = "{}";
+            defaultValue = '{}';
     }
-    console.log('constructMethodParams : ', type, defaultValue, p.type)
+
 
     return {
                 name: p.name.getText(),
@@ -189,7 +234,9 @@ export type methodeType = {
     isPublic?: boolean,
     type?: 'public' | 'private' | 'protected',
     body?: string,
-    params?: methodParams[], 
+    params?: methodParams[],
+    returnType?: string,
+    hasReturn?: boolean,
     [key: string]: any;
 }
 

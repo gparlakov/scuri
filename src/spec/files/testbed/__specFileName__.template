@@ -12,7 +12,7 @@ describe('<%= className %>: ', () => {
 
     describe('Test all class method :', () => {  
 
-        let build, builder, component: <%= className %>, actualValue, expectedValue;
+        let build, builder, component: <%= className %>;
 
         beforeEach(() => {
             // GIVEN - 
@@ -23,6 +23,10 @@ describe('<%= className %>: ', () => {
 
         <% methods.forEach(meth=> { %>describe('when "<%= meth.name %>()" is called', () => {
             <% callParam = meth.params.map((param) => param.name).join(', '); %>
+
+            <% if (meth.hasReturn) { %>
+            let actualValue: <%= meth.returnType %>, expectedValue: <%= meth.returnType %>;
+            <% } %>
                 
              <% meth.params.forEach(param => { %>let <%= param.name %>: <%= param.type %>;
                 <% }); %>
@@ -35,7 +39,8 @@ describe('<%= className %>: ', () => {
             }); 
 
             describe('it should', () => {                 
-        
+
+                <% if (meth.hasReturn) { %>
                 it('Return VALUE', () => {
                     // GIVEN 
                     <% meth.params.forEach(param => { %><%= param.name %> = <%= param.defaultValue %>;
@@ -45,10 +50,26 @@ describe('<%= className %>: ', () => {
                     actualValue = component.<%= meth.name %>(<%= callParam %>);
 
                     // THEN - assert
-                    // expectedValue = {};
-                    // expect(actualValue).toEqual(expectedValue);
+                    expectedValue = null;
+                    expect(actualValue).toEqual(expectedValue);
                     // expect(builder.SERVICE).toHaveBeenCalled();
                 });
+                <% } else { %>
+                    it('DO ...', () => {
+                        // GIVEN
+                        <% meth.params.forEach(param => { %><%= param.name %> = <%= param.defaultValue %>;
+                            <% }); %>
+
+                        // WHEN - act
+                        component.<%= meth.name %>(<%= callParam %>);
+
+                        // THEN - assert
+                        // expect(builder.SERVICE).toHaveBeenCalled();
+                    });
+
+                <% }  %>
+
+
 
                 /** 
                 * Add more test about method <%= meth.name %>
@@ -136,9 +157,8 @@ function setup() {
     build() {
         component = TestBed.get(<%= className %>);
 
-        if (component.ngOnInit) { 
-            component.ngOnInit();
-        }
+        // @ts-ignore If it is a component call the ng Init before
+        if (component.ngOnInit) { component.ngOnInit();   }
         return component;
     },
     /** 

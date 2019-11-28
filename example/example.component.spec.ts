@@ -11,7 +11,7 @@ describe('ExampleComponent: ', () => {
 
     describe('Test all class method :', () => {  
 
-        let build, builder, component: ExampleComponent, actualValue, expectedValue;
+        let build, builder, component: ExampleComponent;
 
         beforeEach(() => {
             // GIVEN - 
@@ -22,6 +22,8 @@ describe('ExampleComponent: ', () => {
 
         describe('when "aMethod()" is called', () => {
             
+
+            let actualValue: , expectedValue: ;
                 
              let dep: string;
                 let service: Object;
@@ -35,21 +37,24 @@ describe('ExampleComponent: ', () => {
             }); 
 
             describe('it should', () => {                 
-        
-                it('Return VALUE', () => {
-                    // GIVEN 
-                    dep = '';
-                        service = {};
-                        
 
-                    // WHEN - act
-                    actualValue = component.aMethod(dep, service);
+                
+                    it('DO ...', () => {
+                        // GIVEN
+                        dep = '';
+                            service = {};
+                            
 
-                    // THEN - assert
-                    // expectedValue = {};
-                    // expect(actualValue).toEqual(expectedValue);
-                    // expect(builder.SERVICE).toHaveBeenCalled();
-                });
+                        // WHEN - act
+                        component.aMethod(dep, service);
+
+                        // THEN - assert
+                        // expect(builder.SERVICE).toHaveBeenCalled();
+                    });
+
+                
+
+
 
                 /** 
                 * Add more test about method aMethod
@@ -84,6 +89,8 @@ describe('ExampleComponent: ', () => {
 
         describe('when "anotherMethod()" is called', () => {
             
+
+            let actualValue: , expectedValue: ;
                 
              let param1: string;
                 let parame2: Object;
@@ -98,22 +105,25 @@ describe('ExampleComponent: ', () => {
             }); 
 
             describe('it should', () => {                 
-        
-                it('Return VALUE', () => {
-                    // GIVEN 
-                    param1 = '';
-                        parame2 = {};
-                        param3 = null;
-                        
 
-                    // WHEN - act
-                    actualValue = component.anotherMethod(param1, parame2, param3);
+                
+                    it('DO ...', () => {
+                        // GIVEN
+                        param1 = '';
+                            parame2 = {};
+                            param3 = null;
+                            
 
-                    // THEN - assert
-                    // expectedValue = {};
-                    // expect(actualValue).toEqual(expectedValue);
-                    // expect(builder.SERVICE).toHaveBeenCalled();
-                });
+                        // WHEN - act
+                        component.anotherMethod(param1, parame2, param3);
+
+                        // THEN - assert
+                        // expect(builder.SERVICE).toHaveBeenCalled();
+                    });
+
+                
+
+
 
                 /** 
                 * Add more test about method anotherMethod
@@ -150,6 +160,8 @@ describe('ExampleComponent: ', () => {
 
         describe('when "fourth()" is called', () => {
             
+
+            let actualValue: string, expectedValue: string;
                 
              
 
@@ -161,7 +173,8 @@ describe('ExampleComponent: ', () => {
             }); 
 
             describe('it should', () => {                 
-        
+
+                
                 it('Return VALUE', () => {
                     // GIVEN 
                     
@@ -170,10 +183,13 @@ describe('ExampleComponent: ', () => {
                     actualValue = component.fourth();
 
                     // THEN - assert
-                    // expectedValue = {};
-                    // expect(actualValue).toEqual(expectedValue);
+                    expectedValue = null;
+                    expect(actualValue).toEqual(expectedValue);
                     // expect(builder.SERVICE).toHaveBeenCalled();
                 });
+                
+
+
 
                 /** 
                 * Add more test about method fourth
@@ -261,9 +277,8 @@ service1,
     build() {
         component = TestBed.get(ExampleComponent);
 
-        if (component.ngOnInit) { 
-            component.ngOnInit();
-        }
+        // @ts-ignore If it is a component call the ng Init before
+        if (component.ngOnInit) { component.ngOnInit();   }
         return component;
     },
     /** 
