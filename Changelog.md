@@ -1,3 +1,5 @@
+0.9.4 Fix auto-spy not working with Typescript target e2015. Issue comes from methods of classes NOT  being enumerable i.e. Object.keys(obj) will not "see" them
+
 0.9.3 Allow update to take the name of the spec (`--update c.spec.ts` will now work instead of throwing)
 
 0.9.2 Update the Readme [roadmap](./readme.md#road-map)
