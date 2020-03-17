@@ -5,7 +5,11 @@
 
 _Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_. 
 
-[**VS Code extension**](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code) available!
+👩‍💻[**VS Code extension**](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code) available!
+
+🚀[Want to use SCuri in **enterprise** environment?](#scuri-for-enterprise)
+
+🤵[Need commercial-quality coverage for SCuri?](#scuri-for-enterprise)
 ## Why?
 
 **After** a component has been **created** it is **boring and tedious** to do the tests - and we often **don't**. SCuri[*](#scuri-name) tries to jump start that by walking the component's constructor, parsing the dependencies and creating mocks for each of them, and then including them in the spec.
@@ -230,3 +234,10 @@ npm run watch.test
 ```
 
 Will do the same as above but will also **watch** for file changes and **re-run** the tests.
+
+
+## SCuri for enterprise
+
+Available as part of the Tidelift Subscription
+
+The maintainers of scuri and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/npm-scuri?utm_source=npm-scuri&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)
