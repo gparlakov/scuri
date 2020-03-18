@@ -20,19 +20,9 @@ steps:
     npm run build
   displayName: 'npm install and build'
 
-- script: npm test
+- script: npm pack
 
 - task: CopyFiles@2
   inputs:
-    contents: 'lib/**'
+    contents: 'scuri*.tgz'
     targetFolder: $(Build.ArtifactStagingDirectory)
-
-- task: CopyFiles@2
-  inputs:
-    contents: 'src/**'
-    targetFolder: $(Build.ArtifactStagingDirectory)
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathToPublish: $(Build.ArtifactStagingDirectory)
-    artifactName: Scuri
