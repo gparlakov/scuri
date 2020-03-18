@@ -5,6 +5,8 @@
 
 trigger:
 - master
+pr:
+
 
 pool:
   vmImage: 'ubuntu-latest'
