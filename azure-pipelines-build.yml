@@ -5,7 +5,7 @@
 
 trigger:
 - master
-pr:
+pr: none
 
 
 pool:
