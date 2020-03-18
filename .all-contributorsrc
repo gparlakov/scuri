@@ -1,0 +1,24 @@
+{
+  "projectName": "scuri",
+  "projectOwner": "Georgi Parlakov",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 80,
+  "commit": true,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "gparlakov",
+      "name": "Georgi Parlakov",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/3482199?v=4",
+      "profile": "https://github.com/gparlakov",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
