@@ -21,6 +21,15 @@
         "doc",
         "test"
       ]
+    },
+    {
+      "login": "tziyang-lum",
+      "name": "Tzi Yang",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/56020413?v=4",
+      "profile": "https://github.com/tziyang-lum",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7
