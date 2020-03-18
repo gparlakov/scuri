@@ -26,3 +26,9 @@ steps:
   inputs:
     contents: 'scuri*.tgz'
     targetFolder: $(Build.ArtifactStagingDirectory)
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    path: $(Build.ArtifactStagingDirectory)
+    artifact: scuri_pack
+
