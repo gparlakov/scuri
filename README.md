@@ -253,7 +253,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/gparlakov"><img src="https://avatars0.githubusercontent.com/u/3482199?v=4" width="80px;" alt=""/><br /><sub><b>Georgi Parlakov</b></sub></a><br /><a href="https://github.com/Georgi Parlakov/scuri/commits?author=gparlakov" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/gparlakov"><img src="https://avatars0.githubusercontent.com/u/3482199?v=4" width="80px;" alt=""/><br /><sub><b>Georgi Parlakov</b></sub></a><br /><a href="https://github.com/Georgi Parlakov/scuri/commits?author=gparlakov" title="Code">💻</a> <a href="#ideas-gparlakov" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/Georgi Parlakov/scuri/commits?author=gparlakov" title="Documentation">📖</a> <a href="https://github.com/Georgi Parlakov/scuri/commits?author=gparlakov" title="Tests">⚠️</a></td>
   </tr>
 </table>
 

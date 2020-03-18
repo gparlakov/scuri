@@ -16,7 +16,10 @@
       "avatar_url": "https://avatars0.githubusercontent.com/u/3482199?v=4",
       "profile": "https://github.com/gparlakov",
       "contributions": [
-        "code"
+        "code",
+        "ideas",
+        "doc",
+        "test"
       ]
     }
   ],
