@@ -15,7 +15,7 @@
     "tslint": "tslint",
     "lint": "npm run tslint -- -p tsconfig.test.json -c tslint.json",
     "pretty-quick": "pretty-quick",
-    "prepublish": "npm run build"
+    "deprecated_prepublish": "npm run build"
   },
   "keywords": [
     "schematics"
