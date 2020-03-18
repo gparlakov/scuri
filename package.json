@@ -15,14 +15,14 @@
     "tslint": "tslint",
     "lint": "npm run tslint -- -p tsconfig.test.json -c tslint.json",
     "pretty-quick": "pretty-quick",
-    "prepublish": "npm run build"
+    "deprecated_prepublish": "npm run build"
   },
   "keywords": [
     "schematics"
   ],
   "author": "gparlakov@gmail.com",
   "license": "MIT",
-  "schematics": "./src/collection.json",
+  "schematics": "./dist/collection.json",
   "repository": "https://github.com/gparlakov/scuri",
   "dependencies": {
     "@angular-devkit/core": "^9.0.6",
