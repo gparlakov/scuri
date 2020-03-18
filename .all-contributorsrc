@@ -1,0 +1,45 @@
+{
+  "projectName": "scuri",
+  "projectOwner": "Georgi Parlakov",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 80,
+  "commit": true,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "gparlakov",
+      "name": "Georgi Parlakov",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/3482199?v=4",
+      "profile": "https://github.com/gparlakov",
+      "contributions": [
+        "code",
+        "ideas",
+        "doc",
+        "test"
+      ]
+    },
+    {
+      "login": "tziyang-lum",
+      "name": "Tzi Yang",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/56020413?v=4",
+      "profile": "https://github.com/tziyang-lum",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "fgisslen",
+      "name": "fgisslen",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/35102084?v=4",
+      "profile": "https://github.com/fgisslen",
+      "contributions": [
+        "bug"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
