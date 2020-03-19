@@ -240,6 +240,17 @@ npm run watch.test
 
 Will do the same as above but will also **watch** for file changes and **re-run** the tests.
 
+### Unit test naming convention
+
+Try and create test files per use case:
+`spec-without-setup-function` - will house all tests for that use case.
+
+Begin specs with:
+
+-   `spec-create.` - scuri:spec (ex. `spec.spec.ts` - deprecated - not named by per-use-case-name-convention above)
+-   `spec-update.` - scuri:spec --update (ex `spec-update.testbed-tests.spec.ts`)
+-   `all.` - both of the above - when use case covers both create and update spec
+
 ## SCuri for enterprise
 
 Available as part of the Tidelift Subscription
