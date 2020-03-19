@@ -14,7 +14,9 @@ describe('Calling update on existing specs without setup function', () => {
 
 export class C  {
     constructor(
-        private bDep: bDep,
+        private aDep: BDep,
+        private bDep: BDep,
+        private cDep: BDep,
         private logger: LogService
     ) {}
 }`
@@ -29,7 +31,7 @@ describe('C', () => {
         );
     });
 
-    xit('should pass successfully', () => {
+    it('should pass successfully', () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
@@ -40,7 +42,7 @@ describe('C', () => {
         expect(errors.length).toBe(0);
     });
 
-    it('should create the setup function and then update it', () => {
+    it('should indent setup function variable declarations', () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
@@ -50,22 +52,29 @@ describe('C', () => {
         const contents = result.readContent('./c.spec.ts');
         // update should add LogService to imports, to construct params and create a spy for it
         expect(contents).toMatchInlineSnapshot(`
-            "import { LogService } from '@angular/core';
+            "import { BDep } from '@angular/core';
+            import { BDep } from '@angular/core';
+            import { BDep } from '@angular/core';
+            import { LogService } from '@angular/core';
             import { bDep } from '@angular/core';
 
             describe('C', () => {
             });
             function setup() {
-                const bDep = autoSpy(bDep);
-                    const logger = autoSpy(LogService);
-                    const builder = {
+                const aDep = autoSpy(BDep);
+                const bDep = autoSpy(BDep);
+                const cDep = autoSpy(BDep);
+                const logger = autoSpy(LogService);
+                const builder = {
+                    aDep,
                     bDep,
+                    cDep,
                     logger,
                     default() {
                         return builder;
                     },
                     build() {
-                        return new C(bDep, logger);
+                        return new C(aDep, bDep, cDep, logger);
                     }
                 }
                 return builder;

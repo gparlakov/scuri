@@ -2,7 +2,6 @@
 **/*.js
 **/*.js.map
 **/*.d.ts
-!jest.config.js
 
 # IDEs
 .idea/
@@ -20,3 +19,7 @@ yarn-error.log*
 dist
 
 *.tgz
+
+# Project specific
+!jest.config.js
+**/*.skip-me.ts
