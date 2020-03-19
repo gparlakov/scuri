@@ -1,8 +1,6 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import * as path from 'path';
-
-const collectionPath = path.join(__dirname, '../../src/collection.json');
+import { collectionPath } from './common';
 
 describe('spec', () => {
     let tree: Tree;
@@ -136,12 +134,12 @@ describe('spec', () => {
             expect(contents).toMatch(/it\('when anotherMethod is called/);
             expect(contents).toMatch(/it\('when fourth is called/);
             expect(contents).not.toMatch(
-                /it\('when third is called/,
-                'method `third` is private - we should not create a test for it '
+                /it\('when third is called/
+                //'method `third` is private - we should not create a test for it '
             );
             expect(contents).not.toMatch(
-                /it\('when protectedMethod is called/,
-                'method `protectedMethod` is protected - we should not create a test for it '
+                /it\('when protectedMethod is called/
+                //'method `protectedMethod` is protected - we should not create a test for it '
             );
         });
 
@@ -430,8 +428,8 @@ describe('spec', () => {
             // splitting by the expected it description  - if there is one such it -
             // then we'll get 2 results otherwise - 1, 3 or more
             expect(contents.split('when oldMethod is called it should').length).toBe(
-                2,
-                "We expect to see 2 results because when splitting by the expected it description  - if there is one such it method - then we'll get 2 results otherwise - 1, 3 or more"
+                2
+                //"We expect to see 2 results because when splitting by the expected it description  - if there is one such it method - then we'll get 2 results otherwise - 1, 3 or more"
             );
         });
 
