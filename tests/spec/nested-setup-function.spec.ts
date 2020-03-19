@@ -43,11 +43,7 @@ describe('Nested setup functions should not break', () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        const result = runner.runSchematic(
-            'spec',
-            { name: './c.ts', update: true },
-            tree
-        );
+        const result = runner.runSchematic('spec', { name: './c.ts', update: true }, tree);
         // assert
         // @ts-ignore
         const contents = result.readContent('./c.spec.ts');
