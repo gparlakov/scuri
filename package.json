@@ -31,7 +31,6 @@
   },
   "devDependencies": {
     "@angular-devkit/schematics-cli": "^0.800.1",
-    "@types/jasmine": "^3.5.9",
     "@types/jest": "^25.1.4",
     "@types/node": "^8.0.31",
     "all-contributors-cli": "^6.14.0",

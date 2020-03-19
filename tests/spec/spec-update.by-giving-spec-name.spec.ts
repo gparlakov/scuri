@@ -1,9 +1,7 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import * as path from 'path';
 import { filter } from 'rxjs/operators';
-
-const collectionPath = path.join(__dirname, '../../src/collection.json');
+import { collectionPath } from './common';
 
 describe('Calling update and passing the spec file in --name ', () => {
     let tree = Tree.empty();

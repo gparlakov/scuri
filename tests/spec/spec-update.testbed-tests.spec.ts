@@ -1,8 +1,6 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import * as path from 'path';
-
-const collectionPath = path.join(__dirname, '../../src/collection.json');
+import { collectionPath } from './common';
 
 describe('Calling update on existing spec with the TestBed.configureTestingModule', () => {
     let tree = Tree.empty();

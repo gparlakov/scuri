@@ -17,7 +17,7 @@
     "sourceMap": true,
     "strictNullChecks": true,
     "target": "es6",
-    "types": ["jasmine", "node"],
+    "types": ["jest", "node"],
     "allowJs": true
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "lib/**/*.ts"],
