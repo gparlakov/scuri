@@ -2,10 +2,7 @@
 **/*.js
 **/*.js.map
 **/*.d.ts
-tests/**/*.js
-tests/**/*.js.map
-tests/**/*.d.ts
-
+!jest.config.js
 
 # IDEs
 .idea/

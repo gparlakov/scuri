@@ -4,33 +4,31 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 trigger:
-- master
+    - master
 pr: none
 
-
 pool:
-  vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-latest'
 
 steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '10.x'
-  displayName: 'Install Node.js'
+    - task: NodeTool@0
+      inputs:
+          versionSpec: '10.x'
+      displayName: 'Install Node.js'
 
-- script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
+    - script: |
+          npm install
+          npm run build
+      displayName: 'npm install and build'
 
-- script: npm pack
+    - script: npm pack
 
-- task: CopyFiles@2
-  inputs:
-    contents: 'scuri*.tgz'
-    targetFolder: $(Build.ArtifactStagingDirectory)
+    - task: CopyFiles@2
+      inputs:
+          contents: 'scuri*.tgz'
+          targetFolder: $(Build.ArtifactStagingDirectory)
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    path: $(Build.ArtifactStagingDirectory)
-    artifact: scuri_pack
-
+    - task: PublishBuildArtifacts@1
+      inputs:
+          path: $(Build.ArtifactStagingDirectory)
+          artifact: scuri_pack
