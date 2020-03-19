@@ -9,7 +9,7 @@ export function addMissing(
     path: string,
     fileContent: string,
     _dependencies: ConstructorParam[],
-    _classUnderTestName: string
+    classUnderTestName: string
 ) {
     const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
 
@@ -28,7 +28,7 @@ function setup() {
             return builder;
         },
         build() {
-            return new ${_classUnderTestName}();
+            return new ${classUnderTestName}();
         }
     }
     return builder;
@@ -151,11 +151,9 @@ function add(
         throw new Error('Could not find the block of the setup function.');
     }
 
-    const blockIndentation = '        ';
-
     return [
-        ...declareNewDependencies(block, toAdd, path, blockIndentation),
-        ...exposeNewDependencies(block, toAdd, path, blockIndentation),
+        ...declareNewDependencies(block, toAdd, path),
+        ...exposeNewDependencies(block, toAdd, path),
         ...useNewDependenciesInConstructor(block, toAdd, path, classUnderTestName)
     ];
 }
@@ -164,11 +162,15 @@ function declareNewDependencies(
     block: ts.Block,
     toAdd: ConstructorParam[],
     path: string,
-    indentation?: string
+    _indentation?: string
 ) {
-    // children of the block are the opening {  the block content (SyntaxList) and the closing }
+    // children of the block are the opening { [at index [0]], the block content (SyntaxList) [at index[1]] and the closing } [index [2]]
     // we want to update the SyntaxList
     const setupBlockContent = block.getChildAt(1);
+
+    // leading because it includes the end-of-line from previous line plus indentation on current line
+    const leadingIndent = getIndentationMinusComments(setupBlockContent);
+
     const position = setupBlockContent.getStart();
     return toAdd.map(
         p =>
@@ -182,18 +184,13 @@ function declareNewDependencies(
                 p.type === 'any' ||
                 p.type === 'unknown' ||
                 p.type === 'Object'
-                    ? `let ${p.name}: ${p.type};${EOL}${indentation}`
-                    : `const ${p.name} = autoSpy(${p.type});${EOL}${indentation}`
+                    ? `let ${p.name}: ${p.type};` + leadingIndent
+                    : `const ${p.name} = autoSpy(${p.type});` + leadingIndent
             )
     );
 }
 
-function exposeNewDependencies(
-    block: ts.Block,
-    toAdd: ConstructorParam[],
-    path: string,
-    indentation?: string
-) {
+function exposeNewDependencies(block: ts.Block, toAdd: ConstructorParam[], path: string) {
     const builderDeclaration = findNodes(block, ts.SyntaxKind.VariableDeclaration).find(v =>
         (v as ts.VariableDeclaration).name.getFullText().includes('builder')
     );
@@ -204,8 +201,11 @@ function exposeNewDependencies(
     if (builderDeclaration == null || builderObjectLiteral == null) {
         throw new Error('Could not find the builder declaration or its object literal.');
     }
+
+    const indentation = getIndentationMinusComments(builderObjectLiteral.getChildAt(1));
+
     const positionToAdd = builderObjectLiteral.getChildAt(0).getEnd();
-    return toAdd.map(a => new InsertChange(path, positionToAdd, `${EOL}${indentation}${a.name},`));
+    return toAdd.map(a => new InsertChange(path, positionToAdd, `${indentation}${a.name},`));
 }
 
 function useNewDependenciesInConstructor(
@@ -381,34 +381,56 @@ function findTheParentBlock(node: ts.Node): ts.Node {
     }
 }
 
+function getIndentationMinusComments(node: ts.Node) {
+    if (node == null) {
+        return '';
+    }
+    const leadingTrivia = node.getFullText().replace(node.getText(), '');
+    let index = leadingTrivia.indexOf(EOL);
+    return index < 0 ? leadingTrivia : leadingTrivia.slice(index);
+}
+
 //@ts-ignore
-function _printKindAndText(node?: ts.Node[] | ts.Node | null) {
+function _printKindAndText(node?: ts.Node[] | ts.Node | null, printOutSpaces = false) {
     if (node != null) {
         if (Array.isArray(node)) {
-            node.forEach(_printKindAndText);
+            node.forEach(n => _printKindAndText(n, printOutSpaces));
         } else {
             // tslint:disable-next-line:no-console
-            console.log(ts.SyntaxKind[node.kind], node.getText(), EOL);
+            console.log(
+                _formatTextWithSpaces(node, printOutSpaces),
+                'kind:',
+                ts.SyntaxKind[node.kind],
+                EOL
+            );
         }
     } else {
         // tslint:disable-next-line:no-console
         console.log('this is empty');
     }
 }
-
 let depth = 1;
+let maxDepth = 5;
 //@ts-ignore
-function _printKindAndTextRecursive(node?: ts.Node[] | ts.Node | null) {
+function _printKindAndTextRecursive(node?: ts.Node[] | ts.Node | null, printOutSpaces = false) {
     if (node != null) {
         if (Array.isArray(node)) {
-            node.forEach(_printKindAndTextRecursive);
+            node.forEach(c => _printKindAndTextRecursive(c, printOutSpaces));
         } else {
             // tslint:disable-next-line:no-console
-            console.log(ts.SyntaxKind[node.kind], node.getText(), depth, EOL);
+            console.log(
+                _formatTextWithSpaces(node, printOutSpaces),
+                EOL,
+                'kind:',
+                ts.SyntaxKind[node.kind],
+                'depth:',
+                depth,
+                EOL
+            );
             depth += 1;
             const children = node.getChildren();
-            if (Array.isArray(children) && depth < 6) {
-                _printKindAndTextRecursive(children);
+            if (Array.isArray(children) && depth <= maxDepth) {
+                _printKindAndTextRecursive(children, printOutSpaces);
             }
             depth -= 1;
         }
@@ -416,4 +438,14 @@ function _printKindAndTextRecursive(node?: ts.Node[] | ts.Node | null) {
         // tslint:disable-next-line:no-console
         console.log('this is empty');
     }
+}
+
+function _formatTextWithSpaces(node: ts.Node | string, printOutSpaces: boolean) {
+    const text = typeof node === 'string' ? node : node.getFullText();
+    return printOutSpaces
+        ? text
+              .replace(/(\r\n|\r|\n)/g, 'NEW_LINE_MF')
+              .replace(/\s/g, '•')
+              .replace(/NEW_LINE_MF/g, '¶' + EOL)
+        : text;
 }
