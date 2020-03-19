@@ -1,10 +1,12 @@
-# SCuri[*](#scuri-name)
+# SCuri[\*](#scuri-name)
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 **Automates unit test boilerplate** for **Angular** components/services/directives/etc. It will **generate** spec for you and help you **update** it when dependencies are added or removed!
-
 
 _Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_.
 
@@ -13,9 +15,10 @@ _Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript co
 🚀[Want to use SCuri in **enterprise** environment?](#scuri-for-enterprise)
 
 🤵[Need commercial-quality coverage for SCuri?](#scuri-for-enterprise)
+
 ## Why?
 
-**After** a component has been **created** it is **boring and tedious** to do the tests - and we often **don't**. SCuri[*](#scuri-name) tries to jump start that by walking the component's constructor, parsing the dependencies and creating mocks for each of them, and then including them in the spec.
+**After** a component has been **created** it is **boring and tedious** to do the tests - and we often **don't**. SCuri[\*](#scuri-name) tries to jump start that by walking the component's constructor, parsing the dependencies and creating mocks for each of them, and then including them in the spec.
 
 ## Features
 
@@ -25,7 +28,7 @@ _Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript co
 
 The video shows how to use `schematics scuri:spec --name src\app\my-com\my-com.component.ts` to create a spec from scratch (if already created see **update** or use **--force** to overwrite).
 
->For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts` could be used instead.
+> For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts` could be used instead.
 
 See details [down here](#create-spec-from-scratch).
 
@@ -40,7 +43,7 @@ Shows how we begin with an outdated test:
 
 And after `schematics scuri:spec --name src\app\my-com\my-com.component.ts --update` command we get the updated test - dependency and a scaffold test case added.
 
->For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts --update` could be used instead.
+> For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts --update` could be used instead.
 
 See details [down here](#update-existing-spec)
 
@@ -156,12 +159,11 @@ See [here](https://www.typescriptlang.org/docs/handbook/module-resolution.html#p
 -   [ ] Allow configuration via file (.scuri.json)
 -   [ ] ([workaround](#autospy-path-in-tsconfigjson)) Import `autoSpy` function automatically - now imported as `import { autoSpy } from 'autoSpy';`
 
+## S.C.u.r.i. <a id="scuri-name" href="#scuri-name">\*</a>
 
-## S.C.u.r.i. <a id="scuri-name" href="#scuri-name">*</a>
 What's with the name?
 
 A spec generator schematic - **S**pec **C**reate **U**pdate **R**ead (class - component, service, directive and dependencies) **I**ncorporate (them in the spec generated/updated)
-
 
 ## 🐱‍💻 Troubleshooting
 
@@ -238,12 +240,12 @@ npm run watch.test
 
 Will do the same as above but will also **watch** for file changes and **re-run** the tests.
 
-
 ## SCuri for enterprise
 
 Available as part of the Tidelift Subscription
 
 The maintainers of SCuri and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/npm-scuri?utm_source=npm-scuri&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
@@ -261,6 +263,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
