@@ -52,7 +52,7 @@ describe('spec', () => {
         expect(generatedContent).not.toMatch('jasmine.Spy');
     });
 
-    describe('--legacy', () => {
+    describe('with --legacy flag', () => {
         it('creates jasmine-style auto-spy by default without using conditional types', () => {
             const runner = new SchematicTestRunner('schematics', collectionPath);
             const res = runner.runSchematic('autospy', { legacy: true }, tree);
