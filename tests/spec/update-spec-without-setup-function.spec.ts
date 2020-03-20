@@ -52,7 +52,7 @@ describe('Calling update on existing specs without setup function', () => {
         const contents = result.readContent('./c.spec.ts');
         // update should add LogService to imports, to construct params and create a spy for it
         expect(contents).toContain(`function setup() {`);
-        expect(contents).toContain("import { LogService } from '@angular/core';");
+        expect(contents).toContain("import { bDep, LogService } from '@angular/core';"); // add import to existing one
         expect(contents).toContain('C(bDep, logger)');
         expect(contents).toContain(`const logger = autoSpy(LogService);`);
     });

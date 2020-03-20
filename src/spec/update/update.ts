@@ -1,6 +1,11 @@
 import { EOL } from 'os';
 import * as ts from '../../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
-import { findNodes, insertAfterLastOccurrence } from '../../../lib/utility/ast-utils';
+import {
+    findNodes,
+    insertAfterLastOccurrence,
+    isImported,
+    insertImport
+} from '../../../lib/utility/ast-utils';
 import { Change, InsertChange, RemoveChange } from '../../../lib/utility/change';
 import { ConstructorParam } from '../read/read';
 export const i = insertAfterLastOccurrence;
@@ -64,7 +69,7 @@ export function update(
         : [
               ...add(paramsToAdd, setupFunctionNode, path, classUnderTestName),
               ...addMethods(publicMethods, path, fileContent, source),
-              ...addMissingImports(dependencies, fileContent, path),
+              ...addMissingImports(dependencies, path, source),
               ...addProviders(
                   source,
                   dependencies,
@@ -281,15 +286,11 @@ it('when ${m} is called it should', () => {
     );
 }
 
-function addMissingImports(dependencies: ConstructorParam[], fileContent: string, path: string) {
-    const missingImports = dependencies.filter(d => {
-        const matchImport = new RegExp(`import.*${d.type}`);
-        return fileContent.match(matchImport) == null;
-    });
-    const addImports = missingImports.map(
-        i => new InsertChange(path, 0, `import { ${i.type} } from '${i.importPath}';${EOL}`)
-    );
-    return addImports;
+function addMissingImports(dependencies: ConstructorParam[], path: string, source: ts.SourceFile) {
+    return dependencies
+        .filter(d => d.importPath != null)
+        .filter(d => !isImported(source, d.type, d.importPath!))
+        .map(d => insertImport(source, path, d.type, d.importPath!));
 }
 
 /**

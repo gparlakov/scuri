@@ -22,7 +22,9 @@
     "@angular/platform-browser-dynamic": "^6.1.0",
     "@angular/router": "^6.1.0",
     "@briebug/jest-schematic": "^1.7.0",
+    "@netbasal/spectator": "^3.12.0",
     "core-js": "^2.5.4",
+    "ngx-build-plus": "^6.1.0",
     "rxjs": "~6.2.0",
     "zone.js": "~0.8.26"
   },
@@ -31,6 +33,7 @@
     "@angular/cli": "~6.2.9",
     "@angular/compiler-cli": "^6.1.0",
     "@angular/language-service": "^6.1.0",
+    "@netbasal/spectator": "~3.2.1",
     "@types/jasminewd2": "~2.0.3",
     "@types/jest": "^24.0.17",
     "@types/node": "~8.9.4",
