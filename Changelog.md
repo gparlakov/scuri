@@ -7,11 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-alpha.0] - 2020-03-20
+
 ### Fixed
 
 -   Correct indentation of added deps (following the last symbol just above) [Issue 3]
 -   Correct imports: only import missing modules and do not double existing imports [Issue ]
--   [TODO] Do not try and test static methods on instances (ie. Class.static() vs new Class().static() // error)
 
 ## [0.9.4] - 2020-03-11
 
