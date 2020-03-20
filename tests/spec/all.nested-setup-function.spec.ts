@@ -11,7 +11,7 @@ describe('Nested setup functions should not break', () => {
 
         export class C  {
             constructor(
-                private bDep: bDep,
+                private bDep: BDep,
                 private logger: LogService
             ) {}
         `
@@ -19,7 +19,7 @@ describe('Nested setup functions should not break', () => {
 
     tree.create(
         'c.spec.ts',
-        `import { bDep } from '@angular/core';
+        `import { BDep } from '@angular/core';
 
         describe('C', () => {
 
@@ -46,7 +46,7 @@ describe('Nested setup functions should not break', () => {
         // @ts-ignore
         const contents = result.readContent('./c.spec.ts');
         // update should add LogService to imports, to construct params and create a spy for it
-        expect(contents).toContain("import { LogService } from '@angular/core';");
+        expect(contents).toContain("import { BDep, LogService } from '@angular/core';");
         expect(contents).toContain('C(bDep, logger)');
         expect(contents).toContain(`const logger = autoSpy(LogService);`);
     });

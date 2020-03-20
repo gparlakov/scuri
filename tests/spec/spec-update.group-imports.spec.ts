@@ -97,4 +97,52 @@ describe('C', () => {
             }"
         `);
     });
+
+    it('should not import deps with no path i.e. from dom or other tslibs, Object, Event', () => {
+        // arrange
+        const t = Tree.empty();
+        t.create(
+            'c.ts',
+            `export class C  {
+    constructor(
+        private aDep: Event,
+        private bDep: Object,
+        private cDep: Window,
+    ) {}
+}`
+        );
+
+        t.create(
+            'c.spec.ts',
+            `describe('C', () => {
+});`
+        );
+        const runner = new SchematicTestRunner('schematics', collectionPath);
+        // act
+        const result = runner.runSchematic('spec', { name: './c.ts', update: true }, t);
+        // assert
+        // @ts-ignore
+        const contents = result.readContent('./c.spec.ts');
+        expect(contents).toMatchInlineSnapshot(`
+            "describe('C', () => {
+            });
+            function setup() {
+                const aDep = autoSpy(Event);
+                let bDep: Object;
+                const cDep = autoSpy(Window);
+                const builder = {
+                    aDep,
+                    bDep,
+                    cDep,
+                    default() {
+                        return builder;
+                    },
+                    build() {
+                        return new C(aDep, bDep, cDep);
+                    }
+                }
+                return builder;
+            }"
+        `);
+    });
 });

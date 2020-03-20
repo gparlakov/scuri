@@ -288,8 +288,9 @@ it('when ${m} is called it should', () => {
 
 function addMissingImports(dependencies: ConstructorParam[], path: string, source: ts.SourceFile) {
     return dependencies
-        .filter(d => !isImported(source, d.type, d.importPath || ''))
-        .map(d => insertImport(source, path, d.type, d.importPath || ''));
+        .filter(d => d.importPath != null)
+        .filter(d => !isImported(source, d.type, d.importPath!))
+        .map(d => insertImport(source, path, d.type, d.importPath!));
 }
 
 /**
