@@ -15,6 +15,9 @@ steps:
     - script: npm i
       displayName: 'Install deps'
 
+    - script: npm run build
+      displayName: 'Run the build'
+
     - script: npm run lint
       displayName: 'Run linting'
 
