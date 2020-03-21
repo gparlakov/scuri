@@ -52,7 +52,7 @@ describe('C', () => {
         const contents = result.readContent('./c.spec.ts');
         // update should add LogService to imports, to construct params and create a spy for it
         expect(contents).toMatchInlineSnapshot(`
-            "import { bDep, BDep, BDep, BDep, LogService } from '@angular/core';
+            "import { bDep, BDep, LogService } from '@angular/core';
 
             describe('C', () => {
             });

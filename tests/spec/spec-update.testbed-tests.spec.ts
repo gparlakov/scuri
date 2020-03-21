@@ -55,7 +55,7 @@ function setup() {
         );
     });
 
-    it('when setup function call missing should add a the setup function call', () => {
+    it('when setup function call missing should add a the setup function call with appropriate indendtation', () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
@@ -63,7 +63,7 @@ function setup() {
         const result = runner.runSchematic('spec', { name: './c.ts', update: true }, tree);
         const contents = result.readContent('c.spec.ts');
         // assert
-        expect(contents).toContain('const a = setup().default();\n        TestBed');
+        expect(contents).toContain('        const a = setup().default();\n        TestBed');
         expect(contents).toContain(
             `.configureTestingModule({ providers: [{ provide: bDep, useValue: a.bDep },`
         );
