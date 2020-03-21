@@ -23,6 +23,7 @@
     "@angular/router": "^5.2.0",
     "core-js": "^2.4.1",
     "rxjs": "^5.5.6",
+    "scuri": "^1.0.0-rc.1",
     "zone.js": "^0.8.19"
   },
   "devDependencies": {
