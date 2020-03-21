@@ -7,6 +7,7 @@ describe('AppComponent', () => {
     const ser = autoSpy(Service);
 
     beforeEach(async(() => {
+        const a = setup().default();
         TestBed.configureTestingModule({
             declarations: [AppComponent],
             providers: [{ provide: Service, useValue: ser }]
@@ -57,3 +58,17 @@ describe('AppComponent', () => {
         expect(res).toBe('test');
     });
 });
+
+function setup() {
+    const s = autoSpy(Service);
+    const builder = {
+        s,
+        default() {
+            return builder;
+        },
+        build() {
+            return new AppComponent(s);
+        }
+    }
+    return builder;
+}
