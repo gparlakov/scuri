@@ -65,11 +65,47 @@ function setup() {
         const result = runner.runSchematic('spec', { name: './c.ts', update: true }, tree);
         const contents = result.readContent('c.spec.ts');
         // assert
-        expect(contents).toContain('const a = setup().default();\n        TestBed');
+        expect(contents).toContain('      const a = setup().default();\n        TestBed');
         expect(contents).toContain(
             `.configureTestingModule({ providers: [{ provide: bDep, useValue: a.bDep },`
         );
         expect(contents).toContain(`{ provide: LogService, useValue: a.logger }] })`);
+        expect(contents).toMatchInlineSnapshot(`
+            "
+            import { bDep, LogService } from '@angular/core';
+
+            describe('C', () => {
+                beforeEach(async(() => {
+
+                    const a = setup().default();
+                    TestBed
+                    // somewhere
+                    .configureCompiler()
+                    .configureTestingModule({
+                        declarations: [AppComponent],
+                        providers: [{ provide: 'someValue', useValue: 'other value' }]
+                    }).configureTestingModule({ providers: [{ provide: bDep, useValue: a.bDep },
+                        { provide: LogService, useValue: a.logger }] }).compileComponents();
+                }));
+            });
+
+            function setup() {
+                const bDep = autoSpy(bDep);
+                const logger = autoSpy(LogService);
+                const builder = {
+                    bDep,
+                    logger,
+                    default() {
+                        return builder;
+                    },
+                    build() {
+                        return new C(bDep, logger);
+                    }
+                }
+                return builder;
+            }
+                    "
+        `);
     });
 
     it('when setup function call existing should use that and add missing dependencies', () => {

@@ -271,16 +271,15 @@ function addMethods(
             new InsertChange(
                 path,
                 lastClosingBracketPositionOfDescribe,
-                `
-it('when ${m} is called it should', () => {
-    // arrange
-    const { build } = setup().default();
-    const c = build();
-    // act
-    c.${m}();
-    // assert
-    // expect(c).toEqual
-});
+`${EOL}    it('when ${m} is called it should', () => {
+${EOL}        // arrange
+${EOL}        const { build } = setup().default();
+${EOL}        const c = build();
+${EOL}        // act
+${EOL}        c.${m}();
+${EOL}        // assert
+${EOL}        // expect(c).toEqual
+${EOL}    });
 `
             )
     );
@@ -346,6 +345,8 @@ function addProviders(
         // as well as the position right at the end of the first brace (so we could insert setup call if necessary)
         const openingBracketPosition = block.getChildAt(0)!.end;
 
+        const firstChildIndentation = getIndentationMinusComments(block.getChildAt(1));
+
         // if setup function is called - take the name
         const setupInstance = findNodes(block, ts.SyntaxKind.VariableDeclaration).find(n =>
             n.getText().includes('setup')
@@ -365,8 +366,7 @@ function addProviders(
                   new InsertChange(
                       path,
                       openingBracketPosition,
-                      `
-const ${a} = ${setupFunctionName}().default();`
+                      `${EOL}${firstChildIndentation}const ${a} = ${setupFunctionName}().default();`
                   )
               ]
             : [];
