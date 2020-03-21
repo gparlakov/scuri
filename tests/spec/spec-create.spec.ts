@@ -449,7 +449,7 @@ describe('spec', () => {
             // splitting by the expected it description  - if there is one such it -
             // then we'll get 2 results otherwise - 1, 3 or more
             expect(contents).toMatch(
-                /it\('when oldMethod is called it should', \(\) => \{\}\);\n\s*it\('when newMethod is called it should/
+                /it\('when oldMethod is called it should', \(\) => \{\}\);(\r\n|\n\r|\n)\s*it\('when newMethod is called it should/
             );
         });
 
@@ -504,7 +504,7 @@ function setup() {
                 // splitting by the expected it description  - if there is one such it -
                 // then we'll get 2 results otherwise - 1, 3 or more
                 expect(contents).toMatch(
-                    /describe\('ToUpdate', \(\) => \{\n\s*it\('when method is called it should/
+                    /describe\('ToUpdate', \(\) => \{(\r\n|\n\r|\n)\s*it\('when method is called it should/
                 );
             });
         });
