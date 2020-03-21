@@ -8,7 +8,7 @@ import { Service } from './service';
     styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-    constructor(rest: HttpClient, oneMore: Service) {}
+    constructor(rest: HttpClient, oneMore: Service, two: Service) {}
     title = 'app';
     publicMethod() {}
 
