@@ -5,6 +5,7 @@
 
 pr:
     - master
+    - release/*
 
 trigger: none
 

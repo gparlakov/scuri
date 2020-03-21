@@ -7,12 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.0-alpha.0] - 2020-03-20
+## [1.0.0] - 2020-03-21
 
 ### Fixed
 
--   Correct indentation of added deps (following the last symbol just above) [Issue 3]
--   Correct imports: only import missing modules and do not double existing imports [Issue ]
+-   Correct indentation of added deps (following the last symbol just above) [Issue 3](https://github.com/gparlakov/scuri/issues/3)
+-   Correct indentation of added methods (following the last symbol just above) [Issue 3](https://github.com/gparlakov/scuri/issues/3)
+-   Correct imports: only import missing modules and do not double existing imports [Issue 3](https://github.com/gparlakov/scuri/issues/73)
 
 ## [0.9.4] - 2020-03-11
 
