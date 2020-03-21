@@ -237,7 +237,7 @@ function useNewDependenciesInConstructor(
                   (hasOtherParams ? ', ' : '') + toAdd.map(p => p.name).join(', ')
               )
           ]
-        : []; // dont add params in constructor if no need to
+        : []; // don't add params in constructor if no need to
 }
 
 function addMethods(
@@ -287,8 +287,27 @@ it('when ${m} is called it should', () => {
 }
 
 function addMissingImports(dependencies: ConstructorParam[], path: string, source: ts.SourceFile) {
+    // build a map of duplicate/first for each entry, based on the whether or not `previous` contains the elements
+    const { duplicateMap } = dependencies.reduce(
+        (r, n) => {
+            r.duplicateMap.set(
+                n,
+                r.previous.some(p => p.type === n.type && p.importPath === n.importPath)
+                    ? 'duplicate'
+                    : 'first'
+            );
+            r.previous = [...r.previous, n];
+            return r;
+        },
+        {
+            previous: [] as ConstructorParam[],
+            duplicateMap: new Map<ConstructorParam, 'duplicate' | 'first'>()
+        }
+    );
+
     return dependencies
         .filter(d => d.importPath != null)
+        .filter(d => duplicateMap.get(d) === 'first')
         .filter(d => !isImported(source, d.type, d.importPath!))
         .map(d => insertImport(source, path, d.type, d.importPath!));
 }
