@@ -30,8 +30,6 @@ The video shows how to use `schematics scuri:spec --name src\app\my-com\my-com.c
 
 > For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts` could be used instead.
 
-TODO - angular 7 cli works 6 and 5 have issues
-
 See details [down here](#create-spec-from-scratch).
 
 ### Update existing test
@@ -59,12 +57,36 @@ Needs tsconfig path setup -> [there](#autospy-path-in-tsconfigjson).
 
 ## Getting started / Setup
 
-```
-npm install -D scuri
-ng g scuri:spec --name src/app/app.component.ts
-```
+Using VS Code? Just install the [**SCuri** VS Code extension](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code)
 
-If you gen error of the `Error: Invalid rule result: Function().` see the [troubleshooting section below](#rule-result-function).
+### Command line setup
+
+1. Install deps
+    ```bash
+    npm install -D scuri
+    ng g scuri:spec --name src/app/app.component.ts
+    ```
+2. Generate autospy
+    ```bash
+    ng g scuri:autospy
+    ```
+    [Details and older Angular versions](#autospy-1)
+3. Tell **Typescript** where to find `autospy` by adding `autospy` to `paths`:
+    ```json
+    {
+        ...
+        "compilerOptions": {
+            ...
+            "baseUrl": ".",
+            "paths": {
+                "autospy": ["./src/auto-spy"]
+            }
+        }
+    }
+    ```
+    Details [here](#Autospy-and-Typescript)
+
+If you get `Error: Invalid rule result: Function().` see the [troubleshooting section below](#rule-result-function).
 
 ## Details
 
@@ -116,11 +138,36 @@ Requires `--name` - an existing `.ts` file with one `class` (Component/Service/D
 
 To generate an `auto-spy.ts` file with the type and function which can be used for automating mock creation, use:
 
--   `schematics scuri:autospy` - for angular 5 and previous
--   `ng g scuri:autospy` for angular 6 and up
-    Both cases requires `npm i scuri` (or `npm i -g scuri`) and the first requires `npm i -g @angular-devkit/schematics-cli`.
+`ng g scuri:autospy`
 
-It supports the following flags:
+#### Using older versions of Angular?
+
+-   Angular v5, v4, v2:
+    `bash npm i -g @angular-devkit/schematics-cli npm i -D scuri schematics scuri:autospy --legacy`
+    _Notice the --legacy flag. It's required due to typescript being less than 2.8. See flags below_
+
+#### Using Jest
+
+`ng g scuri:autospy --for jest`
+
+Or
+
+`schematics scuri:autospy --for jest`
+
+Versions and flags
+
+| angular | jest | jasmine | command                                        |
+| ------- | ---- | ------- | ---------------------------------------------- |
+| 5       |      | V       | `schematics scuri:autospy --legacy`            |
+| 5       | V    |         | `schematics scuri:autospy --for jest --legacy` |
+| 6       |      | V       | `ng g scuri:autospy`                           |
+| 6       | V    |         | `ng g scuri:autospy --for jest`                |
+| 7       |      | V       | `ng g scuri:autospy`                           |
+| 7       | V    |         | `ng g scuri:autospy --for jest`                |
+| 8       |      | V       | `ng g scuri:autospy`                           |
+| 8       | V    |         | `ng g scuri:autospy --for jest`                |
+
+Flags:
 
 -   `--for` with accepted values `jest` and `jasmine` (default is `jasmine`)
 -   `--legacy` for generating a type compatible with typescript < 2.8 (namely the conditional types feature)
@@ -129,7 +176,7 @@ Examples:
 `ng g scuri:autospy --for jest --legacy` would generate a ts<2.8 jest compatible `autoSpy` type and function
 `ng g scuri:autospy` would generate a ts>2.8 jasmine compatible `autoSpy` type and function
 
-### Autospy path in `tsconfig.json`
+### Autospy and Typescript
 
 After creating the `auto-spy.ts` file as result of the `scuri:autospy` schematic invocation we need to make sure its properly imported in our tests. To that end and keeping in mind that `autoSpy` is being imported in the created tests as `import { autoSpy } from 'autoSpy';`. To make that an actual import one could add this line to `tsconfig.json`:
 
