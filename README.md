@@ -30,6 +30,8 @@ The video shows how to use `schematics scuri:spec --name src\app\my-com\my-com.c
 
 > For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts` could be used instead.
 
+TODO - angular 7 cli works 6 and 5 have issues
+
 See details [down here](#create-spec-from-scratch).
 
 ### Update existing test
