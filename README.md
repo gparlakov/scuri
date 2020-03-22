@@ -56,9 +56,11 @@ See details [down here](#autospy-1).
 Needs tsconfig path setup -> [there](#autospy-path-in-tsconfigjson).
 
 ## Getting started / Setup
+
 Using VS Code? Just install the [**SCuri** VS Code extension](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code)
 
 ### Command line setup
+
 1. Install deps
     ```bash
     npm install -D scuri
@@ -83,7 +85,6 @@ Using VS Code? Just install the [**SCuri** VS Code extension](https://marketplac
     }
     ```
     Details [here](#Autospy-and-Typescript)
-
 
 If you get `Error: Invalid rule result: Function().` see the [troubleshooting section below](#rule-result-function).
 
@@ -142,7 +143,7 @@ To generate an `auto-spy.ts` file with the type and function which can be used f
 #### Using older versions of Angular?
 
 -   Angular v5, v4, v2:
-     `bash npm i -g @angular-devkit/schematics-cli npm i -D scuri schematics scuri:autospy --legacy`
+    `bash npm i -g @angular-devkit/schematics-cli npm i -D scuri schematics scuri:autospy --legacy`
     _Notice the --legacy flag. It's required due to typescript being less than 2.8. See flags below_
 
 #### Using Jest
