@@ -277,8 +277,27 @@ function addMethods(
 }
 
 function addMissingImports(dependencies: ConstructorParam[], path: string, source: ts.SourceFile) {
+    // build a map of duplicate/first for each entry, based on the whether or not `previous` contains the elements
+    const { duplicateMap } = dependencies.reduce(
+        (r, n) => {
+            r.duplicateMap.set(
+                n,
+                r.previous.some(p => p.type === n.type && p.importPath === n.importPath)
+                    ? 'duplicate'
+                    : 'first'
+            );
+            r.previous = [...r.previous, n];
+            return r;
+        },
+        {
+            previous: [] as ConstructorParam[],
+            duplicateMap: new Map<ConstructorParam, 'duplicate' | 'first'>()
+        }
+    );
+
     return dependencies
         .filter(d => d.importPath != null)
+        .filter(d => duplicateMap.get(d) === 'first')
         .filter(d => !isImported(source, d.type, d.importPath!))
         .map(d => insertImport(source, path, d.type, d.importPath!));
 }
@@ -316,6 +335,7 @@ function addProviders(
         const block = findTheParentBlock(configureTestingModuleCall) as ts.Block;
         // as well as the position right at the end of the first brace (so we could insert setup call if necessary)
         const openingBracketPosition = block.getChildAt(0)!.end;
+        const firstChildIndentation = getIndentationMinusComments(block.getChildAt(1));
 
         // if setup function is called - take the name
         const setupInstance = findNodes(block, ts.SyntaxKind.VariableDeclaration).find(n =>
@@ -336,8 +356,7 @@ function addProviders(
                   new InsertChange(
                       path,
                       openingBracketPosition,
-                      `
-const ${a} = ${setupFunctionName}().default();`
+                      `${firstChildIndentation}const ${a} = ${setupFunctionName}().default();`
                   )
               ]
             : [];
