@@ -235,17 +235,32 @@ npx schematics scuri:spec --name src/app/app.component.ts
 
 ## Contributing
 
+### Linux/Mac
+
+Keep in mind examples are using windows style folder structure `\my\folder\structure\` which would need to be changed to `/my/folder/structure/` on Linux/Mac
+
+### Scuri-examples are a separate repo
+
+Due to constant security issues, moving the examples in a separate repository. In order to test out the library examples contain older versions of packages and naturally get security issues discovered. It is out of scope for the main package to fix the security issues in Angular 5 example app. Still we'd like to NOT have an outstanding number of unfixed security issues to appeal to users. Hence the move.
+
+Please keep in mind the separate repository and clone it to do the testing - `git clone https://github.com/gparlkov/scuri-examples`. The examples assume that the two repos are cloned in adjacent folders
+```
+|--scuri
+|--scuri-examples
+```
+
 ### Clone and run
 
 In this example I clone `https://github.com/gparlakov/scuri`. If you want to contribute fork and clone your own forked repo.
 
 ```
 git clone https://github.com/gparlakov/scuri
+git clone https://github.com/gparlkov/scuri-examples
 cd scuri
 npm install
 npm install -g @angular-devkit/schematics-cli
 npm run build
-schematics .:spec --name example/example.component.ts
+schematics .:spec --name ../scuri-examples/example.component.ts
 ```
 
 Or use the package.json/scripts setup for the day-to-day development to speed things up instead of the **last three lines** from above example: `npm run build.run -- --force --dry-run false`
@@ -258,9 +273,9 @@ Or use the package.json/scripts setup for the day-to-day development to speed th
 In this example I'm using the `example/angular-5-app` bundled with this repo. Feel free to use any Angular application you work on
 
 ```
-cd #into-my-scuri-cloned-src-folder
+cd scuri
 npm link
-cd example\angular-5-app
+cd ..\scuri-examples\angular-5-app
 npm link scuri
 ng g scuri:spec --name src/app/app.component.ts --force
 ```
