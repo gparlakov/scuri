@@ -250,6 +250,8 @@ Please keep in mind the separate repository and clone it to do the testing - `gi
 |--scuri-examples
 ```
 
+Use `scuri-examples.code-workspace` for VS Code to edit both the main project and the examples.
+
 ### Clone and run
 
 In this example I clone `https://github.com/gparlakov/scuri`. If you want to contribute fork and clone your own forked repo.
