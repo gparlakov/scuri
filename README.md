@@ -51,7 +51,7 @@ See details [down here](#update-existing-spec)
 Generates an `autoSpy` function that takes a type and returns an object with the same type plus all its methods are mocked i.e. `jasmine.spy()` or `jest.fn()`.
 
 See details [down here](#autospy-1).
-Needs tsconfig path setup -> [there](#autospy-path-in-tsconfigjson).
+Needs tsconfig path setup -> [there](#autospy-and-typescript).
 
 ## Getting started / Setup
 
@@ -142,7 +142,7 @@ To generate an `auto-spy.ts` file with the type and function which can be used f
 
 `ng g scuri:autospy`
 
-See the [Autospy](./wiki/Autospy) wiki page
+See the [Autospy](/wiki/Autospy) wiki page
 
 #### Using older versions of Angular?
 
