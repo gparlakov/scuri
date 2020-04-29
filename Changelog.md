@@ -10,9 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.2] - 2020-04-03
 
 ### Added
+
 -   Wiki link from README.md
 
 ### Fixed
+
 -   README.md links
 
 ## [1.0.1] - 2020-04-03
