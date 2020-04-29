@@ -10,7 +10,7 @@
 
 _Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_.
 
-![](./docs/VSCode_20px.png)[ **VS Code extension**](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code) available! ![](./docs/VSCode_20px.png)
+[![](./docs/VSCode_20px.png)](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code) [VS Code extension](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code) available!
 
 🤵[Need commercial-quality coverage for SCuri?](#scuri-for-enterprise)
 
