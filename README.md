@@ -10,9 +10,7 @@
 
 _Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_.
 
-👩‍💻[**VS Code extension**](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code) available!
-
-🚀[Want to use SCuri in **enterprise** environment?](#scuri-for-enterprise)
+![](./docs/VSCode_20px.png)[ **VS Code extension**](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code) available! ![](./docs/VSCode_20px.png)
 
 🤵[Need commercial-quality coverage for SCuri?](#scuri-for-enterprise)
 
@@ -85,6 +83,10 @@ Using VS Code? Just install the [**SCuri** VS Code extension](https://marketplac
     }
     ```
     Details [here](#Autospy-and-Typescript)
+4. Start using scuri:
+    ```sh
+    ng g scuri:spec --name src/app/app.component.ts
+    ```
 
 If you get `Error: Invalid rule result: Function().` see the [troubleshooting section below](#rule-result-function).
 
@@ -139,6 +141,8 @@ Requires `--name` - an existing `.ts` file with one `class` (Component/Service/D
 To generate an `auto-spy.ts` file with the type and function which can be used for automating mock creation, use:
 
 `ng g scuri:autospy`
+
+See the [Autospy](./wiki/Autospy) wiki page
 
 #### Using older versions of Angular?
 
@@ -206,7 +210,7 @@ See [here](https://www.typescriptlang.org/docs/handbook/module-resolution.html#p
     -   [x] Add `setup` function when missing
     -   [x] Update dependencies
 -   [ ] Allow configuration via file (.scuri.json)
--   [ ] ([workaround](#autospy-path-in-tsconfigjson)) Import `autoSpy` function automatically - now imported as `import { autoSpy } from 'autoSpy';`
+-   [ ] ([workaround](#autospy-and-typescript)) Import `autoSpy` function automatically - now imported as `import { autoSpy } from 'autoSpy';`
 
 ## S.C.u.r.i. <a id="scuri-name" href="#scuri-name">\*</a>
 
