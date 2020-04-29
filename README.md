@@ -142,7 +142,7 @@ To generate an `auto-spy.ts` file with the type and function which can be used f
 
 `ng g scuri:autospy`
 
-See the [Autospy](/wiki/Autospy) wiki page
+See the [Autospy](https://github.com/gparlakov/scuri/wiki/Autospy) wiki page.
 
 #### Using older versions of Angular?
 
