@@ -22,7 +22,7 @@ _Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript co
 
 ### Create test from scratch
 
-![missing create spec video](./docs/new.gif)
+![missing create spec video](./docs/new-v2.gif)
 
 The video shows how to use `schematics scuri:spec --name src\app\my-com\my-com.component.ts` to create a spec from scratch (if already created see **update** or use **--force** to overwrite).
 
