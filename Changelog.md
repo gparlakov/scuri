@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+-   Issue 93 - line endings in the template switched to LF to support all platforms
+
 ## [1.0.2] - 2020-04-03
 
 ### Added
