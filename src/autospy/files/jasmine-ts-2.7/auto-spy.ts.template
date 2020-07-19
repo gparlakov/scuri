@@ -37,7 +37,7 @@ export function autoSpy<T>(obj: new (...args: any[]) => T): SpyOf<T> {
  *  }
  * }
  */
-type SpyOf<T> = T &
+export type SpyOf<T> = T &
     {
         [k in keyof T]: T[k] & jasmine.Spy;
     };
