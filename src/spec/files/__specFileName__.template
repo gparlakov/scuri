@@ -12,7 +12,6 @@ describe('<%= className %>', () => {
     // assert
     // expect(c).toEqual
   });
-
   <% }) %>
 });
 

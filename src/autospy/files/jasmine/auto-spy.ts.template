@@ -9,7 +9,6 @@ export function autoSpy<T>(obj: new (...args: any[]) => T): SpyOf<T> {
     });
 
     return res;
-    // check if it works
 }
 
 /** Keeps the types of properties of a type but assigns type of Spy to the methods */
