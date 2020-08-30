@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.4] - 2020-08-30
+
+### Fixed
+
+-   Issue 100 - only add missing test cases based on method invocations, rather than test case title
+-   Typos and syntax errors in readme and test cases
+
+### Added
+
+-   Moved the contributing guide out to its own file
+
 ## [1.0.3] - 2020-08-19
 
 ### Fixed

@@ -29,7 +29,7 @@ describe('Calling update and passing the spec file in --name ', () => {
         );
     });
 
-    it('should work and mnp throw errors', () => {
+    it('should work and not throw errors', () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
