@@ -13,7 +13,7 @@ import {
 import { EOL } from 'os';
 import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
 import { readClassNamesAndConstructorParams } from './read/read';
-import { addMissing, update as updateFunc } from './update/update';
+import { addMissing, update as doUpdate } from './update/update';
 
 class SpecOptions {
     name: string;
@@ -57,8 +57,8 @@ function sliceSpecFromFileName(path: string) {
     }
 }
 
-function updateExistingSpec(name: string, tree: Tree, logger: Logger) {
-    name = sliceSpecFromFileName(name);
+function updateExistingSpec(fullName: string, tree: Tree, logger: Logger) {
+    const name = sliceSpecFromFileName(fullName);
     const content = tree.read(name);
     if (content == null) {
         logger.error(`The file ${name} is missing or empty.`);
@@ -85,7 +85,7 @@ function updateExistingSpec(name: string, tree: Tree, logger: Logger) {
             applyChanges(tree, specFilePath, addMissingChanges, 'add');
 
             // then on the resulting tree - remove unneeded deps
-            const removeChanges = updateFunc(
+            const removeChanges = doUpdate(
                 specFilePath,
                 tree.read(specFilePath)!.toString('utf8'),
                 params,
@@ -96,7 +96,7 @@ function updateExistingSpec(name: string, tree: Tree, logger: Logger) {
             applyChanges(tree, specFilePath, removeChanges, 'remove');
 
             // then add what needs to be added (new deps in the instantiation, 'it' for new methods, etc.)
-            const changesToAdd = updateFunc(
+            const changesToAdd = doUpdate(
                 specFilePath,
                 tree.read(specFilePath)!.toString('utf8'),
                 params,

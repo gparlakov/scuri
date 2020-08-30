@@ -247,7 +247,8 @@ function addMethods(
     source: ts.SourceFile
 ) {
     const methodsThatHaveNoTests = publicMethods.filter(
-        m => !fileContent.match(new RegExp("it\\s?\\('.*" + m))
+        // search for invokations of the method (c.myMethod) - these are inevitable if one wants to actually test the method...
+        m => !fileContent.match(new RegExp(`.${m}`))
     );
 
     let lastClosingBracketPositionOfDescribe = findNodes(source, ts.SyntaxKind.CallExpression)
