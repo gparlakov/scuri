@@ -3,7 +3,7 @@
 import { autoSpy } from 'autoSpy';
 
 describe('<%= className %>', () => {
-  <% publicMethods.forEach(meth=> { %>it('when <%= meth %> is called it should', () => {
+  <% publicMethods.forEach(meth=> {if(meth != '') { %>it('when <%= meth %> is called it should', () => {
     // arrange
     const { build } = setup().default();
     const c = build();
@@ -12,7 +12,16 @@ describe('<%= className %>', () => {
     // assert
     // expect(c).toEqual
   });
-  <% }) %>
+  <% } else { %>
+  it('it should construct', () => {
+    // arrange
+    const { build } = setup().default();
+    // act
+    const c = build();
+    // assert
+    // expect(c).toEqual
+  });
+  <% }}) %>
 });
 
 function setup() {

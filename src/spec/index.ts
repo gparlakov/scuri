@@ -152,6 +152,12 @@ function createNewSpec(name: string, tree: Tree, logger: Logger) {
         const path = name.split(fileName)[0]; // split on the filename - so we get only an array of one item
 
         const { params, className, publicMethods } = parseClassUnderTestFile(name, content);
+
+        // if there are no methods in the class - let's add one test case anyway
+        if (Array.isArray(publicMethods) && publicMethods.length === 0) {
+            publicMethods.push('');
+        }
+
         const templateSource = apply(url('./files'), [
             applyTemplates({
                 // the name of the new spec file

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5] - 2020-08-31
+
+### Added
+
+-   Issue 94 - add a single test case when creating the spec for a class without public methods
+
 ## [1.0.4] - 2020-08-30
 
 ### Fixed

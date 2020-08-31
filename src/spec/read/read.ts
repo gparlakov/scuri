@@ -27,12 +27,12 @@ export function readClassNamesAndConstructorParams(
 ): ClassDescription[] {
     const sourceFile = ts.createSourceFile(fileName, fileContents, ts.ScriptTarget.ES2015, true);
 
-    const res = read(sourceFile);
-    const enrichedRes = res.map(r => ({
+    const description = read(sourceFile);
+    const enrichedDescription = description.map(r => ({
         ...r,
         constructorParams: addImportPaths(r.constructorParams, fileContents)
     }));
-    return enrichedRes;
+    return enrichedDescription;
 }
 
 function read(node: ts.Node) {
