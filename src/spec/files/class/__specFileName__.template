@@ -8,7 +8,7 @@ describe('<%= className %>', () => {
     const { build } = setup().default();
     const c = build();
     // act
-    c.<%= meth %>();
+    <%= shorthand %>.<%= meth %>();
     // assert
     // expect(c).toEqual
   });

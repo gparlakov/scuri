@@ -12,7 +12,12 @@ import {
 } from '@angular-devkit/schematics';
 import { EOL } from 'os';
 import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
-import { readClassNamesAndConstructorParams } from './read/read';
+import {
+    describeSource,
+    isClassDescription,
+    ClassDescription,
+    FunctionDescription
+} from './read/read';
 import { addMissing, update as doUpdate } from './update/update';
 
 class SpecOptions {
@@ -58,29 +63,30 @@ function sliceSpecFromFileName(path: string) {
 }
 
 function updateExistingSpec(fullName: string, tree: Tree, logger: Logger) {
-    const name = sliceSpecFromFileName(fullName);
-    const content = tree.read(name);
+    const specFileName = sliceSpecFromFileName(fullName);
+    const content = tree.read(specFileName);
     if (content == null) {
-        logger.error(`The file ${name} is missing or empty.`);
+        logger.error(`The file ${specFileName} is missing or empty.`);
     } else {
         // the new spec full file name contents - null if file not exist
-        const existingSpecFile = tree.get(getSpecFileName(name));
+        const existingSpecFile = tree.get(getSpecFileName(specFileName));
         if (existingSpecFile == null) {
             logger.error(
-                `Can not update spec (for ${name}) since it does not exist. Try running without the --update flag.`
+                `Can not update spec (for ${specFileName}) since it does not exist. Try running without the --update flag.`
             );
         } else {
             const specFilePath = existingSpecFile.path;
             // if a spec exists we'll try to update it
-            const { params, className, publicMethods } = parseClassUnderTestFile(name, content);
-            logger.debug(`Class name ${className} ${EOL}Constructor(${params}) {${publicMethods}}`);
+            const { params, name, publicMethods } = getFirstClass(specFileName, content);
+            const shorthand = typeShorthand(name);
+            logger.debug(`Class name ${name} ${EOL}Constructor(${params}) {${publicMethods}}`);
 
             // start by adding missing things (like the setup function)
             const addMissingChanges = addMissing(
                 specFilePath,
                 tree.read(specFilePath)!.toString('utf8'),
                 params,
-                className
+                name
             );
             applyChanges(tree, specFilePath, addMissingChanges, 'add');
 
@@ -89,9 +95,10 @@ function updateExistingSpec(fullName: string, tree: Tree, logger: Logger) {
                 specFilePath,
                 tree.read(specFilePath)!.toString('utf8'),
                 params,
-                className,
+                name,
                 'remove',
-                publicMethods
+                publicMethods,
+                shorthand
             );
             applyChanges(tree, specFilePath, removeChanges, 'remove');
 
@@ -100,12 +107,13 @@ function updateExistingSpec(fullName: string, tree: Tree, logger: Logger) {
                 specFilePath,
                 tree.read(specFilePath)!.toString('utf8'),
                 params,
-                className,
+                name,
                 'add',
-                publicMethods
+                publicMethods,
+                shorthand
             );
             applyChanges(tree, specFilePath, changesToAdd, 'add');
-            // console.log(tree.read('c.spec.ts')!.toString());
+
             return tree;
         }
     }
@@ -131,17 +139,17 @@ function applyChanges(tree: Tree, specFilePath: string, changes: Change[], act: 
     tree.commitUpdate(recorder);
 }
 
-function createNewSpec(name: string, tree: Tree, logger: Logger) {
-    const content = tree.read(name);
+function createNewSpec(fileNameRaw: string, tree: Tree, logger: Logger) {
+    const content = tree.read(fileNameRaw);
     if (content == null) {
-        logger.error(`The file ${name} is missing or empty.`);
+        logger.error(`The file ${fileNameRaw} is missing or empty.`);
     } else {
         // we aim at creating or updating a spec from the class under test (name)
         // for the spec name we'll need to parse the base file name and its extension and calculate the path
 
         // normalize the / and \ according to local OS
         // --name = ./example/example.component.ts -> example.component.ts
-        const fileName = basename(normalize(name));
+        const fileName = basename(normalize(fileNameRaw));
         // --name = ./example/example.component.ts -> ./example/example.component and the ext name -> .ts
         // for import { ExampleComponent } from "./example/example.component"
         const normalizedName = fileName.slice(0, fileName.length - extname(fileName).length);
@@ -149,77 +157,129 @@ function createNewSpec(name: string, tree: Tree, logger: Logger) {
         // the new spec file name
         const specFileName = `${normalizedName}.spec.ts`;
 
-        const path = name.split(fileName)[0]; // split on the filename - so we get only an array of one item
+        const path = fileNameRaw.split(fileName)[0]; // split on the filename - so we get only an array of one item
 
-        const { params, className, publicMethods } = parseClassUnderTestFile(name, content);
+        try {
+            const { params, name, publicMethods } = getFirstClass(fileNameRaw, content);
 
-        // if there are no methods in the class - let's add one test case anyway
-        if (Array.isArray(publicMethods) && publicMethods.length === 0) {
-            publicMethods.push('');
-        }
+            // if there are no methods in the class - let's add one test case anyway
+            if (Array.isArray(publicMethods) && publicMethods.length === 0) {
+                publicMethods.push('');
+            }
 
-        const templateSource = apply(url('./files'), [
-            applyTemplates({
-                // the name of the new spec file
-                specFileName,
-                normalizedName: normalizedName,
-                className: className,
-                publicMethods,
-                declaration: toDeclaration(),
-                builderExports: toBuilderExports(),
-                constructorParams: toConstructorParams(),
-                params
-            }),
-            move(path)
-        ]);
+            const shorthand = typeShorthand(name);
 
-        return mergeWith(templateSource);
-        /**
-         * End of the create function
-         * Below are the in-scope functions
-         */
+            const templateSource = apply(url('./files/class'), [
+                applyTemplates({
+                    // the name of the new spec file
+                    specFileName,
+                    normalizedName: normalizedName,
+                    className: name,
+                    publicMethods,
+                    declaration: toDeclaration(),
+                    builderExports: toBuilderExports(),
+                    constructorParams: toConstructorParams(),
+                    params,
+                    shorthand
+                }),
+                move(path)
+            ]);
 
-        // functions defined in the scope of the else to use params and such
-        // for getting called in the template - todo - just call the functions and get the result
-        function toConstructorParams() {
-            return params.map(p => p.name).join(',');
-        }
-        function toDeclaration() {
-            return params
-                .map(p =>
-                    p.type === 'string' || p.type === 'number'
-                        ? `let ${p.name}:${p.type};`
-                        : `const ${p.name} = autoSpy(${p.type});`
-                )
-                .join(EOL);
-        }
-        function toBuilderExports() {
-            return params.length > 0
-                ? params
-                      .map(p => p.name)
-                      .join(',' + EOL)
-                      .concat(',')
-                : '';
+            return mergeWith(templateSource);
+
+            /**
+             * End of the create function
+             * Below are the in-scope functions
+             */
+
+            // functions defined in the scope of the else to use params and such
+            // for getting called in the template - todo - just call the functions and get the result
+            function toConstructorParams() {
+                return params.map(p => p.name).join(',');
+            }
+            function toDeclaration() {
+                return params
+                    .map(p =>
+                        p.type === 'string' || p.type === 'number'
+                            ? `let ${p.name}:${p.type};`
+                            : `const ${p.name} = autoSpy(${p.type});`
+                    )
+                    .join(EOL);
+            }
+            function toBuilderExports() {
+                return params.length > 0
+                    ? params
+                          .map(p => p.name)
+                          .join(',' + EOL)
+                          .concat(',')
+                    : '';
+            }
+        } catch (e) {
+            if (e != null && e.message === 'No classes found to be spec-ed!') {
+                const f = getFirstFunction(fileNameRaw, content);
+
+                if (f == null) {
+                    throw new Error('No exported class or function to be spec-ed!');
+                }
+
+                const templateSource = apply(url('./files/function'), [
+                    applyTemplates({
+                        // the name of the new spec file
+                        specFileName,
+                        normalizedName: normalizedName,
+                        name: f.name
+                    }),
+                    move(path)
+                ]);
+
+                return mergeWith(templateSource);
+            } else {
+                throw e;
+            }
         }
     }
 }
 
-function parseClassUnderTestFile(name: string, fileContents: Buffer) {
-    const classDescriptions = readClassNamesAndConstructorParams(
-        name,
-        fileContents.toString('utf8')
-    );
+function getFirstClass(fileName: string, fileContents: Buffer) {
+    const descriptions = describeSource(fileName, fileContents.toString('utf8'));
+
+    const classes = descriptions.filter(c => isClassDescription(c)) as ClassDescription[];
+
     // we'll take the first class with any number of constructor params or just the first if there are none
-    const classWithConstructorParamsOrFirst =
-        classDescriptions.filter(c => c.constructorParams.length > 0)[0] || classDescriptions[0];
+    const classWithConstructorParamsOrFirst: ClassDescription =
+        classes.filter((c: ClassDescription) => c.constructorParams.length > 0)[0] ||
+        descriptions[0];
+
     if (classWithConstructorParamsOrFirst == null) {
         throw new Error('No classes found to be spec-ed!');
     }
     const {
         constructorParams: params,
-        name: className,
-        publicMethods
+        name,
+        publicMethods,
+        type
     } = classWithConstructorParamsOrFirst;
 
-    return { params, className, publicMethods };
+    return { params, name, publicMethods, type };
+}
+
+function getFirstFunction(fileName: string, fileContents: Buffer) {
+    const descriptions = describeSource(fileName, fileContents.toString('utf8'));
+    return (descriptions.filter(f => f.type === 'function') as FunctionDescription[])[0];
+}
+
+function typeShorthand(name: string) {
+    const normalizedName = (name || '').toLocaleLowerCase();
+    const type = normalizedName.includes('component')
+        ? 'c'
+        : normalizedName.includes('service')
+        ? 's'
+        : normalizedName.includes('guard')
+        ? 'g'
+        : normalizedName.includes('effect')
+        ? 'e'
+        : normalizedName.includes('reduce')
+        ? 'r'
+        : 'x';
+    return type;
 }

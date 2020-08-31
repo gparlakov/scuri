@@ -323,7 +323,7 @@ function setup() {
                 treeForComma.create(
                     't.ts',
                     `
-class T {
+export class T {
     constructor(a: string, b:string) {}
 }`
                 );

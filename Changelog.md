@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 -   Issue 94 - add a single test case when creating the spec for a class without public methods
+-   Issue 95 - add a test case for a file with at least one exported function
+-   Make the shorthand dynamic based on the type of tested entity - 'c' for component, 's' for service, etc.
 
 ## [1.0.4] - 2020-08-30
 
@@ -51,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
--   Correct indentation of added deps (following the last symbol just above) [Issue 3](https://github.com/gparlakov/scuri/issues/3)
+-   Correct indentation of added dependencies (following the last symbol just above) [Issue 3](https://github.com/gparlakov/scuri/issues/3)
 -   Correct indentation of added methods (following the last symbol just above) [Issue 3](https://github.com/gparlakov/scuri/issues/3)
 -   Correct imports: only import missing modules and do not double existing imports [Issue 3](https://github.com/gparlakov/scuri/issues/73)
 
@@ -59,13 +61,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--   Fix auto-spy not working with Typescript target e2015. Issue comes from methods of classes NOT being enumerable i.e. Object.keys(obj) will not "see" them
+-   Fix auto-spy not working with Typescript target e2015. The issue comes from methods of classes NOT being enumerable i.e. Object.keys(obj) will not "see" them
 
 ## [0.9.3] - 2019-09-23
 
 ### Fixed
 
--   Allow update to take the name of the spec (`--update c.spec.ts` will now work instead of throwing)
+-   Allow the update to take the name of the spec (`--update c.spec.ts` will now work instead of throwing)
 
 ## [0.9.2] - 2019-09-23
 
@@ -158,7 +160,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
--   Change behavior to rely on flags to decide if we should update. If `--update` is passed in we always try to update. If not we always try to create new spec file. From there on the schematics cli will make the decision (based on `--force`) to overwrite or not.
+-   Change behavior to rely on flags to decide if we should update. If `--update` is passed in we always try to update. If not we always try to create a new spec file. From there on the schematics cli will make the decision (based on `--force`) to overwrite or not.
 
 ## [0.3.1] - 2019-07-06
 

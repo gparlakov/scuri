@@ -14,7 +14,7 @@ _Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript co
 
 🤵[Need commercial-quality coverage for SCuri?](#scuri-for-enterprise)
 
-💵[Support us](#like-it-?)
+💵[Support us](#like-it)
 
 ## Why?
 
