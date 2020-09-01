@@ -23,9 +23,9 @@ describe('spec', () => {
                     `\\/\\/ arrange${eol}` +
                     `const \\{ build \\} = setup\\(\\).default\\(\\);${eol}` +
                     `\\/\\/ act${eol}` +
-                    `const c = build\\(\\);${eol}` +
+                    `const e = build\\(\\);${eol}` +
                     `\\/\\/ assert${eol}` +
-                    `\\/\\/ expect\\(c\\).toEqual${eol}`
+                    `\\/\\/ expect\\(e\\).toEqual${eol}`
             )
         );
     });

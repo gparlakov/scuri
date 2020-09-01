@@ -55,7 +55,7 @@ function read(node: ts.Node) {
         result = [
             {
                 type: 'function',
-                name: func.name != null ? func.name.getFullText() : 'anonymousFunction'
+                name: func.name != null ? func.name.getText() : 'anonymousFunction'
             }
         ];
     }

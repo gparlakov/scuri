@@ -1,12 +1,12 @@
-<% }}) %>import { <%= name %> } from './<%= normalizedName %>';
+import { <%= name %> } from './<%= normalizedName %>';
 import { autoSpy } from 'autoSpy';
 
 describe('<%= name %>', () => {
   it('it should', () => {
     // arrange
     // act
-    const r = <%= name %>();
+    const x = <%= name %>();
     // assert
-    // expect(r).toEqual()
+    // expect(x).toEqual()
   });
 });

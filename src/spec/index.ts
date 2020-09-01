@@ -217,7 +217,6 @@ function createNewSpec(fileNameRaw: string, tree: Tree, logger: Logger) {
         } catch (e) {
             if (e != null && e.message === 'No classes found to be spec-ed!') {
                 const f = getFirstFunction(fileNameRaw, content);
-
                 if (f == null) {
                     throw new Error('No exported class or function to be spec-ed!');
                 }
@@ -226,7 +225,7 @@ function createNewSpec(fileNameRaw: string, tree: Tree, logger: Logger) {
                     applyTemplates({
                         // the name of the new spec file
                         specFileName,
-                        normalizedName: normalizedName,
+                        normalizedName,
                         name: f.name
                     }),
                     move(path)
@@ -244,11 +243,9 @@ function getFirstClass(fileName: string, fileContents: Buffer) {
     const descriptions = describeSource(fileName, fileContents.toString('utf8'));
 
     const classes = descriptions.filter(c => isClassDescription(c)) as ClassDescription[];
-
     // we'll take the first class with any number of constructor params or just the first if there are none
     const classWithConstructorParamsOrFirst: ClassDescription =
-        classes.filter((c: ClassDescription) => c.constructorParams.length > 0)[0] ||
-        descriptions[0];
+        classes.filter((c: ClassDescription) => c.constructorParams.length > 0)[0] || classes[0];
 
     if (classWithConstructorParamsOrFirst == null) {
         throw new Error('No classes found to be spec-ed!');
@@ -269,17 +266,5 @@ function getFirstFunction(fileName: string, fileContents: Buffer) {
 }
 
 function typeShorthand(name: string) {
-    const normalizedName = (name || '').toLocaleLowerCase();
-    const type = normalizedName.includes('component')
-        ? 'c'
-        : normalizedName.includes('service')
-        ? 's'
-        : normalizedName.includes('guard')
-        ? 'g'
-        : normalizedName.includes('effect')
-        ? 'e'
-        : normalizedName.includes('reduce')
-        ? 'r'
-        : 'x';
-    return type;
+    return typeof name === 'string' && name.length > 0 ? name.toLocaleLowerCase()[0] : 'x';
 }
