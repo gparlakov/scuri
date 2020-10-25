@@ -3,16 +3,25 @@
 import { autoSpy } from 'autoSpy';
 
 describe('<%= className %>', () => {
-  <% publicMethods.forEach(meth=> { %>it('when <%= meth %> is called it should', () => {
+  <% publicMethods.forEach(meth=> {if(meth != '') { %>it('when <%= meth %> is called it should', () => {
     // arrange
     const { build } = setup().default();
-    const c = build();
+    const <%= shorthand %> = build();
     // act
-    c.<%= meth %>();
+    <%= shorthand %>.<%= meth %>();
     // assert
-    // expect(c).toEqual
+    // expect(<%= shorthand %>).toEqual
   });
-  <% }) %>
+  <% } else { %>
+  it('it should construct', () => {
+    // arrange
+    const { build } = setup().default();
+    // act
+    const <%= shorthand %> = build();
+    // assert
+    // expect(<%= shorthand %>).toEqual
+  });
+  <% }}) %>
 });
 
 function setup() {

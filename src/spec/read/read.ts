@@ -21,26 +21,28 @@ import * as ts from '../../../lib/third_party/github.com/Microsoft/TypeScript/li
  * @param fileName the name of the file (required by ts API)
  * @param fileContents contents of the file
  */
-export function readClassNamesAndConstructorParams(
-    fileName: string,
-    fileContents: string
-): ClassDescription[] {
+export function describeSource(fileName: string, fileContents: string): Description[] {
     const sourceFile = ts.createSourceFile(fileName, fileContents, ts.ScriptTarget.ES2015, true);
 
-    const res = read(sourceFile);
-    const enrichedRes = res.map(r => ({
-        ...r,
-        constructorParams: addImportPaths(r.constructorParams, fileContents)
-    }));
-    return enrichedRes;
+    const description = read(sourceFile);
+    const enrichedDescription = description.map(r =>
+        isClassDescription(r)
+            ? {
+                  ...r,
+                  constructorParams: addImportPaths(r.constructorParams, fileContents)
+              }
+            : r
+    );
+    return enrichedDescription;
 }
 
 function read(node: ts.Node) {
-    let result: ClassDescription[] = [];
-    if (node.kind === ts.SyntaxKind.ClassDeclaration) {
+    let result: Description[] = [];
+    if (isExportedClass(node)) {
         const classDeclaration = node as ts.ClassDeclaration;
         result = [
             {
+                type: 'class',
                 name: classDeclaration.name != null ? classDeclaration.name.getText() : 'default',
                 constructorParams: readConstructorParams(node as ts.ClassDeclaration),
                 publicMethods: readPublicMethods(node as ts.ClassDeclaration)
@@ -48,6 +50,15 @@ function read(node: ts.Node) {
         ];
     }
 
+    if (isExportedFunction(node)) {
+        const func = node as ts.FunctionDeclaration;
+        result = [
+            {
+                type: 'function',
+                name: func.name != null ? func.name.getText() : 'anonymousFunction'
+            }
+        ];
+    }
     ts.forEachChild(node, n => {
         const r = read(n);
         if (r && r.length > 0) {
@@ -105,6 +116,7 @@ function addImportPaths(params: ConstructorParam[], fullText: string) {
     });
 }
 export type ClassDescription = {
+    type: 'class';
     name: string;
     constructorParams: ConstructorParam[];
     publicMethods: string[];
@@ -115,3 +127,29 @@ export type ConstructorParam = {
     type: string;
     importPath?: string;
 };
+
+export type FunctionDescription = {
+    type: 'function';
+    name: string;
+};
+
+export function isClassDescription(obj: Description): obj is ClassDescription {
+    return obj != null && obj.type === 'class';
+}
+
+export type Description = ClassDescription | FunctionDescription;
+
+function isExported(node: ts.Node, kind: ts.SyntaxKind): boolean {
+    return (
+        node.kind === kind &&
+        node.modifiers != null &&
+        node.modifiers.some(m => m.kind === ts.SyntaxKind.ExportKeyword)
+    );
+}
+
+function isExportedClass(node: ts.Node): node is ts.ClassDeclaration {
+    return isExported(node, ts.SyntaxKind.ClassDeclaration);
+}
+function isExportedFunction(node: ts.Node): node is ts.FunctionDeclaration {
+    return isExported(node, ts.SyntaxKind.FunctionDeclaration);
+}

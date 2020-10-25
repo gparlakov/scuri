@@ -33,7 +33,8 @@ function setup() {
             [],
             'ExampleComponent',
             'remove',
-            []
+            [],
+            'a'
         );
 
         const removes = result.filter(r => r instanceof RemoveChange);
@@ -323,7 +324,7 @@ function setup() {
                 treeForComma.create(
                     't.ts',
                     `
-class T {
+export class T {
     constructor(a: string, b:string) {}
 }`
                 );

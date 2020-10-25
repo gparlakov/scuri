@@ -8,6 +8,7 @@ import {
 } from '../../../lib/utility/ast-utils';
 import { Change, InsertChange, RemoveChange } from '../../../lib/utility/change';
 import { ConstructorParam } from '../read/read';
+
 export const i = insertAfterLastOccurrence;
 
 export function addMissing(
@@ -50,7 +51,8 @@ export function update(
     dependencies: ConstructorParam[],
     classUnderTestName: string,
     action: 'add' | 'remove',
-    publicMethods: string[]
+    publicMethods: string[],
+    shorthand: string
 ): Change[] {
     const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
 
@@ -68,7 +70,7 @@ export function update(
         ? remove(paramsToRemove, setupFunctionNode, path)
         : [
               ...add(paramsToAdd, setupFunctionNode, path, classUnderTestName),
-              ...addMethods(publicMethods, path, fileContent, source),
+              ...addMethods(publicMethods, path, fileContent, source, shorthand),
               ...addMissingImports(dependencies, path, source),
               ...addProviders(
                   source,
@@ -244,7 +246,8 @@ function addMethods(
     publicMethods: string[],
     path: string,
     fileContent: string,
-    source: ts.SourceFile
+    source: ts.SourceFile,
+    shorthand: string
 ) {
     const methodsThatHaveNoTests = publicMethods.filter(
         // search for invokations of the method (c.myMethod) - these are inevitable if one wants to actually test the method...
@@ -272,7 +275,7 @@ function addMethods(
             new InsertChange(
                 path,
                 lastClosingBracketPositionOfDescribe,
-                `${EOL}    it('when ${m} is called it should', () => {${EOL}        // arrange${EOL}        const { build } = setup().default();${EOL}        const c = build();${EOL}        // act${EOL}        c.${m}();${EOL}        // assert${EOL}        // expect(c).toEqual${EOL}    });`
+                `${EOL}    it('when ${m} is called it should', () => {${EOL}        // arrange${EOL}        const { build } = setup().default();${EOL}        const ${shorthand} = build();${EOL}        // act${EOL}        c.${m}();${EOL}        // assert${EOL}        // expect(c).toEqual${EOL}    });`
             )
     );
 }
