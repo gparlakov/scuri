@@ -33,7 +33,8 @@ function setup() {
             [],
             'ExampleComponent',
             'remove',
-            []
+            [],
+            'a'
         );
 
         const removes = result.filter(r => r instanceof RemoveChange);
