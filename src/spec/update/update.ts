@@ -275,7 +275,7 @@ function addMethods(
             new InsertChange(
                 path,
                 lastClosingBracketPositionOfDescribe,
-                `${EOL}    it('when ${m} is called it should', () => {${EOL}        // arrange${EOL}        const { build } = setup().default();${EOL}        const ${shorthand} = build();${EOL}        // act${EOL}        c.${m}();${EOL}        // assert${EOL}        // expect(c).toEqual${EOL}    });`
+                `${EOL}    it('when ${m} is called it should', () => {${EOL}        // arrange${EOL}        const { build } = setup().default();${EOL}        const ${shorthand} = build();${EOL}        // act${EOL}        ${shorthand}.${m}();${EOL}        // assert${EOL}        // expect(${shorthand}).toEqual${EOL}    });`
             )
     );
 }

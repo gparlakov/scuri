@@ -315,6 +315,24 @@ function setup() {
                     /describe\('ToUpdate', \(\) => \{(\r\n|\n\r|\n)\s*it\('when method is called it should/
                 );
             });
+
+            it('uses the correct shorthand (ToUpdate shorthand t)', () => {
+                // arrange
+                const runner = new SchematicTestRunner('schematics', collectionPath);
+                // act
+                // ToUpdate class has new deps - so we need to update the existing spec file
+                const result = runner.runSchematic(
+                    'spec',
+                    { name: 'to-update.ts', update: true },
+                    treeWithASpecAndOnlyDescribe
+                );
+                // assert
+                const contents = result.readContent('to-update.spec.ts');
+                // splitting by the expected it description  - if there is one such it -
+                // then we'll get 2 results otherwise - 1, 3 or more
+                expect(contents).toMatch('t.method();');
+                expect(contents).toMatch('expect(t).toEqual');
+            });
         });
 
         describe('when there are existing deps in the class-under-test constructor', () => {
