@@ -2,11 +2,25 @@
 
 Hi and thanks for your contribution! We take issues, suggestions, bugs, and code. Don't have the time but still want to contribute? [We'd appreciate that](#like-it-?)
 
-Here's a few notes about what we expect from contributors, how to get the examples, run the code and Linux/Mac specific note.
+A few notes about what we expect from contributors, how to get the examples, run the code and a Linux/Mac specific note.
+
+## Contribution workflow
+
+-   select an issue you'd like to work on (please create one if missing)
+-   clone the repo
+-   open a feature branch from master for your work
+    -   prettier is run on every commit for the changed files
+    -   Why? For consistency.
+-   write some tests
+-   try to make small changes
+    -   no one wants to review a 40 files commit
+    -   large number of files changed makes it easy to miss issues
+-   open a PR to master
+-   discuss the PR
 
 ## Contributions expected to have unit tests
 
-The SCuri project is generating spec files for Angular Apps, and it itself is covered by extensive test case suite. We expect any new code to be covered by unit test(s).
+The SCuri project is generating spec files for Angular Apps, and is itself covered by an extensive test case suite. We expect any new code to be covered by unit test(s).
 
 ### Where do unit tests live?
 
@@ -25,9 +39,9 @@ Begin specs with:
 -   `spec-update.` - scuri:spec --update (ex `spec-update.testbed-tests.spec.ts`)
 -   `all.` - both of the above - when use case covers both create and update spec
 
-### Scuri-examples are a separate repo
+### Scuri-examples are in a separate repo
 
-Due to constant security issues, moving the examples in a separate repository. In order to test out the library examples contain older versions of packages and naturally get security issues discovered. It is out of scope for the main package to fix the security issues in Angular 5 example app. Still we'd like to NOT have an outstanding number of unfixed security issues to appeal to users. Hence the move.
+Due to constant security issues, moving the examples in a separate repository. To test out the library examples contain older versions of packages and naturally get security issues discovered. It is out of scope for the main package to fix the security issues in the Angular 5 example app. We'd like to NOT have an outstanding number of unfixed security issues to appeal to users. Hence the move.
 
 Please keep in mind the separate repository and clone it to do the testing - `git clone https://github.com/gparlkov/scuri-examples`. The examples assume that the two repos are cloned in adjacent folders
 
@@ -97,8 +111,20 @@ Will do the same as above but will also **watch** for file changes and **re-run*
 
 Keep in mind examples are using windows style folder structure `\my\folder\structure\` which would need to be changed to `/my/folder/structure/` on Linux/Mac
 
+## Release flow
+
+-   example targets release of 1.0.6 - patch version - no braking changes, no new API - just fixes/documentation/etc
+-   create a feature branch
+-   work commit, open a PR to master
+-   for version `@next` open a branch from master named `release/1.0.6-rc.1` (change vers)
+-   approval required at this point [for @next version](https://dev.azure.com/gparlakov/Scuri/_releaseProgress?_a=release-pipeline-progress&releaseId=68)
+-   `scuri@next` is now `1.0.6-rc.1`. Test if the @next version works as expected
+-   in case of issues - fix in feature branch, merge to master and open `release/1.0.6-rc.2`
+-   when done - open a branch from master named `release/1.0.6`
+-   approval required at this point [for @latest version](https://dev.azure.com/gparlakov/Scuri/_releaseProgress?_a=release-pipeline-progress&releaseId=74)
+-   scuri@latest is now `scuri@1.0.6`
+
 ## Like it?
 
 You like the project and it gives you value? You are considering supporting it? I'd really appreciate that!
-
-<style>.bmc-button img{height: 34px !important;width: 35px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{padding: 7px 15px 7px 10px !important;line-height: 35px !important;height:51px !important;text-decoration: none !important;display:inline-flex !important;color:#ffffff !important;background-color:#5F7FFF !important;border-radius: 8px !important;border: 1px solid transparent !important;font-size: 24px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#ffffff !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bHQk8Cu">☕<span style="margin-left:5px;font-size:24px !important;">Buy me a coffee</span></a>
+<a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bHQk8Cu">☕<span style="margin-left:5px;font-size:24px !important;">Buy me a coffee</span></a>
