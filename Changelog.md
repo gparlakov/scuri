@@ -16,7 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.6] - 2021-01-09
 
 ### Fixed
-- Issue 108 - use the class shorthand when updating a spec
+
+-   Issue 108 - use the class shorthand when updating a spec
 
 ## [1.0.5] - 2020-08-31
 
