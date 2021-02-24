@@ -162,16 +162,14 @@ Or
 
 Versions and flags
 
-| angular | jest | jasmine | command                                        |
-| ------- | ---- | ------- | ---------------------------------------------- |
-| 5       |      | V       | `schematics scuri:autospy --legacy`            |
-| 5       | V    |         | `schematics scuri:autospy --for jest --legacy` |
-| 6       |      | V       | `ng g scuri:autospy`                           |
-| 6       | V    |         | `ng g scuri:autospy --for jest`                |
-| 7       |      | V       | `ng g scuri:autospy`                           |
-| 7       | V    |         | `ng g scuri:autospy --for jest`                |
-| 8       |      | V       | `ng g scuri:autospy`                           |
-| 8       | V    |         | `ng g scuri:autospy --for jest`                |
+| angular        | jest / jasmine | command                                        |
+| -------------- | -------------- | ---------------------------------------------- |
+| 2,4,5          | jasmine        | `schematics scuri:autospy --legacy`            |
+|                | jest           | `schematics scuri:autospy --for jest --legacy` |
+| 6, 7, 8 and up | jasmine        | `ng g scuri:autospy`                           |
+|                | jest           | `ng g scuri:autospy --for jest`                |
+
+All Angular versions after and including 6 can use the Angular CLI - `ng generate scuri:autospy`.
 
 Flags:
 
@@ -273,6 +271,6 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 
 ## Like it?
 
-You like the project and it gives you value? You are considering supporting it? We'd really appreciate that!
+You like the project and it gives you value? You are considering supporting it? That would be really appreciated!
 
-<style>.bmc-button img{height: 34px !important;width: 35px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{padding: 7px 15px 7px 10px !important;line-height: 35px !important;height:51px !important;text-decoration: none !important;display:inline-flex !important;color:#ffffff !important;background-color:#5F7FFF !important;border-radius: 8px !important;border: 1px solid transparent !important;font-size: 24px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#ffffff !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bHQk8Cu">☕<span style="margin-left:5px;font-size:24px !important;">Buy us a coffee</span></a>
+<a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/bHQk8Cu">☕<span style="margin-left:5px;">Buy us a coffee</span></a>
