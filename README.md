@@ -6,11 +6,17 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-**Automates unit test boilerplate** for **Angular** components/services/directives/etc. It will **generate** spec for you and help you **update** it when dependencies are added or removed!
+### **Automates unit test boilerplate** for **Angular** components/services/directives/etc. It will **generate** spec for you and help you **update** it when dependencies are added or removed!
 
-_Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_.
+<br />
+
+> _Powered by [Schematics](https://angular.io/guide/schematics) and [TypeScript compiler](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API)_
+
+## Links
 
 [![](./docs/VSCode_20px.png)](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code) [VS Code extension](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code) available!
+
+🤙 Have some feedback or need a feature? [SCuri discussion on github](https://github.com/gparlakov/scuri/discussions/110)
 
 🤵[Need commercial-quality coverage for SCuri?](#scuri-for-enterprise)
 
