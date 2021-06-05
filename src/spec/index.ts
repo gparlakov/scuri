@@ -7,8 +7,10 @@ import {
     move,
     Rule,
     SchematicContext,
+    Source,
+    source,
     Tree,
-    url
+    url,
 } from '@angular-devkit/schematics';
 import { EOL } from 'os';
 import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
@@ -16,33 +18,33 @@ import {
     describeSource,
     isClassDescription,
     ClassDescription,
-    FunctionDescription
+    FunctionDescription,
 } from './read/read';
 import { addMissing, update as doUpdate } from './update/update';
 
 class SpecOptions {
     name: string;
     update?: boolean;
+    classTemplate?: string;
 }
 
-export function spec({ name, update }: SpecOptions): Rule {
+export function spec({ name, update, classTemplate }: SpecOptions): Rule {
     return (tree: Tree, context: SchematicContext) => {
-        // @ts-ignore
         const logger = context.logger.createChild('scuri.index');
         logger.info(`Params: name: ${name} update: ${update}`);
         try {
             if (update) {
                 return updateExistingSpec(name, tree, logger);
             } else {
-                // spec file does not exist
-                return createNewSpec(name, tree, logger);
+                return createNewSpec(name, tree, logger, { classTemplate });
             }
         } catch (e) {
             e = e || {};
             logger.error(e.message || 'An error occurred');
             logger.debug(
-                `---Error--- ${EOL}${e.message || 'Empty error message'} ${e.stack ||
-                    'Empty stack.'}`
+                `---Error--- ${EOL}${e.message || 'Empty error message'} ${
+                    e.stack || 'Empty stack.'
+                }`
             );
         }
     };
@@ -124,13 +126,13 @@ function applyChanges(tree: Tree, specFilePath: string, changes: Change[], act: 
 
     if (act === 'add') {
         changes
-            .filter(c => c instanceof InsertChange)
+            .filter((c) => c instanceof InsertChange)
             .forEach((change: InsertChange) => {
                 recorder.insertLeft(change.order, change.toAdd);
             });
     } else {
         changes
-            .filter(c => c instanceof RemoveChange)
+            .filter((c) => c instanceof RemoveChange)
             .forEach((change: RemoveChange) => {
                 recorder.remove(change.order, change.toRemove.length);
             });
@@ -139,7 +141,12 @@ function applyChanges(tree: Tree, specFilePath: string, changes: Change[], act: 
     tree.commitUpdate(recorder);
 }
 
-function createNewSpec(fileNameRaw: string, tree: Tree, logger: Logger) {
+function createNewSpec(
+    fileNameRaw: string,
+    tree: Tree,
+    logger: Logger,
+    o?: { classTemplate?: string }
+) {
     const content = tree.read(fileNameRaw);
     if (content == null) {
         logger.error(`The file ${fileNameRaw} is missing or empty.`);
@@ -169,7 +176,9 @@ function createNewSpec(fileNameRaw: string, tree: Tree, logger: Logger) {
 
             const shorthand = typeShorthand(name);
 
-            const templateSource = apply(url('./files/class'), [
+            const src = maybeUseCustomClassTemplate(o, tree, url('./files/class'));
+
+            const templateSource = apply(src, [
                 applyTemplates({
                     // the name of the new spec file
                     specFileName,
@@ -180,9 +189,9 @@ function createNewSpec(fileNameRaw: string, tree: Tree, logger: Logger) {
                     builderExports: toBuilderExports(),
                     constructorParams: toConstructorParams(),
                     params,
-                    shorthand
+                    shorthand,
                 }),
-                move(path)
+                move(path),
             ]);
 
             return mergeWith(templateSource);
@@ -195,11 +204,11 @@ function createNewSpec(fileNameRaw: string, tree: Tree, logger: Logger) {
             // functions defined in the scope of the else to use params and such
             // for getting called in the template - todo - just call the functions and get the result
             function toConstructorParams() {
-                return params.map(p => p.name).join(',');
+                return params.map((p) => p.name).join(',');
             }
             function toDeclaration() {
                 return params
-                    .map(p =>
+                    .map((p) =>
                         p.type === 'string' || p.type === 'number'
                             ? `let ${p.name}:${p.type};`
                             : `const ${p.name} = autoSpy(${p.type});`
@@ -209,7 +218,7 @@ function createNewSpec(fileNameRaw: string, tree: Tree, logger: Logger) {
             function toBuilderExports() {
                 return params.length > 0
                     ? params
-                          .map(p => p.name)
+                          .map((p) => p.name)
                           .join(',' + EOL)
                           .concat(',')
                     : '';
@@ -226,9 +235,9 @@ function createNewSpec(fileNameRaw: string, tree: Tree, logger: Logger) {
                         // the name of the new spec file
                         specFileName,
                         normalizedName,
-                        name: f.name
+                        name: f.name,
                     }),
-                    move(path)
+                    move(path),
                 ]);
 
                 return mergeWith(templateSource);
@@ -239,10 +248,27 @@ function createNewSpec(fileNameRaw: string, tree: Tree, logger: Logger) {
     }
 }
 
+function maybeUseCustomClassTemplate(
+    o: { classTemplate?: string | undefined } | undefined,
+    tree: Tree,
+    src: Source
+): Source {
+    const c = o?.classTemplate;
+    if (typeof c === 'string' && tree.exists(c)) {
+        const template = tree.read(c);
+        if (template != null) {
+            const t = Tree.empty();
+            t.create('__specFileName__.template', template);
+            src = source(t);
+        }
+    }
+    return src;
+}
+
 function getFirstClass(fileName: string, fileContents: Buffer) {
     const descriptions = describeSource(fileName, fileContents.toString('utf8'));
 
-    const classes = descriptions.filter(c => isClassDescription(c)) as ClassDescription[];
+    const classes = descriptions.filter((c) => isClassDescription(c)) as ClassDescription[];
     // we'll take the first class with any number of constructor params or just the first if there are none
     const classWithConstructorParamsOrFirst: ClassDescription =
         classes.filter((c: ClassDescription) => c.constructorParams.length > 0)[0] || classes[0];
@@ -254,7 +280,7 @@ function getFirstClass(fileName: string, fileContents: Buffer) {
         constructorParams: params,
         name,
         publicMethods,
-        type
+        type,
     } = classWithConstructorParamsOrFirst;
 
     return { params, name, publicMethods, type };
@@ -262,7 +288,7 @@ function getFirstClass(fileName: string, fileContents: Buffer) {
 
 function getFirstFunction(fileName: string, fileContents: Buffer) {
     const descriptions = describeSource(fileName, fileContents.toString('utf8'));
-    return (descriptions.filter(f => f.type === 'function') as FunctionDescription[])[0];
+    return (descriptions.filter((f) => f.type === 'function') as FunctionDescription[])[0];
 }
 
 function typeShorthand(name: string) {

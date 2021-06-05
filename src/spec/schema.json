@@ -17,6 +17,10 @@
       "default": false,
       "alias": "u",
       "description": "Whether or not to update a pre-existing spec file."
+    },
+    "classTemplate": {
+      "type": "string",
+      "description": "the path to a file to be used when creating a spec file for a class"
     }
   },
   "required": ["name"]

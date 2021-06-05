@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.0.8-rc.1
+
+### Added
+
+-   Add option for user to specify their own template
+
 ## [1.0.7] - 2021-02-24
 
 ### Changed
