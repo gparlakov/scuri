@@ -248,13 +248,13 @@ function addMethods(
     fileContent: string,
     source: ts.SourceFile,
     shorthand: string
-) {
+): Change[] {
     const methodsThatHaveNoTests = publicMethods.filter(
         // search for invokations of the method (c.myMethod) - these are inevitable if one wants to actually test the method...
         m => !fileContent.match(new RegExp(`.${m}`))
     );
 
-    let lastClosingBracketPositionOfDescribe = findNodes(source, ts.SyntaxKind.CallExpression)
+    let lastClosingBracketPositionOfDescribe = findNodes(source, ts.SyntaxKind.CallExpression, 100, true)
         .map(e => (e as ts.CallExpression).expression)
         // we get all describes calls
         .filter(i => i.getText() === 'describe')
@@ -262,7 +262,7 @@ function addMethods(
         .map(c => c.parent)
         // then we flat the arrays of all close brace tokens from those bodies
         .reduce(
-            (acc, c) => [...acc, ...findNodes(c, ts.SyntaxKind.CloseBraceToken)],
+            (acc, c) => [...acc, ...findNodes(c, ts.SyntaxKind.CloseBraceToken, 100, true)],
             [] as ts.Node[]
         )
         // finally get the last brace position
@@ -323,7 +323,7 @@ function addProviders(
     setupFunctionName: string,
     path: string
 ) {
-    const configureTestingModuleCall = findNodes(source, ts.SyntaxKind.CallExpression)
+    const configureTestingModuleCall = findNodes(source, ts.SyntaxKind.CallExpression, 5000, true)
         // reverse to find the innermost callExpression (the configureTestingModule)
         .reverse()
         .find(n => {

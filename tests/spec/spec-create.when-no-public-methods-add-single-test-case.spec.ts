@@ -8,11 +8,11 @@ describe('spec', () => {
         tree = Tree.empty();
         tree.create('empty-class.ts', 'export class EmptyClass {}');
     });
-    it('creates a file with the boilerplate setup method ', () => {
+    it('creates a file with the boilerplate setup method ', async  () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        const result = runner.runSchematic('spec', { name: 'empty-class.ts' }, tree);
+        const result = await runner.runSchematicAsync('spec', { name: 'empty-class.ts' }, tree).toPromise();
         // assert
         const contents = result.readContent('empty-class.spec.ts');
 
