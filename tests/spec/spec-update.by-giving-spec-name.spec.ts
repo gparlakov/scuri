@@ -29,22 +29,22 @@ describe('Calling update and passing the spec file in --name ', () => {
         );
     });
 
-    it('should work and not throw errors', () => {
+    it('should work and not throw errors', async  () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
         const errors = [];
         runner.logger.pipe(filter(v => v.level === 'error')).subscribe(v => errors.push(v));
-        runner.runSchematic('spec', { name: './c.spec.ts', update: true }, tree);
+        await runner.runSchematicAsync('spec', { name: './c.spec.ts', update: true }, tree).toPromise();
         // assert
         expect(errors.length).toBe(0);
     });
 
-    it('should update the spec file', () => {
+    it('should update the spec file', async  () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        const result = runner.runSchematic('spec', { name: './c.spec.ts', update: true }, tree);
+        const result = await runner.runSchematicAsync('spec', { name: './c.spec.ts', update: true }, tree).toPromise();
         const contents = result.readContent('./c.spec.ts');
         // assert
         expect(contents).toContain('const logger = autoSpy(LogService);');

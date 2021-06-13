@@ -1,10 +1,11 @@
 /**
  * @license
- * Copyright Google Inc. All Rights Reserved.
+ * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+
 import { EmptyTree } from '@angular-devkit/schematics';
 import { UnitTestTree } from '@angular-devkit/schematics/testing';
 import {
@@ -13,7 +14,6 @@ import {
   addPackageJsonDependency,
   getPackageJsonDependency,
 } from './dependencies';
-
 
 describe('dependencies', () => {
   describe('addDependency', () => {
@@ -36,7 +36,7 @@ describe('dependencies', () => {
       { type: NodeDependencyType.Dev, key: 'devDependencies' },
       { type: NodeDependencyType.Optional, key: 'optionalDependencies' },
       { type: NodeDependencyType.Peer, key: 'peerDependencies' },
-    ].forEach(type => {
+    ].forEach((type) => {
       describe(`Type: ${type.toString()}`, () => {
         beforeEach(() => {
           dependency.type = type.type;
@@ -49,8 +49,8 @@ describe('dependencies', () => {
         });
 
         it('should handle an existing dependency (update version)', () => {
-          addPackageJsonDependency(tree, {...dependency, version: '0.0.0'});
-          addPackageJsonDependency(tree, {...dependency, overwrite: true});
+          addPackageJsonDependency(tree, { ...dependency, version: '0.0.0' });
+          addPackageJsonDependency(tree, { ...dependency, overwrite: true });
           const pkgJson = JSON.parse(tree.readContent(pkgJsonPath));
           expect(pkgJson[type.key][dependency.name]).toEqual(dependency.version);
         });
@@ -58,20 +58,23 @@ describe('dependencies', () => {
     });
 
     it('should throw when missing package.json', () => {
-      expect((() => addPackageJsonDependency(new EmptyTree(), dependency))).toThrow();
+      expect(() => addPackageJsonDependency(new EmptyTree(), dependency)).toThrow();
     });
-
   });
 
   describe('getDependency', () => {
     let tree: UnitTestTree;
     beforeEach(() => {
       const pkgJsonPath = '/package.json';
-      const pkgJsonContent = JSON.stringify({
-        dependencies: {
-          'my-pkg': '1.2.3',
+      const pkgJsonContent = JSON.stringify(
+        {
+          dependencies: {
+            'my-pkg': '1.2.3',
+          },
         },
-      }, null, 2);
+        null,
+        2,
+      );
       tree = new UnitTestTree(new EmptyTree());
       tree.create(pkgJsonPath, pkgJsonContent);
     });

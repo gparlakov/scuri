@@ -26,8 +26,9 @@
   "schematics": "./src/collection.json",
   "repository": "https://github.com/gparlakov/scuri",
   "dependencies": {
-    "@angular-devkit/core": "^0.8.9",
-    "@angular-devkit/schematics": "^0.8.9"
+    "@angular-devkit/core": "^12.0.4",
+    "@angular-devkit/schematics": "^12.0.4",
+    "jsonc-parser": "^3.0.0"
   },
   "devDependencies": {
     "@angular-devkit/schematics-cli": "^0.901.1",
