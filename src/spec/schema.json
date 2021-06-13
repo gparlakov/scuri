@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "id": "SpecSchema",
+  "$id": "SpecSchema",
   "title": "Spec options Schema",
   "type": "object",
   "properties": {
