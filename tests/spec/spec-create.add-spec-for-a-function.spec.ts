@@ -14,11 +14,11 @@ export function add(a: number, b: number) {
 }`
     );
 
-    it('create should create a describe and one test case for the function', () => {
+    it('create should create a describe and one test case for the function', async  () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        const result = runner.runSchematic('spec', { name: source, update: false }, tree);
+        const result = await runner.runSchematicAsync('spec', { name: source, update: false }, tree).toPromise();
         // assert
         const contents = result.readContent(spec);
         expect(contents).toMatch(`import { add } from './add';`);

@@ -9,24 +9,24 @@ describe('spec', () => {
     beforeEach(() => {
         tree = Tree.empty();
     });
-    it('scaffolds a test case with shorthand `c` for empty (c)ustomerComponent', () => {
+    it('scaffolds a test case with shorthand `c` for empty (c)ustomerComponent', async  () => {
         tree.create(source, 'export class CustomerComponent {}');
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        const result = runner.runSchematic('spec', { name: source }, tree);
+        const result = await runner.runSchematicAsync('spec', { name: source }, tree).toPromise();
         // assert
         const contents = result.readContent(spec);
 
         expect(contents).toMatch('const c = build();');
     });
 
-    it('scaffolds a test case with shorthand `c` for (c)ustomerComponent', () => {
+    it('scaffolds a test case with shorthand `c` for (c)ustomerComponent', async  () => {
         tree.create(source, 'export class CustomerComponent { method(){} }');
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        const result = runner.runSchematic('spec', { name: source }, tree);
+        const result = await runner.runSchematicAsync('spec', { name: source }, tree).toPromise();
         // assert
         const contents = result.readContent(spec);
 
@@ -34,12 +34,12 @@ describe('spec', () => {
         expect(contents).toMatch('c.method();');
     });
 
-    it('scaffolds a test case with shorthand `a` for (a)uthService', () => {
+    it('scaffolds a test case with shorthand `a` for (a)uthService', async  () => {
         tree.create(source, 'export class AuthService { login(){} }');
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        const result = runner.runSchematic('spec', { name: source }, tree);
+        const result = await runner.runSchematicAsync('spec', { name: source }, tree).toPromise();
         // assert
         const contents = result.readContent(spec);
 
@@ -47,12 +47,12 @@ describe('spec', () => {
         expect(contents).toMatch('a.login();');
     });
 
-    it('scaffolds a test case with shorthand `a` for empty (a)uthService', () => {
+    it('scaffolds a test case with shorthand `a` for empty (a)uthService', async  () => {
         tree.create(source, 'export class AuthService { }');
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        const result = runner.runSchematic('spec', { name: source }, tree);
+        const result = await runner.runSchematicAsync('spec', { name: source }, tree).toPromise();
         // assert
         const contents = result.readContent(spec);
 

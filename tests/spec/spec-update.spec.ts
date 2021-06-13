@@ -5,7 +5,7 @@ import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import { collectionPath } from './common';
 
 describe('Update a spec', () => {
-    it('should return a remove list', () => {
+    it('should return a remove list', async () => {
         const result = update(
             './test',
             `import { autoSpy } from 'autoSpy';
@@ -37,7 +37,7 @@ function setup() {
             'a'
         );
 
-        const removes = result.filter(r => r instanceof RemoveChange);
+        const removes = result.filter((r) => r instanceof RemoveChange);
         // expecting 6 removes
         expect(removes.length).toBe(6);
         // order is the position of the remove
@@ -86,33 +86,29 @@ function setup() {
             );
         });
 
-        it('removes the removed dependencies', () => {
+        it('removes the removed dependencies', async () => {
             // arrange
             const runner = new SchematicTestRunner('schematics', collectionPath);
 
             // act
             // ToUpdate class has new deps - so we need to update the existing spec file
-            const result = runner.runSchematic(
-                'spec',
-                { name: 'to-update.ts', update: true },
-                treeWithASpec
-            );
+            const result = await runner
+                .runSchematicAsync('spec', { name: 'to-update.ts', update: true }, treeWithASpec)
+                .toPromise();
             // assert
             const contents = result.readContent('to-update.spec.ts');
             expect(contents.includes('ToUpdate(stringDependency, service)')).toBe(false);
         });
 
-        it('adds the added dependencies', () => {
+        it('adds the added dependencies', async () => {
             // arrange
             const runner = new SchematicTestRunner('schematics', collectionPath);
 
             // act
             // ToUpdate class has new deps - so we need to update the existing spec file
-            const result = runner.runSchematic(
-                'spec',
-                { name: 'to-update.ts', update: true },
-                treeWithASpec
-            );
+            const result = await runner
+                .runSchematicAsync('spec', { name: 'to-update.ts', update: true }, treeWithASpec)
+                .toPromise();
             // assert
             const contents = result.readContent('to-update.spec.ts');
 
@@ -120,49 +116,47 @@ function setup() {
             expect(contents.includes('const anotherService = autoSpy(Service);')).toBe(true);
         });
 
-        it('adds the added dependencies to builder `exports`', () => {
+        it('adds the added dependencies to builder `exports`', async () => {
             // arrange
             const runner = new SchematicTestRunner('schematics', collectionPath);
 
             // act
             // ToUpdate class has new deps - so we need to update the existing spec file
-            const result = runner.runSchematic(
-                'spec',
-                { name: 'to-update.ts', update: true },
-                treeWithASpec
-            );
+            const result = await runner
+                .runSchematicAsync('spec', { name: 'to-update.ts', update: true }, treeWithASpec)
+                .toPromise();
             // assert
             const contents = result.readContent('to-update.spec.ts');
             expect(contents.includes(' anotherStr,')).toBe(true);
             expect(contents.includes(' anotherService,')).toBe(true);
         });
 
-        it('adds the added dependencies to the class-under-test construction', () => {
+        it('adds the added dependencies to the class-under-test construction', async () => {
             // arrange
             const runner = new SchematicTestRunner('schematics', collectionPath);
 
             // act
             // ToUpdate class has new deps - so we need to update the existing spec file
-            const result = runner.runSchematic(
-                'spec',
-                { name: 'to-update.ts', update: true },
-                treeWithASpec
-            );
+            const result = await runner
+                .runSchematicAsync('spec', { name: 'to-update.ts', update: true }, treeWithASpec)
+                .toPromise();
             // assert
             const contents = result.readContent('to-update.spec.ts');
             expect(contents).toMatch(/return new ToUpdate\(anotherStr,\s*anotherService\)/);
         });
 
-        it('Errors if the update flag is not passed in', () => {
+        it('Errors if the update flag is not passed in', async () => {
             // arrange
             const runner = new SchematicTestRunner('schematics', collectionPath);
             treeWithASpec.overwrite('to-update.spec.ts', `Some other content`);
 
             // act
             // assert
-            expect(() => {
-                runner.runSchematic('spec', { name: 'to-update.ts' }, treeWithASpec);
-            }).toThrow();
+            return runner
+                .runSchematicAsync('spec', { name: 'to-update.ts' }, treeWithASpec)
+                .toPromise()
+                .then(() => fail('should throw'))
+                .catch((e) => expect(e).toBeDefined());
         });
     });
 
@@ -185,54 +179,50 @@ function setup() {
                 'to-update.spec.ts',
                 `import { ToUpdate } from "./to-update";
 
-                describe('ToUpdate', () => {
-                    it('when oldMethod is called it should', () => {
-                        c.oldMethod();
-                    });
-                });
+describe('ToUpdate', () => {
+    it('when oldMethod is called it should', () => {
+        c.oldMethod();
+    });
+});
 
-                function setup() {
-                    const builder = {
-                        default() {
-                            return builder;
-                        },
-                        build() {
-                            return new ToUpdate(stringDependency, service);
-                        }
-                    };
+function setup() {
+    const builder = {
+        default() {
+            return builder;
+        },
+        build() {
+            return new ToUpdate(stringDependency, service);
+        }
+    };
 
-                    return builder;
-                }`
+    return builder;
+}`
             );
         });
 
-        it('adds the missing public method tests', () => {
+        it('adds the missing public method tests', async () => {
             // arrange
             const runner = new SchematicTestRunner('schematics', collectionPath);
 
             // act
             // ToUpdate class has new deps - so we need to update the existing spec file
-            const result = runner.runSchematic(
-                'spec',
-                { name: 'to-update.ts', update: true },
-                treeWithASpec
-            );
+            const result = await runner
+                .runSchematicAsync('spec', { name: 'to-update.ts', update: true }, treeWithASpec)
+                .toPromise();
             // assert
             const contents = result.readContent('to-update.spec.ts');
             expect(contents.includes('when newMethod is called it should')).toBe(true);
         });
 
-        it('does not add (would duplicate) the existing public method tests', () => {
+        it('does not add (would duplicate) the existing public method tests', async () => {
             // arrange
             const runner = new SchematicTestRunner('schematics', collectionPath);
 
             // act
             // ToUpdate class has new deps - so we need to update the existing spec file
-            const result = runner.runSchematic(
-                'spec',
-                { name: 'to-update.ts', update: true },
-                treeWithASpec
-            );
+            const result = await runner
+                .runSchematicAsync('spec', { name: 'to-update.ts', update: true }, treeWithASpec)
+                .toPromise();
             // assert
             const contents = result.readContent('to-update.spec.ts');
             // splitting by the expected it description  - if there is one such it -
@@ -243,17 +233,15 @@ function setup() {
             );
         });
 
-        it('adds the it at the correct location after the last it', () => {
+        it('adds the it at the correct location after the last it', async () => {
             // arrange
             const runner = new SchematicTestRunner('schematics', collectionPath);
 
             // act
             // ToUpdate class has new deps - so we need to update the existing spec file
-            const result = runner.runSchematic(
-                'spec',
-                { name: 'to-update.ts', update: true },
-                treeWithASpec
-            );
+            const result = await runner
+                .runSchematicAsync('spec', { name: 'to-update.ts', update: true }, treeWithASpec)
+                .toPromise();
             // assert
             const contents = result.readContent('to-update.spec.ts');
             expect(contents).toMatch(
@@ -296,17 +284,19 @@ function setup() {
 }`
                 );
             });
-            it('adds the it at the correct location after the last describe', () => {
+            it('adds the it at the correct location after the last describe', async () => {
                 // arrange
                 const runner = new SchematicTestRunner('schematics', collectionPath);
 
                 // act
                 // ToUpdate class has new deps - so we need to update the existing spec file
-                const result = runner.runSchematic(
-                    'spec',
-                    { name: 'to-update.ts', update: true },
-                    treeWithASpecAndOnlyDescribe
-                );
+                const result = await runner
+                    .runSchematicAsync(
+                        'spec',
+                        { name: 'to-update.ts', update: true },
+                        treeWithASpecAndOnlyDescribe
+                    )
+                    .toPromise();
                 // assert
                 const contents = result.readContent('to-update.spec.ts');
                 // splitting by the expected it description  - if there is one such it -
@@ -316,16 +306,18 @@ function setup() {
                 );
             });
 
-            it('uses the correct shorthand (ToUpdate shorthand t)', () => {
+            it('uses the correct shorthand (ToUpdate shorthand t)', async () => {
                 // arrange
                 const runner = new SchematicTestRunner('schematics', collectionPath);
                 // act
                 // ToUpdate class has new deps - so we need to update the existing spec file
-                const result = runner.runSchematic(
-                    'spec',
-                    { name: 'to-update.ts', update: true },
-                    treeWithASpecAndOnlyDescribe
-                );
+                const result = await runner
+                    .runSchematicAsync(
+                        'spec',
+                        { name: 'to-update.ts', update: true },
+                        treeWithASpecAndOnlyDescribe
+                    )
+                    .toPromise();
                 // assert
                 const contents = result.readContent('to-update.spec.ts');
                 // splitting by the expected it description  - if there is one such it -
@@ -364,15 +356,13 @@ describe('existing spec', () => {
                 );
             });
 
-            it('should add a comma at the start of the deps list', () => {
+            it('should add a comma at the start of the deps list', async () => {
                 // arrange
                 let runner = new SchematicTestRunner('schematics', collectionPath);
                 // act
-                const result = runner.runSchematic(
-                    'spec',
-                    { name: 't.ts', update: true },
-                    treeForComma
-                );
+                const result = await runner
+                    .runSchematicAsync('spec', { name: 't.ts', update: true }, treeForComma)
+                    .toPromise();
                 // assert
                 const content = result.readContent('t.spec.ts');
                 expect(content).toMatch(/return new T\(a, b\);/);

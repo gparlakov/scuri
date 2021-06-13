@@ -48,31 +48,31 @@ function setup() {
 }`
     );
 
-    it('update should import all required', () => {
+    it('update should import all required', async () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        const result = runner.runSchematic(
+        const result = await runner.runSchematicAsync(
             'spec',
             { name: 'with-imports.component.ts', update: true },
             treeWithMultipleImports
-        );
+        ).toPromise();
         // assert
         const contents = result.readContent('with-imports.component.spec.ts');
         expect(contents).toMatch(`import { ADep, BDep } from '../my/relative/path';`);
         expect(contents).toContain(`import { DDep, Router } from '@angular/router';`);
     });
 
-    it('create should import all required', () => {
+    it('create should import all required', async () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         treeWithMultipleImports.delete('with-imports.component.spec.ts');
         // act
-        const result = runner.runSchematic(
+        const result = await runner.runSchematicAsync(
             'spec',
             { name: 'with-imports.component.ts', update: false },
             treeWithMultipleImports
-        );
+        ).toPromise();
         // assert
         const contents = result.readContent('with-imports.component.spec.ts');
         expect(contents).toMatch(`import { ADep } from '../my/relative/path';`);

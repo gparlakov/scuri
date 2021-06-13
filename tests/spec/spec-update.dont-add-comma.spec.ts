@@ -46,12 +46,12 @@ function setup() {
         );
     });
 
-    it('should not add a comma in constructor params of builder build method', () => {
+    it('should not add a comma in constructor params of builder build method', async  () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
 
-        const result = runner.runSchematic('spec', { name: './c.ts', update: true }, tree);
+        const result = await runner.runSchematicAsync('spec', { name: './c.ts', update: true }, tree).toPromise();
         const contents = result.readContent('c.spec.ts');
         // assert
         expect(contents).toContain('C(bDep, logger)'); // used to add a comma like so -> C(bDep, logger, )

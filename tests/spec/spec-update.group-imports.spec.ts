@@ -39,22 +39,22 @@ describe('C', () => {
         );
     });
 
-    it('should pass successfully', () => {
+    it('should pass successfully', async  () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
         const errors = [];
         runner.logger.pipe(filter(v => v.level === 'error')).subscribe(v => errors.push(v));
-        runner.runSchematic('spec', { name: './c.ts', update: true }, tree);
+        await runner.runSchematicAsync('spec', { name: './c.ts', update: true }, tree).toPromise();
         // assert
         expect(errors.length).toBe(0);
     });
 
-    it('should import only missing deps and not duplicate deps (BDep is used multiple times), ', () => {
+    it('should import only missing deps and not duplicate deps (BDep is used multiple times), ', async  () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        const result = runner.runSchematic('spec', { name: './c.ts', update: true }, tree);
+        const result = await runner.runSchematicAsync('spec', { name: './c.ts', update: true }, tree).toPromise();
         // assert
         // @ts-ignore
         const contents = result.readContent('./c.spec.ts');
@@ -98,7 +98,7 @@ describe('C', () => {
         `);
     });
 
-    it('should not import deps with no path i.e. from dom or other tslibs, Object, Event', () => {
+    it('should not import deps with no path i.e. from dom or other tslibs, Object, Event', async  () => {
         // arrange
         const t = Tree.empty();
         t.create(
@@ -119,7 +119,7 @@ describe('C', () => {
         );
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        const result = runner.runSchematic('spec', { name: './c.ts', update: true }, t);
+        const result = await runner.runSchematicAsync('spec', { name: './c.ts', update: true }, t).toPromise();
         // assert
         // @ts-ignore
         const contents = result.readContent('./c.spec.ts');
