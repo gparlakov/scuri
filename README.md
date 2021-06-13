@@ -2,7 +2,7 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
+[![Build Status](https://dev.azure.com/gparlakov/Scuri/_apis/build/status/Scuri%20release?branchName=master)](https://dev.azure.com/gparlakov/Scuri/_build/latest?definitionId=6&branchName=master) [![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
