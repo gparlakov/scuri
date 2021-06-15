@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 -   Add option for user to specify their own template(1.0.8-rc.1)
+-   Add configuration by file(1.0.8-rc.2)
 
 ### Changed
 
 -   Updated npm package versions(1.0.8-rc.2)
+-   Allow `--name` to be skipped - infers first arg as file name
 
 ## [1.0.7] - 2021-02-24
 

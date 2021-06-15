@@ -21,17 +21,36 @@ import {
     FunctionDescription,
 } from './read/read';
 import { addMissing, update as doUpdate } from './update/update';
-
+import { cosmiconfigSync } from 'cosmiconfig';
+import {resolve} from 'path';
 class SpecOptions {
     name: string;
     update?: boolean;
     classTemplate?: string;
+    config?: string;
 }
 
-export function spec({ name, update, classTemplate }: SpecOptions): Rule {
+type Config = Omit<SpecOptions, 'name' | 'update' | 'config'>;
+
+export  function spec({ name, update, classTemplate, config }: SpecOptions): Rule {
     return (tree: Tree, context: SchematicContext) => {
         const logger = context.logger.createChild('scuri.index');
-        logger.info(`Params: name: ${name} update: ${update}`);
+        logger.debug(`Params: name: ${name} update: ${update} classTemplate: ${classTemplate} config: ${config}`);
+        let c: Config = {};
+        try {
+            const res = config ? cosmiconfigSync('scuri').load(config) : cosmiconfigSync('scuri').search();
+            c = res?.config ?? {};
+        } catch(e) {
+            //  the config file is apparently missing/malformed (as per https://www.npmjs.com/package/cosmiconfig#explorersearch)
+            logger.debug(e?.stack)
+            throw new Error(`Looks like the configuration was missing/malformed. ${e?.message}`);
+        }
+
+        classTemplate = classTemplate ?? c.classTemplate;
+        if(typeof classTemplate === 'string' && !tree.exists(classTemplate)) {
+            throw new Error(`Class template configuration was [${resolve(classTemplate)}] but that file seems to be missing.`);
+        }
+
         try {
             if (update) {
                 return updateExistingSpec(name, tree, logger);

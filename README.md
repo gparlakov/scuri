@@ -36,6 +36,8 @@ The video shows how to use `schematics scuri:spec --name src\app\my-com\my-com.c
 
 > For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts` could be used instead.
 
+> **--name** is now optional `ng g scuri:spec my-com.component.ts` or `npx schematics scuri:spec my-com.component.ts`
+
 See details [down here](#create-spec-from-scratch).
 
 ### Update existing test
@@ -215,7 +217,7 @@ See [here](https://www.typescriptlang.org/docs/handbook/module-resolution.html#p
 -   [x] Support traditional Angular cli generated tests (with `--update`)
     -   [x] Add `setup` function when missing
     -   [x] Update dependencies
--   [ ] Allow configuration via file (.scuri.json)
+-   [x] Allow configuration via file (.scuri.json)
 -   [ ] ([workaround](#autospy-and-typescript)) Import `autoSpy` function automatically - now imported as `import { autoSpy } from 'autoSpy';`
 
 ## S.C.u.r.i. <a id="scuri-name" href="#scuri-name">\*</a>
@@ -223,6 +225,33 @@ See [here](https://www.typescriptlang.org/docs/handbook/module-resolution.html#p
 What's with the name?
 
 A spec generator schematic - **S**pec **C**reate **U**pdate **R**ead (class - component, service, directive and dependencies) **I**ncorporate (them in the spec generated/updated)
+
+## Configuring
+Scuri can use configuration from the following list by default (package.json .scurirc .scurirc.json .scurirc.yml .scurirc.yaml scurirc.js scurirc.config.js).
+
+### Example package.json
+
+```json
+{
+  "name": "my-app",
+  ...
+  "scuri": {
+      "classTemplate": "src/templates/__specFileName__.template"
+  }
+}
+```
+
+### Example .scurirc
+```json
+{
+  "classTemplate": "src/templates/__specFileName__.template"
+}
+```
+
+### Supported configuration
+
+- **classTemplate** - a location of a custom class template to be used. Here's a [gist](https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97) of starter template that explains what properties are available to the class template
+    - starter https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97
 
 ## 🐱‍💻 Troubleshooting
 

@@ -21,7 +21,12 @@
     "classTemplate": {
       "type": "string",
       "description": "the path to a file to be used when creating a spec file for a class"
+    },
+    "config": {
+      "type": "string",
+      "alias": "c",
+      "description": "config file path. If the default locations (package.json .scurirc .scurirc.json .scurirc.yml .scurirc.yaml scurirc.js scurirc.config.js) are not enough"
     }
   },
-  "required": ["name"]
+  "required": []
 }
