@@ -31,22 +31,22 @@ describe('C', () => {
         );
     });
 
-    it('should pass successfully', () => {
+    it('should pass successfully', async  () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
         const errors = [];
         runner.logger.pipe(filter(v => v.level === 'error')).subscribe(v => errors.push(v));
-        runner.runSchematic('spec', { name: './c.ts', update: true }, tree);
+        await runner.runSchematicAsync('spec', { name: './c.ts', update: true }, tree).toPromise();
         // assert
         expect(errors.length).toBe(0);
     });
 
-    it('should indent setup function variable declarations', () => {
+    it('should indent setup function variable declarations', async  () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        const result = runner.runSchematic('spec', { name: './c.ts', update: true }, tree);
+        const result = await runner.runSchematicAsync('spec', { name: './c.ts', update: true }, tree).toPromise();
         // assert
         // @ts-ignore
         const contents = result.readContent('./c.spec.ts');

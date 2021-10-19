@@ -2,7 +2,7 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
+[![Build Status](https://dev.azure.com/gparlakov/Scuri/_apis/build/status/Scuri%20release?branchName=master)](https://dev.azure.com/gparlakov/Scuri/_build/latest?definitionId=6&branchName=master) [![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
@@ -35,6 +35,8 @@
 The video shows how to use `schematics scuri:spec --name src\app\my-com\my-com.component.ts` to create a spec from scratch (if already created see **update** or use **--force** to overwrite).
 
 > For Angular CLI >= 6 `ng g scuri:spec --name src\app\my-com\my-com.component.ts` could be used instead.
+
+> **--name** is now optional `ng g scuri:spec my-com.component.ts` or `npx schematics scuri:spec my-com.component.ts`
 
 See details [down here](#create-spec-from-scratch).
 
@@ -215,7 +217,7 @@ See [here](https://www.typescriptlang.org/docs/handbook/module-resolution.html#p
 -   [x] Support traditional Angular cli generated tests (with `--update`)
     -   [x] Add `setup` function when missing
     -   [x] Update dependencies
--   [ ] Allow configuration via file (.scuri.json)
+-   [x] Allow configuration via file (.scuri.json)
 -   [ ] ([workaround](#autospy-and-typescript)) Import `autoSpy` function automatically - now imported as `import { autoSpy } from 'autoSpy';`
 
 ## S.C.u.r.i. <a id="scuri-name" href="#scuri-name">\*</a>
@@ -223,6 +225,33 @@ See [here](https://www.typescriptlang.org/docs/handbook/module-resolution.html#p
 What's with the name?
 
 A spec generator schematic - **S**pec **C**reate **U**pdate **R**ead (class - component, service, directive and dependencies) **I**ncorporate (them in the spec generated/updated)
+
+## Configuring
+Scuri can use configuration from the following list by default (package.json .scurirc .scurirc.json .scurirc.yml .scurirc.yaml scurirc.js scurirc.config.js).
+
+### Example package.json
+
+```json
+{
+  "name": "my-app",
+  ...
+  "scuri": {
+      "classTemplate": "src/templates/__specFileName__.template"
+  }
+}
+```
+
+### Example .scurirc
+```json
+{
+  "classTemplate": "src/templates/__specFileName__.template"
+}
+```
+
+### Supported configuration
+
+- **classTemplate** - a location of a custom class template to be used. Here's a [gist](https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97) of starter template that explains what properties are available to the class template
+    - starter https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97
 
 ## 🐱‍💻 Troubleshooting
 

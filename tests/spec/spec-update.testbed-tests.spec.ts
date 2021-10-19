@@ -55,12 +55,12 @@ function setup() {
         );
     });
 
-    it('when setup function call missing should add a the setup function call with appropriate indendtation', () => {
+    it('when setup function call missing should add a the setup function call with appropriate indendtation', async  () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
 
-        const result = runner.runSchematic('spec', { name: './c.ts', update: true }, tree);
+        const result = await runner.runSchematicAsync('spec', { name: './c.ts', update: true }, tree).toPromise();
         const contents = result.readContent('c.spec.ts');
         // assert
         expect(contents).toContain('        const a = setup().default();\n        TestBed');
@@ -70,7 +70,7 @@ function setup() {
         expect(contents).toContain(`{ provide: LogService, useValue: a.logger }] })`);
     });
 
-    it('when setup function call existing should use that and add missing dependencies', () => {
+    it('when setup function call existing should use that and add missing dependencies', async  () => {
         // arrange
         tree.overwrite(
             'c.spec.ts',
@@ -112,7 +112,7 @@ function setup() {
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
 
-        const result = runner.runSchematic('spec', { name: './c.ts', update: true }, tree);
+        const result = await runner.runSchematicAsync('spec', { name: './c.ts', update: true }, tree).toPromise();
         const contents = result.readContent('c.spec.ts');
         // assert
         expect(contents).toContain(
@@ -121,7 +121,7 @@ function setup() {
         expect(contents).toContain(`{ provide: LogService, useValue: setupInstance.logger }] })`);
     });
 
-    it('when one of the providers is already provided and the other is not it should add the other provider to configureTestingModule providers', () => {
+    it('when one of the providers is already provided and the other is not it should add the other provider to configureTestingModule providers', async  () => {
         // arrange
         tree.overwrite(
             'c.spec.ts',
@@ -163,7 +163,7 @@ function setup() {
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
 
-        const result = runner.runSchematic('spec', { name: './c.ts', update: true }, tree);
+        const result = await runner.runSchematicAsync('spec', { name: './c.ts', update: true }, tree).toPromise();
         const contents = result.readContent('c.spec.ts');
         // assert
         expect(contents).toContain(
@@ -171,7 +171,7 @@ function setup() {
         );
     });
 
-    it('when setup function call existing is destructured it should add a new call to setup and use that for the providers', () => {
+    it('when setup function call existing is destructured it should add a new call to setup and use that for the providers', async  () => {
         // arrange
         tree.overwrite(
             'c.spec.ts',
@@ -213,7 +213,7 @@ function setup() {
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
 
-        const result = runner.runSchematic('spec', { name: './c.ts', update: true }, tree);
+        const result = await runner.runSchematicAsync('spec', { name: './c.ts', update: true }, tree).toPromise();
         const contents = result.readContent('c.spec.ts');
         // assert
         expect(contents).toContain('const a = setup().default();');

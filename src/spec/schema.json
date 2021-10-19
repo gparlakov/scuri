@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "id": "SpecSchema",
+  "$id": "SpecSchema",
   "title": "Spec options Schema",
   "type": "object",
   "properties": {
@@ -17,7 +17,16 @@
       "default": false,
       "alias": "u",
       "description": "Whether or not to update a pre-existing spec file."
+    },
+    "classTemplate": {
+      "type": "string",
+      "description": "the path to a file to be used when creating a spec file for a class"
+    },
+    "config": {
+      "type": "string",
+      "alias": "c",
+      "description": "config file path. If the default locations (package.json .scurirc .scurirc.json .scurirc.yml .scurirc.yaml scurirc.js scurirc.config.js) are not enough"
     }
   },
-  "required": ["name"]
+  "required": []
 }
