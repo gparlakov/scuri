@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["*.ts", "**/*.ts"],
+  "compilerOptions": {
+    "rootDir": "../../",
+    "outDir": "../../dist",
+    "outFile": "../../dist/spec/spec.js",
+    "module": "amd"
+  },
+  "exclude": [
+    "./files/"
+  ]
+}
