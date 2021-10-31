@@ -46,8 +46,8 @@ See details [down here](#create-spec-from-scratch).
 
 Shows how we begin with an outdated test:
 
--   missing `it` test case for one of the public methods (`getData`)
--   missing dependency `HttpClient` to instantiate the component
+- missing `it` test case for one of the public methods (`getData`)
+- missing dependency `HttpClient` to instantiate the component
 
 And after `schematics scuri:spec --name src\app\my-com\my-com.component.ts --update` command we get the updated test - dependency and a scaffold test case added.
 
@@ -70,16 +70,21 @@ Using VS Code? Just install the [**SCuri** VS Code extension](https://marketplac
 ### Command line setup
 
 1. Install deps
+
     ```bash
     npm install -D scuri
     ng g scuri:spec --name src/app/app.component.ts
     ```
+
 2. Generate autospy
+
     ```bash
     ng g scuri:autospy
     ```
+
     [Details and older Angular versions](#autospy-1)
 3. Tell **Typescript** where to find `autospy` by adding `autospy` to `paths`:
+
     ```json
     {
         ...
@@ -92,8 +97,11 @@ Using VS Code? Just install the [**SCuri** VS Code extension](https://marketplac
         }
     }
     ```
+
     Details [here](#Autospy-and-Typescript)
+
 4. Start using scuri:
+
     ```sh
     ng g scuri:spec --name src/app/app.component.ts
     ```
@@ -104,13 +112,13 @@ If you get `Error: Invalid rule result: Function().` see the [troubleshooting se
 
 ### Create spec from scratch
 
-```
+```sh
 ng g scuri:spec --name src/app/app.component.ts
 ```
 
 or
 
-```
+```sh
 npx schematics scuri:spec --name src/app/app.component.ts
 ```
 
@@ -118,13 +126,13 @@ Requires `--name` - an existing `.ts` file with one `class` (Component/Service/D
 
 ### Overwrite existing spec
 
-```
+```sh
 ng g scuri:spec --name src/app/app.component.ts --force
 ```
 
 or
 
-```
+```sh
 npx schematics scuri:spec --name src/app/app.component.ts --force
 ```
 
@@ -134,13 +142,13 @@ Requires `--name` - an existing `.ts` file with one `class` (Component/Service/D
 
 ### Update existing spec
 
-```
+```sh
 ng g scuri:spec --name src/app/app.component.ts --update
 ```
 
 or
 
-```
+```sh
 npx schematics scuri:spec --name src/app/app.component.ts --update
 ```
 
@@ -227,6 +235,7 @@ What's with the name?
 A spec generator schematic - **S**pec **C**reate **U**pdate **R**ead (class - component, service, directive and dependencies) **I**ncorporate (them in the spec generated/updated)
 
 ## Configuring
+
 Scuri can use configuration from the following list by default (package.json .scurirc .scurirc.json .scurirc.yml .scurirc.yaml scurirc.js scurirc.config.js).
 
 ### Example package.json
@@ -242,16 +251,18 @@ Scuri can use configuration from the following list by default (package.json .sc
 ```
 
 ### Example .scurirc
+
 ```json
 {
-  "classTemplate": "src/templates/__specFileName__.template"
+    "classTemplate": "src/templates/__specFileName__.template"
 }
 ```
 
 ### Supported configuration
 
-- **classTemplate** - a location of a custom class template to be used. Here's a [gist](https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97) of starter template that explains what properties are available to the class template
-    - starter https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97
+-   **classTemplate** - a location of a custom class template to be used. Here's a [gist](https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97) of starter template that explains what properties are available to the class template
+    -   starter [https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97](https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97)
+    -   issue with a specific example [link](https://github.com/gparlakov/scuri/issues/32#issuecomment-946332209)
 
 ## 🐱‍💻 Troubleshooting
 
@@ -259,7 +270,7 @@ Scuri can use configuration from the following list by default (package.json .sc
 
 To workaround the `Error: Invalid rule result: Function().` install schematics separately and call `scuri` with that.
 
-```
+```sh
 npm install -D scuri
 npm i -g @angular-devkit/schematics-cli
 schematics scuri:spec --name src/app/app.component.ts
@@ -267,7 +278,7 @@ schematics scuri:spec --name src/app/app.component.ts
 
 or if you don't want to install the `schematics` cli globally and have `npm version 6 and above` you can
 
-```
+```sh
 npm install -D scuri @angular-devkit/schematics-cli
 npx schematics scuri:spec --name src/app/app.component.ts
 ```
