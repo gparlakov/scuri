@@ -46,8 +46,8 @@ See details [down here](#create-spec-from-scratch).
 
 Shows how we begin with an outdated test:
 
-- missing `it` test case for one of the public methods (`getData`)
-- missing dependency `HttpClient` to instantiate the component
+-   missing `it` test case for one of the public methods (`getData`)
+-   missing dependency `HttpClient` to instantiate the component
 
 And after `schematics scuri:spec --name src\app\my-com\my-com.component.ts --update` command we get the updated test - dependency and a scaffold test case added.
 
@@ -83,6 +83,7 @@ Using VS Code? Just install the [**SCuri** VS Code extension](https://marketplac
     ```
 
     [Details and older Angular versions](#autospy-1)
+
 3. Tell **Typescript** where to find `autospy` by adding `autospy` to `paths`:
 
     ```json
@@ -245,7 +246,8 @@ Scuri can use configuration from the following list by default (package.json .sc
   "name": "my-app",
   ...
   "scuri": {
-      "classTemplate": "src/templates/__specFileName__.template"
+      "classTemplate": "src/templates/__specFileName__.template",
+      "functionTemplate": "src/templates/__specFileName__.template"
   }
 }
 ```
@@ -254,7 +256,8 @@ Scuri can use configuration from the following list by default (package.json .sc
 
 ```json
 {
-    "classTemplate": "src/templates/__specFileName__.template"
+    "classTemplate": "src/templates/__specFileName__.template",
+    "functionTemplate": "src/templates/__specFileName__.template"
 }
 ```
 
@@ -263,6 +266,7 @@ Scuri can use configuration from the following list by default (package.json .sc
 -   **classTemplate** - a location of a custom class template to be used. Here's a [gist](https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97) of starter template that explains what properties are available to the class template
     -   starter [https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97](https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97)
     -   issue with a specific example [link](https://github.com/gparlakov/scuri/issues/32#issuecomment-946332209)
+-   **functionTemplate** - a location of a custom function template to be used. Here's a [gist](https://gist.github.com/gparlakov/0b9b94f8140687bb3b1db1772503bd0d) of a starter template that shows what properties are available to the function template
 
 ## 🐱‍💻 Troubleshooting
 

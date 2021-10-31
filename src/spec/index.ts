@@ -27,12 +27,13 @@ class SpecOptions {
     name: string;
     update?: boolean;
     classTemplate?: string;
+    functionTemplate?: string;
     config?: string;
 }
 
 type Config = Omit<SpecOptions, 'name' | 'update' | 'config'>;
 
-export  function spec({ name, update, classTemplate, config }: SpecOptions): Rule {
+export  function spec({ name, update, classTemplate, functionTemplate, config }: SpecOptions): Rule {
     return (tree: Tree, context: SchematicContext) => {
         const logger = context.logger.createChild('scuri.index');
         logger.debug(`Params: name: ${name} update: ${update} classTemplate: ${classTemplate} config: ${config}`);
@@ -51,11 +52,16 @@ export  function spec({ name, update, classTemplate, config }: SpecOptions): Rul
             throw new Error(`Class template configuration was [${resolve(classTemplate)}] but that file seems to be missing.`);
         }
 
+        functionTemplate = functionTemplate ?? c.functionTemplate;
+        if(typeof functionTemplate === 'string' && !tree.exists(functionTemplate)) {
+            throw new Error(`Function template configuration was [${resolve(functionTemplate)}] but that file seems to be missing.`);
+        }
+
         try {
             if (update) {
                 return updateExistingSpec(name, tree, logger);
             } else {
-                return createNewSpec(name, tree, logger, { classTemplate });
+                return createNewSpec(name, tree, logger, { classTemplate, functionTemplate });
             }
         } catch (e) {
             e = e || {};
@@ -164,13 +170,13 @@ function createNewSpec(
     fileNameRaw: string,
     tree: Tree,
     logger: Logger,
-    o?: { classTemplate?: string }
+    o?: { classTemplate?: string, functionTemplate?: string }
 ) {
     const content = tree.read(fileNameRaw);
     if (content == null) {
         logger.error(`The file ${fileNameRaw} is missing or empty.`);
     } else {
-        // we aim at creating or updating a spec from the class under test (name)
+        // we aim at creating a spec from the class/function under test (name)
         // for the spec name we'll need to parse the base file name and its extension and calculate the path
 
         // normalize the / and \ according to local OS
@@ -195,7 +201,7 @@ function createNewSpec(
 
             const shorthand = typeShorthand(name);
 
-            const src = maybeUseCustomClassTemplate(o, tree, url('./files/class'));
+            const src = maybeUseCustomTemplate(tree, url('./files/class'), o?.classTemplate);
 
             const templateSource = apply(src, [
                 applyTemplates({
@@ -249,7 +255,10 @@ function createNewSpec(
                     throw new Error('No exported class or function to be spec-ed!');
                 }
 
-                const templateSource = apply(url('./files/function'), [
+
+                const src = maybeUseCustomTemplate(tree, url('./files/function'), o?.functionTemplate);
+
+                const templateSource = apply(src, [
                     applyTemplates({
                         // the name of the new spec file
                         specFileName,
@@ -267,14 +276,13 @@ function createNewSpec(
     }
 }
 
-function maybeUseCustomClassTemplate(
-    o: { classTemplate?: string | undefined } | undefined,
+function maybeUseCustomTemplate(
     tree: Tree,
-    src: Source
+    src: Source,
+    templateFile?: string | undefined,
 ): Source {
-    const c = o?.classTemplate;
-    if (typeof c === 'string' && tree.exists(c)) {
-        const template = tree.read(c);
+    if (typeof templateFile === 'string' && tree.exists(templateFile)) {
+        const template = tree.read(templateFile);
         if (template != null) {
             const t = Tree.empty();
             t.create('__specFileName__.template', template);
