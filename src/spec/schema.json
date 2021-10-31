@@ -22,6 +22,10 @@
       "type": "string",
       "description": "the path to a file to be used when creating a spec file for a class"
     },
+    "functionTemplate": {
+      "type": "string",
+      "description": "the path to a file to be used when creating a spec file for a function"
+    },
     "config": {
       "type": "string",
       "alias": "c",
