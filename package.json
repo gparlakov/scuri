@@ -23,7 +23,7 @@
   ],
   "author": "gparlakov@gmail.com",
   "license": "MIT",
-  "schematics": "./src/collection.json",
+  "schematics": "./dist/collection.json",
   "repository": "https://github.com/gparlakov/scuri",
   "dependencies": {
     "@angular-devkit/core": "^12.0.4",
