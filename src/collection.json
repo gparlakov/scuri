@@ -3,7 +3,7 @@
   "schematics": {
     "spec": {
       "description": "Create or update a spec for a .ts file with a class in it.",
-      "factory": "./spec/index#spec",
+      "factory": "./spec/index",
       "schema": "./spec/schema.json"
     },
     "autospy": {

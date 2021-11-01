@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "lib": ["es2018", "dom"],
     "declaration": true,
     "outDir": "./dist",
     "module": "esnext",
@@ -18,14 +17,18 @@
     "sourceMap": true,
     "strictNullChecks": true,
     "target": "es6",
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "allowJs": true,
+    "esModuleInterop": true,
+    "paths": {
+      "localTypescript": ["./lib/third_party/github.com/Microsoft/TypeScript/lib/typescript.js"]
+    }
   },
-  "include": ["src/**/*", "lib/utility/*.ts"],
+  "include": ["src/**/*.*"],
   "exclude": [
     "src/**/files/**/*",
     "src/**/*_spec.ts",
     "tests",
-    "lib/third_party",
     "lib/utility/*_spec.ts",
     "**/files/",
     "example"

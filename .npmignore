@@ -4,7 +4,7 @@ example
 *.ts
 !*.d.ts
 !./src/autospy/files/**/*.ts
-dist
+src
 *.tgz
 tsconfig.json
 tsconfig.test.json

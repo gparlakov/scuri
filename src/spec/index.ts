@@ -33,7 +33,7 @@ class SpecOptions {
 
 type Config = Omit<SpecOptions, 'name' | 'update' | 'config'>;
 
-export  function spec({ name, update, classTemplate, functionTemplate, config }: SpecOptions): Rule {
+export function spec ({ name, update, classTemplate, functionTemplate, config }: SpecOptions): Rule {
     return (tree: Tree, context: SchematicContext) => {
         const logger = context.logger.createChild('scuri.index');
         logger.debug(`Params: name: ${name} update: ${update} classTemplate: ${classTemplate} config: ${config}`);
@@ -321,3 +321,5 @@ function getFirstFunction(fileName: string, fileContents: Buffer) {
 function typeShorthand(name: string) {
     return typeof name === 'string' && name.length > 0 ? name.toLocaleLowerCase()[0] : 'x';
 }
+
+export default spec;
