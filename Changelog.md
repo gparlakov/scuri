@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added 
+
+-   use custom template when updating spec for a class. Use // scuri:mark and /**scuri:template:mark:<%my template%>/* to mark the location and the template for the update. Multiple marks and templates supported.
+
 ## [1.1.0]
 ### Added
 
