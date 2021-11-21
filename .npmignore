@@ -1,15 +1,23 @@
-# Ignores TypeScript files, but keeps definitions.
 node_modules
 example
+# Ignores TypeScript files, but keeps definitions.
 *.ts
 !*.d.ts
+
 !./src/autospy/files/**/*.ts
-dist
+# skip src
+src
+# lib
 *.tgz
 tsconfig.json
 tsconfig.test.json
 tslint.json
 tests
-scuri_angular_cli.code-workspace
+*.code-workspace
 docs
 .vscode
+rollup.config.js
+jest.config.js
+*.yml
+lib/third_party/
+*.map

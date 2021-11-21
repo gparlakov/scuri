@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": "tsconfig",
-    "lib": ["es2018", "dom"],
+    "lib": ["es2019", "dom"],
     "declaration": true,
     "module": "commonjs",
     "moduleResolution": "node",
@@ -17,14 +17,14 @@
     "sourceMap": true,
     "strictNullChecks": true,
     "target": "es6",
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "outDir": "./dist"
   },
   "include": ["src/**/*", "lib/utility/*.ts"],
   "exclude": [
     "src/**/files/**/*",
     "src/**/*_spec.ts",
     "tests",
-    "lib/third_party",
     "lib/utility/*_spec.ts",
     "**/files/",
     "example"
