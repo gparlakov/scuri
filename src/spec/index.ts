@@ -1,4 +1,4 @@
-import { basename, extname, normalize } from '@angular-devkit/core';
+import { basename, normalize, strings } from '@angular-devkit/core';
 import { Logger } from '@angular-devkit/core/src/logger';
 import {
     apply,
@@ -6,23 +6,26 @@ import {
     mergeWith,
     move,
     Rule,
+    schematic,
     SchematicContext,
     Source,
     source,
     Tree,
-    url,
+    url
 } from '@angular-devkit/schematics';
-import { EOL } from 'os';
-import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
-import {
-    describeSource,
-    isClassDescription,
-    ClassDescription,
-    FunctionDescription,
-} from './read/read';
-import { addMissing, update as doUpdate } from './update/update';
 import { cosmiconfigSync } from 'cosmiconfig';
-import {resolve} from 'path';
+import { EOL } from 'os';
+import { resolve } from 'path';
+import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
+import { getSpecFilePathName } from '../common/get-spec-file-name';
+import { paths } from '../common/paths';
+import { describeSource } from '../common/read/read';
+import { updateCustomTemplateCut } from '../common/scuri-custom-update-template';
+import {
+    ClassDescription,
+    FunctionDescription, isClassDescription, ClassTemplateData
+} from '../types';
+import { addMissing, update as doUpdate } from './update/update';
 class SpecOptions {
     name: string;
     update?: boolean;
@@ -33,7 +36,7 @@ class SpecOptions {
 
 type Config = Omit<SpecOptions, 'name' | 'update' | 'config'>;
 
-export  function spec({ name, update, classTemplate, functionTemplate, config }: SpecOptions): Rule {
+export function spec({ name, update, classTemplate, functionTemplate, config }: SpecOptions): Rule {
     return (tree: Tree, context: SchematicContext) => {
         const logger = context.logger.createChild('scuri.index');
         logger.debug(`Params: name: ${name} update: ${update} classTemplate: ${classTemplate} config: ${config}`);
@@ -41,24 +44,27 @@ export  function spec({ name, update, classTemplate, functionTemplate, config }:
         try {
             const res = config ? cosmiconfigSync('scuri').load(config) : cosmiconfigSync('scuri').search();
             c = res?.config ?? {};
-        } catch(e) {
+        } catch (e) {
             //  the config file is apparently missing/malformed (as per https://www.npmjs.com/package/cosmiconfig#explorersearch)
             logger.debug(e?.stack)
             throw new Error(`Looks like the configuration was missing/malformed. ${e?.message}`);
         }
 
         classTemplate = classTemplate ?? c.classTemplate;
-        if(typeof classTemplate === 'string' && !tree.exists(classTemplate)) {
+        if (typeof classTemplate === 'string' && !tree.exists(classTemplate)) {
             throw new Error(`Class template configuration was [${resolve(classTemplate)}] but that file seems to be missing.`);
         }
 
         functionTemplate = functionTemplate ?? c.functionTemplate;
-        if(typeof functionTemplate === 'string' && !tree.exists(functionTemplate)) {
+        if (typeof functionTemplate === 'string' && !tree.exists(functionTemplate)) {
             throw new Error(`Function template configuration was [${resolve(functionTemplate)}] but that file seems to be missing.`);
         }
 
         try {
             if (update) {
+                if (classTemplate) {
+                    return schematic('update-custom', { name, classTemplate });
+                }
                 return updateExistingSpec(name, tree, logger);
             } else {
                 return createNewSpec(name, tree, logger, { classTemplate, functionTemplate });
@@ -67,20 +73,12 @@ export  function spec({ name, update, classTemplate, functionTemplate, config }:
             e = e || {};
             logger.error(e.message || 'An error occurred');
             logger.debug(
-                `---Error--- ${EOL}${e.message || 'Empty error message'} ${
-                    e.stack || 'Empty stack.'
+                `---Error--- ${EOL}${e.message || 'Empty error message'} ${e.stack || 'Empty stack.'
                 }`
             );
         }
     };
 }
-function getSpecFileName(name: string) {
-    const normalizedName = normalize(name);
-    const ext = extname(basename(normalizedName));
-
-    return name.split(ext)[0] + '.spec' + ext;
-}
-
 function sliceSpecFromFileName(path: string) {
     if (path.includes('.spec')) {
         return path.replace('.spec', '');
@@ -96,7 +94,7 @@ function updateExistingSpec(fullName: string, tree: Tree, logger: Logger) {
         logger.error(`The file ${specFileName} is missing or empty.`);
     } else {
         // the new spec full file name contents - null if file not exist
-        const existingSpecFile = tree.get(getSpecFileName(specFileName));
+        const existingSpecFile = tree.get(getSpecFilePathName(specFileName));
         if (existingSpecFile == null) {
             logger.error(
                 `Can not update spec (for ${specFileName}) since it does not exist. Try running without the --update flag.`
@@ -173,24 +171,15 @@ function createNewSpec(
     o?: { classTemplate?: string, functionTemplate?: string }
 ) {
     const content = tree.read(fileNameRaw);
+
     if (content == null) {
         logger.error(`The file ${fileNameRaw} is missing or empty.`);
     } else {
         // we aim at creating a spec from the class/function under test (name)
         // for the spec name we'll need to parse the base file name and its extension and calculate the path
 
-        // normalize the / and \ according to local OS
-        // --name = ./example/example.component.ts -> example.component.ts
-        const fileName = basename(normalize(fileNameRaw));
-        // --name = ./example/example.component.ts -> ./example/example.component and the ext name -> .ts
-        // for import { ExampleComponent } from "./example/example.component"
-        const normalizedName = fileName.slice(0, fileName.length - extname(fileName).length);
-
-        // the new spec file name
-        const specFileName = `${normalizedName}.spec.ts`;
-
-        const path = fileNameRaw.split(fileName)[0]; // split on the filename - so we get only an array of one item
-
+        const { specFileName, fileName, folderPathRaw: path, folderPathNormal: folder } = paths(fileNameRaw);
+        let templateVariables: ClassTemplateData;
         try {
             const { params, name, publicMethods } = getFirstClass(fileNameRaw, content);
 
@@ -200,22 +189,25 @@ function createNewSpec(
             }
 
             const shorthand = typeShorthand(name);
-
+            templateVariables = {
+                ...strings,
+                // the name of the new spec file
+                specFileName,
+                normalizedName: fileName,
+                name,
+                className: name,
+                folder,
+                publicMethods,
+                params,
+                declaration: toDeclaration(),
+                builderExports: toBuilderExports(),
+                constructorParams: toConstructorParams(),
+                shorthand,
+            }
             const src = maybeUseCustomTemplate(tree, url('./files/class'), o?.classTemplate);
 
             const templateSource = apply(src, [
-                applyTemplates({
-                    // the name of the new spec file
-                    specFileName,
-                    normalizedName: normalizedName,
-                    className: name,
-                    publicMethods,
-                    declaration: toDeclaration(),
-                    builderExports: toBuilderExports(),
-                    constructorParams: toConstructorParams(),
-                    params,
-                    shorthand,
-                }),
+                applyTemplates(templateVariables),
                 move(path),
             ]);
 
@@ -243,15 +235,15 @@ function createNewSpec(
             function toBuilderExports() {
                 return params.length > 0
                     ? params
-                          .map((p) => p.name)
-                          .join(',' + EOL)
-                          .concat(',')
+                        .map((p) => p.name)
+                        .join(',' + EOL)
+                        .concat(',')
                     : '';
             }
         } catch (e) {
             if (e != null && e.message === 'No classes found to be spec-ed!') {
-                const f = getFirstFunction(fileNameRaw, content);
-                if (f == null) {
+                const funktion = getFirstFunction(fileNameRaw, content);
+                if (funktion == null) {
                     throw new Error('No exported class or function to be spec-ed!');
                 }
 
@@ -260,10 +252,12 @@ function createNewSpec(
 
                 const templateSource = apply(src, [
                     applyTemplates({
+                        ...strings,
                         // the name of the new spec file
                         specFileName,
-                        normalizedName,
-                        name: f.name,
+                        fileName,
+                        normalizedName: fileName,
+                        name: funktion.name,
                     }),
                     move(path),
                 ]);
@@ -279,13 +273,15 @@ function createNewSpec(
 function maybeUseCustomTemplate(
     tree: Tree,
     src: Source,
-    templateFile?: string | undefined,
+    templateFileName?: string
 ): Source {
-    if (typeof templateFile === 'string' && tree.exists(templateFile)) {
-        const template = tree.read(templateFile);
+    if (typeof templateFileName === 'string' && tree.exists(templateFileName)) {
+        const template = tree.read(templateFileName);
         if (template != null) {
+            const [rest] = updateCustomTemplateCut(template.toString('utf8'));
+
             const t = Tree.empty();
-            t.create('__specFileName__.template', template);
+            t.create(basename(normalize(templateFileName)), rest);
             src = source(t);
         }
     }

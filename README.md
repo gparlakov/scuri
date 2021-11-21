@@ -16,7 +16,9 @@
 
 [![](./docs/VSCode_20px.png)](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code) [VS Code extension](https://marketplace.visualstudio.com/items?itemName=gparlakov.scuri-code) available!
 
-🤙 Have some feedback or need a feature? [SCuri discussion on github](https://github.com/gparlakov/scuri/discussions/110)
+🐱‍👤[Need a custom template?](./docs/custom-template-guide.md)
+
+🤙Have some feedback or need a feature? [SCuri discussion on github](https://github.com/gparlakov/scuri/discussions/110)
 
 🤵[Need commercial-quality coverage for SCuri?](#scuri-for-enterprise)
 
@@ -261,12 +263,15 @@ Scuri can use configuration from the following list by default (package.json .sc
 }
 ```
 
-### Supported configuration
+## Custom templates
 
+Head over to the [custom template guide](./docs/custom-template-guide.md) or see the short explanation below:
 -   **classTemplate** - a location of a custom class template to be used. Here's a [gist](https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97) of starter template that explains what properties are available to the class template
     -   starter [https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97](https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97)
     -   issue with a specific example [link](https://github.com/gparlakov/scuri/issues/32#issuecomment-946332209)
 -   **functionTemplate** - a location of a custom function template to be used. Here's a [gist](https://gist.github.com/gparlakov/0b9b94f8140687bb3b1db1772503bd0d) of a starter template that shows what properties are available to the function template
+
+
 
 ## 🐱‍💻 Troubleshooting
 
