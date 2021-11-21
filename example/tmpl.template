@@ -1,0 +1,52 @@
+<% params.forEach(p => { if(p.importPath) {%>import { <%= p.type %> } from '<%= p.importPath %>';
+<% }}) %>import { <%= className %> } from './<%= normalizedName %>';
+import { autoSpy, spyInject } from 'jasmine-auto-spies';
+
+describe('<%= className %>', () => {
+  <%params.forEach(p => {%> let <%= p.type %>Spy: <%= p.type %>;
+      <% }) %>
+    // scuri:lets
+
+  beforeEach(
+  waitForAsync(() => {
+      TestBed.configureTestingModule({
+      providers: [
+              MyDirective,
+          <%params.forEach(p => {%> { provide: <%= p.type %>, useClass: autoSpy(<%= p.type %>, '<%= p.type %>') },
+          <% }) %>
+          // scuri:injectables
+      ]
+      });
+
+      directive = TestBed.inject(MyDirective);
+      <%params.forEach(p => {%> <%= p.type %>Spy = spyInject<<%= p.type %>>(TestBed.inject(<%= p.type %>));
+      <% }) %>
+      // scuri:get-instances
+
+  })
+  );
+
+  <% publicMethods.forEach(meth=> {if(meth != '') { %>it('when <%= meth %> is called it should', () => {
+  // arrange
+  // act
+  <%= shorthand %>.<%= meth %>();
+  // assert
+  // expect(<%= shorthand %>).toEqual
+  });
+  <% }}) %>
+});
+
+/** scuri:template:lets:<%params.forEach(p => {%>let <%= camelize(p.type) %>Spy: <%= p.type %>;
+ <% }) %>*/
+    /** scuri:template:injectables:<%params.forEach(p => {%>{ provide: <%= p.type %>, useClass: autoSpy(<%= p.type %>, '<%= p.type %>') },
+ <% }) %>*/
+    /** scuri:template:get-instances:<%params.forEach(p => {%><%= camelize(p.type) %>Spy = spyInject<<%= p.type %>>(TestBed.inject(<%= p.type %>));
+ <% }) %>*/
+    /** scuri:template:methods-skipDeDupe:<% publicMethods.forEach(meth=> {if(meth != '') { %>it('when <%= meth %> is called it should', () => {
+     // arrange
+        // act
+        <%= shorthand %>.<%= meth %>();
+        // assert
+        // expect(<%= shorthand %>).toEqual
+    });
+    <% }}) %>*/

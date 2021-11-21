@@ -10,6 +10,11 @@
       "description": "Create an autoSpy function. Supports jest and jasmine types",
       "factory": "./autospy/index",
       "schema": "./autospy/schema.json"
+    },
+    "update-custom": {
+      "description": "A blank schematic.",
+      "factory": "./update-custom/index#updateCustom",
+      "schema": "./update-custom/schema.json"
     }
   }
 }

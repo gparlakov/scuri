@@ -18,7 +18,14 @@
     "deprecated_prepublish": "npm run build"
   },
   "keywords": [
-    "test", "schematics",  "spec", "testing", "generate", "specs", "angular", "custom template spec"
+    "test",
+    "schematics",
+    "spec",
+    "testing",
+    "generate",
+    "specs",
+    "angular",
+    "custom template spec"
   ],
   "author": "gparlakov@gmail.com",
   "license": "MIT",
