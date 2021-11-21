@@ -20,7 +20,7 @@
     "types": ["node", "jest"],
     "outDir": "./dist"
   },
-  "include": ["src/**/*", "lib/utility/*.ts", "tests/update-custom/index_spec.ts"],
+  "include": ["src/**/*", "lib/utility/*.ts"],
   "exclude": [
     "src/**/files/**/*",
     "src/**/*_spec.ts",
