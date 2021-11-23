@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2021-11-23
+
 ### Added 
 
--   use custom template when updating spec for a class. Use // scuri:mark and /**scuri:template:mark:<%my template%>/* to mark the location and the template for the update. Multiple marks and templates supported.
+-   use custom template when updating spec for a class. Use // scuri:mark and /**scuri:template:mark:<%my template%>/* to mark the location and the template for the update. Multiple marks and templates supported. See [custom template guide](https://github.com/gparlakov/scuri/blob/master/docs/custom-template-guide.md)
 
-## [1.1.0]
+## [1.1.0] - 2021-10-19 
 ### Added
 
 -   Add option for user to specify their own template for a file with function (1.1.1-rc.1) (--functionTemplate)
