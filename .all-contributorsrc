@@ -1,6 +1,6 @@
 {
   "projectName": "scuri",
-  "projectOwner": "Georgi Parlakov",
+  "projectOwner": "gparlakov",
   "repoType": "github",
   "repoHost": "https://github.com",
   "files": [
@@ -39,7 +39,17 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "danjor",
+      "name": "danjor",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3473673?v=4",
+      "profile": "https://github.com/danjor",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
-  "contributorsPerLine": 7
+  "contributorsPerLine": 7,
+  "skipCi": true
 }

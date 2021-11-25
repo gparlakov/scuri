@@ -1,9 +1,7 @@
 # SCuri[\*](#scuri-name)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-
-[![Build Status](https://dev.azure.com/gparlakov/Scuri/_apis/build/status/Scuri%20release?branchName=master)](https://dev.azure.com/gparlakov/Scuri/_build/latest?definitionId=6&branchName=master) [![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
-
+[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ### **Automates unit test boilerplate** for **Angular** components/services/directives/etc. It will **generate** spec for you and help you **update** it when dependencies are added or removed!
@@ -311,14 +309,14 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/gparlakov"><img src="https://avatars0.githubusercontent.com/u/3482199?v=4" width="80px;" alt=""/><br /><sub><b>Georgi Parlakov</b></sub></a><br /><a href="https://github.com/Georgi Parlakov/scuri/commits?author=gparlakov" title="Code">💻</a> <a href="#ideas-gparlakov" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/Georgi Parlakov/scuri/commits?author=gparlakov" title="Documentation">📖</a> <a href="https://github.com/Georgi Parlakov/scuri/commits?author=gparlakov" title="Tests">⚠️</a></td>
-    <td align="center"><a href="https://github.com/tziyang-lum"><img src="https://avatars3.githubusercontent.com/u/56020413?v=4" width="80px;" alt=""/><br /><sub><b>Tzi Yang</b></sub></a><br /><a href="https://github.com/Georgi Parlakov/scuri/issues?q=author%3Atziyang-lum" title="Bug reports">🐛</a></td>
-    <td align="center"><a href="https://github.com/fgisslen"><img src="https://avatars0.githubusercontent.com/u/35102084?v=4" width="80px;" alt=""/><br /><sub><b>fgisslen</b></sub></a><br /><a href="https://github.com/Georgi Parlakov/scuri/issues?q=author%3Afgisslen" title="Bug reports">🐛</a></td>
-     <td align="center"><a href="https://github.com/danielberebel"><img src="https://avatars3.githubusercontent.com/u/72146432?s=460&v=4" width="80px;" alt=""/><br /><sub><b>danielberebel</b></sub></a><br /><a href="https://github.com/Georgi Parlakov/scuri/issues?q=author%3Afgisslen" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/gparlakov"><img src="https://avatars0.githubusercontent.com/u/3482199?v=4?s=80" width="80px;" alt=""/><br /><sub><b>Georgi Parlakov</b></sub></a><br /><a href="https://github.com/gparlakov/scuri/commits?author=gparlakov" title="Code">💻</a> <a href="#ideas-gparlakov" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/gparlakov/scuri/commits?author=gparlakov" title="Documentation">📖</a> <a href="https://github.com/gparlakov/scuri/commits?author=gparlakov" title="Tests">⚠️</a></td>
+    <td align="center"><a href="https://github.com/tziyang-lum"><img src="https://avatars3.githubusercontent.com/u/56020413?v=4?s=80" width="80px;" alt=""/><br /><sub><b>Tzi Yang</b></sub></a><br /><a href="https://github.com/gparlakov/scuri/issues?q=author%3Atziyang-lum" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/fgisslen"><img src="https://avatars0.githubusercontent.com/u/35102084?v=4?s=80" width="80px;" alt=""/><br /><sub><b>fgisslen</b></sub></a><br /><a href="https://github.com/gparlakov/scuri/issues?q=author%3Afgisslen" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/danjor"><img src="https://avatars.githubusercontent.com/u/3473673?v=4?s=80" width="80px;" alt=""/><br /><sub><b>danjor</b></sub></a><br /><a href="https://github.com/gparlakov/scuri/issues?q=author%3Adanjor" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
-<!-- markdownlint-enable -->
+<!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
