@@ -1,7 +1,9 @@
 # SCuri[\*](#scuri-name)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ### **Automates unit test boilerplate** for **Angular** components/services/directives/etc. It will **generate** spec for you and help you **update** it when dependencies are added or removed!
@@ -264,14 +266,17 @@ Scuri can use configuration from the following list by default (package.json .sc
 ## Custom templates
 
 Head over to the [custom template guide](./docs/custom-template-guide.md) or see the short explanation below:
+
 -   **classTemplate** - a location of a custom class template to be used. Here's a [gist](https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97) of starter template that explains what properties are available to the class template
     -   starter [https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97](https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97)
     -   issue with a specific example [link](https://github.com/gparlakov/scuri/issues/32#issuecomment-946332209)
 -   **functionTemplate** - a location of a custom function template to be used. Here's a [gist](https://gist.github.com/gparlakov/0b9b94f8140687bb3b1db1772503bd0d) of a starter template that shows what properties are available to the function template
 
+## Troubleshooting
 
+### Migrating from 1.1 to 1.2 broke the custom template!
 
-## 🐱‍💻 Troubleshooting
+Try using `__specFileName__.template` for your template name. The `__specFileName__` gets interpreted while creating the spec. There are other variables available too - see the [custom template guide](./docs/custom-template-guide.md)
 
 ### Rule result Function
 
