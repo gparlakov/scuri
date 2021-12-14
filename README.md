@@ -86,7 +86,7 @@ Using VS Code? Just install the [**SCuri** VS Code extension](https://marketplac
 
     [Details and older Angular versions](#autospy-1)
 
-3. Tell **Typescript** where to find `autospy` by adding `autospy` to `paths`:
+3. Tell **Typescript** where to find `autoSpy` by adding `autoSpy` to `paths`:
 
     ```json
     {
@@ -95,7 +95,7 @@ Using VS Code? Just install the [**SCuri** VS Code extension](https://marketplac
             ...
             "baseUrl": ".",
             "paths": {
-                "autospy": ["./src/auto-spy"]
+                "autoSpy": ["./src/auto-spy"]
             }
         }
     }
