@@ -11,7 +11,7 @@ import {
     Source,
     source,
     Tree,
-    url
+    url,
 } from '@angular-devkit/schematics';
 import { cosmiconfigSync } from 'cosmiconfig';
 import { EOL } from 'os';
@@ -23,7 +23,9 @@ import { describeSource } from '../common/read/read';
 import { updateCustomTemplateCut } from '../common/scuri-custom-update-template';
 import {
     ClassDescription,
-    FunctionDescription, isClassDescription, ClassTemplateData
+    FunctionDescription,
+    isClassDescription,
+    ClassTemplateData,
 } from '../types';
 import { addMissing, update as doUpdate } from './update/update';
 class SpecOptions {
@@ -39,25 +41,37 @@ type Config = Omit<SpecOptions, 'name' | 'update' | 'config'>;
 export function spec({ name, update, classTemplate, functionTemplate, config }: SpecOptions): Rule {
     return (tree: Tree, context: SchematicContext) => {
         const logger = context.logger.createChild('scuri.index');
-        logger.debug(`Params: name: ${name} update: ${update} classTemplate: ${classTemplate} config: ${config}`);
+        logger.debug(
+            `Params: name: ${name} update: ${update} classTemplate: ${classTemplate} config: ${config}`
+        );
         let c: Config = {};
         try {
-            const res = config ? cosmiconfigSync('scuri').load(config) : cosmiconfigSync('scuri').search();
+            const res = config
+                ? cosmiconfigSync('scuri').load(config)
+                : cosmiconfigSync('scuri').search();
             c = res?.config ?? {};
         } catch (e) {
             //  the config file is apparently missing/malformed (as per https://www.npmjs.com/package/cosmiconfig#explorersearch)
-            logger.debug(e?.stack)
+            logger.debug(e?.stack);
             throw new Error(`Looks like the configuration was missing/malformed. ${e?.message}`);
         }
 
         classTemplate = classTemplate ?? c.classTemplate;
         if (typeof classTemplate === 'string' && !tree.exists(classTemplate)) {
-            throw new Error(`Class template configuration was [${resolve(classTemplate)}] but that file seems to be missing.`);
+            throw new Error(
+                `Class template configuration was [${resolve(
+                    classTemplate
+                )}] but that file seems to be missing.`
+            );
         }
 
         functionTemplate = functionTemplate ?? c.functionTemplate;
         if (typeof functionTemplate === 'string' && !tree.exists(functionTemplate)) {
-            throw new Error(`Function template configuration was [${resolve(functionTemplate)}] but that file seems to be missing.`);
+            throw new Error(
+                `Function template configuration was [${resolve(
+                    functionTemplate
+                )}] but that file seems to be missing.`
+            );
         }
 
         try {
@@ -73,7 +87,8 @@ export function spec({ name, update, classTemplate, functionTemplate, config }: 
             e = e || {};
             logger.error(e.message || 'An error occurred');
             logger.debug(
-                `---Error--- ${EOL}${e.message || 'Empty error message'} ${e.stack || 'Empty stack.'
+                `---Error--- ${EOL}${e.message || 'Empty error message'} ${
+                    e.stack || 'Empty stack.'
                 }`
             );
         }
@@ -168,7 +183,7 @@ function createNewSpec(
     fileNameRaw: string,
     tree: Tree,
     logger: Logger,
-    o?: { classTemplate?: string, functionTemplate?: string }
+    o?: { classTemplate?: string; functionTemplate?: string }
 ) {
     const content = tree.read(fileNameRaw);
 
@@ -178,7 +193,12 @@ function createNewSpec(
         // we aim at creating a spec from the class/function under test (name)
         // for the spec name we'll need to parse the base file name and its extension and calculate the path
 
-        const { specFileName, fileName, folderPathRaw: path, folderPathNormal: folder } = paths(fileNameRaw);
+        const {
+            specFileName,
+            fileName,
+            folderPathRaw: path,
+            folderPathNormal: folder,
+        } = paths(fileNameRaw);
         let templateVariables: ClassTemplateData;
         try {
             const { params, name, publicMethods } = getFirstClass(fileNameRaw, content);
@@ -203,13 +223,10 @@ function createNewSpec(
                 builderExports: toBuilderExports(),
                 constructorParams: toConstructorParams(),
                 shorthand,
-            }
+            };
             const src = maybeUseCustomTemplate(tree, url('./files/class'), o?.classTemplate);
 
-            const templateSource = apply(src, [
-                applyTemplates(templateVariables),
-                move(path),
-            ]);
+            const templateSource = apply(src, [applyTemplates(templateVariables), move(path)]);
 
             return mergeWith(templateSource);
 
@@ -235,9 +252,9 @@ function createNewSpec(
             function toBuilderExports() {
                 return params.length > 0
                     ? params
-                        .map((p) => p.name)
-                        .join(',' + EOL)
-                        .concat(',')
+                          .map((p) => p.name)
+                          .join(',' + EOL)
+                          .concat(',')
                     : '';
             }
         } catch (e) {
@@ -247,8 +264,11 @@ function createNewSpec(
                     throw new Error('No exported class or function to be spec-ed!');
                 }
 
-
-                const src = maybeUseCustomTemplate(tree, url('./files/function'), o?.functionTemplate);
+                const src = maybeUseCustomTemplate(
+                    tree,
+                    url('./files/function'),
+                    o?.functionTemplate
+                );
 
                 const templateSource = apply(src, [
                     applyTemplates({
@@ -270,11 +290,7 @@ function createNewSpec(
     }
 }
 
-function maybeUseCustomTemplate(
-    tree: Tree,
-    src: Source,
-    templateFileName?: string
-): Source {
+function maybeUseCustomTemplate(tree: Tree, src: Source, templateFileName?: string): Source {
     if (typeof templateFileName === 'string' && tree.exists(templateFileName)) {
         const template = tree.read(templateFileName);
         if (template != null) {

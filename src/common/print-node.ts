@@ -1,5 +1,5 @@
 import { EOL } from 'os';
-import ts = require('../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript');
+import * as ts from 'typescript';
 
 export function printKindAndText(node?: ts.Node[] | ts.Node | null, printOutSpaces = false) {
     if (node != null) {
