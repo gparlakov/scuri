@@ -1,7 +1,7 @@
 # SCuri[\*](#scuri-name)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ### **Automates unit test boilerplate** for **Angular** components/services/directives/etc. It will **generate** spec for you and help you **update** it when dependencies are added or removed!
@@ -317,6 +317,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/fgisslen"><img src="https://avatars0.githubusercontent.com/u/35102084?v=4?s=80" width="80px;" alt=""/><br /><sub><b>fgisslen</b></sub></a><br /><a href="https://github.com/gparlakov/scuri/issues?q=author%3Afgisslen" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/danjor"><img src="https://avatars.githubusercontent.com/u/3473673?v=4?s=80" width="80px;" alt=""/><br /><sub><b>danjor</b></sub></a><br /><a href="https://github.com/gparlakov/scuri/issues?q=author%3Adanjor" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/features/security"><img src="https://avatars.githubusercontent.com/u/27347476?v=4?s=80" width="80px;" alt=""/><br /><sub><b>Dependabot</b></sub></a><br /><a href="#maintenance-dependabot" title="Maintenance">🚧</a></td>
+    <td align="center"><a href="https://github.com/OSHistory"><img src="https://avatars.githubusercontent.com/u/9952252?v=4?s=80" width="80px;" alt=""/><br /><sub><b>OSHistory</b></sub></a><br /><a href="https://github.com/gparlakov/scuri/issues?q=author%3AOSHistory" title="Bug reports">🐛</a> <a href="https://github.com/gparlakov/scuri/commits?author=OSHistory" title="Code">💻</a></td>
   </tr>
 </table>
 
