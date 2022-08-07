@@ -18,7 +18,8 @@
     "strictNullChecks": true,
     "target": "es6",
     "types": ["jest", "node"],
-    "allowJs": true
+    "allowJs": true,
+    "outDir": "../dist-spec"
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "lib/**/*.ts"],
   "exclude": ["src/files/**/*.*", "tests/spec/files/**/*.*", "example/**/*.*", "**/files/"]

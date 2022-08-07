@@ -1,4 +1,4 @@
-import * as ts from '../../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
+import * as ts from 'typescript';
 import { Description, isClassDescription, ConstructorParam } from '../../types';
 
 /**

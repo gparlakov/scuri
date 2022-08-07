@@ -1,5 +1,5 @@
 import { EOL } from 'os';
-import * as ts from '../../../lib/third_party/github.com/Microsoft/TypeScript/lib/typescript';
+import * as ts from 'typescript';
 import {
     findNodes,
     insertAfterLastOccurrence,

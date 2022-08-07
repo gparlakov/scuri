@@ -1,5 +1,5 @@
-# Outputs
 **/*.js
+# Outputs
 **/*.js.map
 **/*.d.ts
 
@@ -24,3 +24,4 @@ yarn-error.log*
 !jest.config.js
 **/*.skip-me.ts
 !/dist/lib/**/*.*
+/dist-spec

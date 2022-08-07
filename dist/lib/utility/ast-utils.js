@@ -9,7 +9,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addRouteDeclarationToModule = exports.getRouterModuleDeclaration = exports.getEnvironmentExportName = exports.isImported = exports.addBootstrapToModule = exports.addExportToModule = exports.addProviderToModule = exports.addImportToModule = exports.addDeclarationToModule = exports.addSymbolToNgModuleMetadata = exports.getMetadataField = exports.getDecoratorMetadata = exports.insertAfterLastOccurrence = exports.findNode = exports.getSourceNodes = exports.findNodes = exports.insertImport = void 0;
 const core_1 = require("@angular-devkit/core");
-const ts = require("../third_party/github.com/Microsoft/TypeScript/lib/typescript");
+const ts = require("typescript");
 const change_1 = require("./change");
 /**
  * Add Import `import { symbolName } from fileName` if the import doesn't exit
