@@ -57,6 +57,16 @@
       "contributions": [
         "maintenance"
       ]
+    },
+    {
+      "login": "OSHistory",
+      "name": "OSHistory",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9952252?v=4",
+      "profile": "https://github.com/OSHistory",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
