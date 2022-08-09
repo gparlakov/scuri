@@ -15,21 +15,21 @@ export function getSpecFileCustomName(
 ): string | undefined {
     const templateFile: FileEntry = {
         path: basename(normalize(templateName)),
-        content: Buffer.from('')
+        content: Buffer.from(''),
     };
 
     const fileResult = applyPathTemplate(classData)(templateFile);
 
-    const folderfyFn = folderfy(classData.folder)
+    const folderfyFn = folderfy(classData.folder);
 
     return typeof fileResult?.path === 'string'
-        ? folderfyFn(fileResult.path
-            // remove template if any
-            .replace(TEMPLATE_FILENAME_RE, '')
-        )
+        ? folderfyFn(
+              fileResult.path
+                  // remove template if any
+                  .replace(TEMPLATE_FILENAME_RE, '')
+          )
         : undefined;
-} 
-
+}
 
 function folderfy(folder: string) {
     return (fileName: string) => {
@@ -38,6 +38,6 @@ function folderfy(folder: string) {
             fileName
                 // remove the path as a possible duplicate
                 .replace(folder, '')
-        )
-    }
+        );
+    };
 }

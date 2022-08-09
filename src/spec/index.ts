@@ -15,7 +15,7 @@ import {
 } from '@angular-devkit/schematics';
 import { cosmiconfigSync } from 'cosmiconfig';
 import { EOL } from 'os';
-import { join, resolve } from 'path';
+import { resolve } from 'path';
 import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
 import { getSpecFilePathName } from '../common/get-spec-file-name';
 import { paths } from '../common/paths';
@@ -220,8 +220,7 @@ function createNewSpec(
                 declaration: toDeclaration(),
                 builderExports: toBuilderExports(),
                 constructorParams: toConstructorParams(),
-                shorthand: typeShorthand(name),
-                depsCallsAndTypes
+                shorthand: typeShorthand(name)
             };
             const src = maybeUseCustomTemplate(tree, url('./files/class'), o?.classTemplate);
 
