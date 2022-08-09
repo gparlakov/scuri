@@ -16,8 +16,7 @@ describe('spec for a class with a method calling a dependency method', () => {
         // act
         const result = await runner
             .runSchematicAsync('spec', { name: depsCallsReturnTypesFile, update: false }, tree)
-            .toPromise()
-            .catch(console.error);
+            .toPromise();
 
         // assert
 
