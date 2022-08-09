@@ -18,7 +18,7 @@ describe('spec', () => {
 
     it('creates a file when name is passed in', async  () => {
         const runner = new SchematicTestRunner('schematics', collectionPath);
-        const result = await runner.runSchematicAsync('spec', { name: 'empty-class.ts' }, tree).toPromise();
+        const result = await runner.runSchematicAsync('spec', { name: 'empty-class.ts'}, tree).toPromise();
         expect(result.files.length).toBe(2); // the empty class + the new spec file
         expect(result.files[1]).toMatch('empty-class.spec.ts');
     });
