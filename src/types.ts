@@ -110,8 +110,6 @@ export type ClassTemplateData = StringsFunctions & {
     declaration: string;
 
     builderExports: string;
-
-    depsCallsAndTypes?: ClassDescription['depsCallsAndTypes'];
 };
 
 type StringsFunctions = {
