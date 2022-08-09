@@ -1,0 +1,29 @@
+import { Tree } from '@angular-devkit/schematics';
+import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
+import {
+    collectionPath,
+    depsCallsReturnTypesFile,
+    depsCallsReturnTypesFileContents,
+} from './common';
+
+describe('spec for a class with a method calling a dependency method', () => {
+    it('should add EMPTY for the dep method returning an observable', async () => {
+        // arrange
+        const tree = Tree.empty();
+        tree.create(depsCallsReturnTypesFile, depsCallsReturnTypesFileContents());
+        const runner = new SchematicTestRunner('schematics', collectionPath);
+
+        // act
+        const result = await runner
+            .runSchematicAsync('spec', { name: depsCallsReturnTypesFile, update: false }, tree)
+            .toPromise()
+            .catch(console.error);
+
+        // assert
+
+        const specFile = result!.readContent(depsCallsReturnTypesFile.replace('.ts', '.spec.ts'));
+        expect(specFile).toBeDefined();
+        expect(specFile).toMatch('service.observableReturning.and.returnValue(EMPTY)')
+        expect(specFile).toMatch('service.promiseReturning.and.returnValue(new Promise())');
+    });
+});

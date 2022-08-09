@@ -4,7 +4,7 @@ import * as ts from 'typescript';
 export function printKindAndText(node?: ts.Node[] | ts.Node | null, printOutSpaces = false) {
     if (node != null) {
         if (Array.isArray(node)) {
-            node.forEach(n => printKindAndText(n, printOutSpaces));
+            node.forEach((n) => printKindAndText(n, printOutSpaces));
         } else {
             // tslint:disable-next-line:no-console
             console.log(
@@ -20,13 +20,17 @@ export function printKindAndText(node?: ts.Node[] | ts.Node | null, printOutSpac
     }
 }
 let depth = 1;
-let maxDepth = 5;
+let maxDepthDefault = 5;
 
-
-export function printKindAndTextRecursive(node?: ts.Node[] | ts.Node | null, printOutSpaces = false) {
+export function printKindAndTextRecursive(
+    node?: ts.Node[] | ts.Node | null,
+    printOutSpaces = false,
+    options?: { maxDepth?: number }
+) {
+    const maxDepth = options?.maxDepth == null || isNaN(options?.maxDepth) ? maxDepthDefault : options?.maxDepth;
     if (node != null) {
         if (Array.isArray(node)) {
-            node.forEach(c => printKindAndTextRecursive(c, printOutSpaces));
+            node.forEach((c) => printKindAndTextRecursive(c, printOutSpaces, options));
         } else {
             // tslint:disable-next-line:no-console
             console.log(
@@ -41,7 +45,7 @@ export function printKindAndTextRecursive(node?: ts.Node[] | ts.Node | null, pri
             depth += 1;
             const children = node.getChildren();
             if (Array.isArray(children) && depth <= maxDepth) {
-                printKindAndTextRecursive(children, printOutSpaces);
+                printKindAndTextRecursive(children, printOutSpaces, options);
             }
             depth -= 1;
         }
@@ -50,7 +54,6 @@ export function printKindAndTextRecursive(node?: ts.Node[] | ts.Node | null, pri
         console.log('this is empty');
     }
 }
-
 
 function _formatTextWithSpaces(node: ts.Node | string, printOutSpaces: boolean) {
     const text = typeof node === 'string' ? node : node.getFullText();

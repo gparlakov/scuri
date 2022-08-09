@@ -15,7 +15,7 @@ import {
 } from '@angular-devkit/schematics';
 import { cosmiconfigSync } from 'cosmiconfig';
 import { EOL } from 'os';
-import { resolve } from 'path';
+import { join, resolve } from 'path';
 import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
 import { getSpecFilePathName } from '../common/get-spec-file-name';
 import { paths } from '../common/paths';
@@ -26,6 +26,7 @@ import {
     FunctionDescription,
     isClassDescription,
     ClassTemplateData,
+    ConstructorParam,
 } from '../types';
 import { addMissing, update as doUpdate } from './update/update';
 class SpecOptions {
@@ -73,7 +74,6 @@ export function spec({ name, update, classTemplate, functionTemplate, config }: 
                 )}] but that file seems to be missing.`
             );
         }
-
         try {
             if (update) {
                 if (classTemplate) {
@@ -199,17 +199,15 @@ function createNewSpec(
             folderPathRaw: path,
             folderPathNormal: folder,
         } = paths(fileNameRaw);
-        let templateVariables: ClassTemplateData;
         try {
-            const { params, name, publicMethods } = getFirstClass(fileNameRaw, content);
+            const { params, name, publicMethods, depsCallsAndTypes } = getFirstClass(fileNameRaw, content);
 
             // if there are no methods in the class - let's add one test case anyway
             if (Array.isArray(publicMethods) && publicMethods.length === 0) {
                 publicMethods.push('');
             }
 
-            const shorthand = typeShorthand(name);
-            templateVariables = {
+            const templateVariables: ClassTemplateData = {
                 ...strings,
                 // the name of the new spec file
                 specFileName,
@@ -222,7 +220,8 @@ function createNewSpec(
                 declaration: toDeclaration(),
                 builderExports: toBuilderExports(),
                 constructorParams: toConstructorParams(),
-                shorthand,
+                shorthand: typeShorthand(name),
+                depsCallsAndTypes
             };
             const src = maybeUseCustomTemplate(tree, url('./files/class'), o?.classTemplate);
 
@@ -245,7 +244,7 @@ function createNewSpec(
                     .map((p) =>
                         p.type === 'string' || p.type === 'number'
                             ? `let ${p.name}:${p.type};`
-                            : `const ${p.name} = autoSpy(${p.type});`
+                            : `const ${p.name} = autoSpy(${p.type});${addDefaultObservableAndPromiseToSpy(p, depsCallsAndTypes, EOL)}`
                     )
                     .join(EOL);
             }
@@ -256,6 +255,27 @@ function createNewSpec(
                           .join(',' + EOL)
                           .concat(',')
                     : '';
+            }
+
+            function addDefaultObservableAndPromiseToSpy(p: ConstructorParam, deps: ClassDescription['depsCallsAndTypes'], joinWith?: string): string {
+                if(!deps?.has(p.type)) {
+                    return ''
+                }
+                const joiner = typeof joinWith === 'string' ? joinWith : EOL;
+                const dep = deps.get(p.type);
+                const observables = Array.from(dep!.entries())
+                    .filter(([_, value]) => value.match(/Observable<|Subject</))
+                    .map(([key,]) => `${p.name}.${key}.and.returnValue(EMPTY)`)
+                    .join(joiner)
+
+                const promises = Array.from(dep!.entries())
+                    .map(([key, value]) => {
+                        return [key, value];
+                    })
+                    .filter(([_, value]) => value.match(/Promise</))
+                    .map(([key]) => `${p.name}.${key}.and.returnValue(new Promise())`)
+                    .join(joiner);
+                return `${typeof joinWith === 'string'? joinWith : ''}${observables}${joiner}${promises}`;
             }
         } catch (e) {
             if (e != null && e.message === 'No classes found to be spec-ed!') {
@@ -320,9 +340,10 @@ function getFirstClass(fileName: string, fileContents: Buffer) {
         name,
         publicMethods,
         type,
+        depsCallsAndTypes
     } = classWithConstructorParamsOrFirst;
 
-    return { params, name, publicMethods, type };
+    return { params, name, publicMethods, type, depsCallsAndTypes };
 }
 
 function getFirstFunction(fileName: string, fileContents: Buffer) {

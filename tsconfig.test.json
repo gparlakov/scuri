@@ -22,5 +22,5 @@
     "outDir": "../dist-spec"
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "lib/**/*.ts"],
-  "exclude": ["src/files/**/*.*", "tests/spec/files/**/*.*", "example/**/*.*", "**/files/"]
+  "exclude": ["src/files/**/*.*", "tests/spec/files/**/*.*", "example/**/*.*", "**/files/", "test/spec/test-data/"]
 }

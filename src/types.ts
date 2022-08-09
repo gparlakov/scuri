@@ -8,11 +8,17 @@ import {
     underscore,
 } from '@angular-devkit/core/src/utils/strings';
 
+export type DepType = string & {___type?: 'DepType'};
+export type MethodName = string & {___type?: 'MethodName'}; ;
+export type ReturnType = string & {___type?: 'ReturnType'};
+
 export type ClassDescription = {
     type: 'class';
     name: string;
     constructorParams: ConstructorParam[];
     publicMethods: string[];
+
+    depsCallsAndTypes?: Map<DepType, Map<MethodName, ReturnType>>;
 };
 
 export type ConstructorParam = {
@@ -104,6 +110,8 @@ export type ClassTemplateData = StringsFunctions & {
     declaration: string;
 
     builderExports: string;
+
+    depsCallsAndTypes?: ClassDescription['depsCallsAndTypes'];
 };
 
 type StringsFunctions = {

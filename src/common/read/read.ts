@@ -1,5 +1,6 @@
 import * as ts from 'typescript';
-import { Description, isClassDescription, ConstructorParam } from '../../types';
+import { findNodes } from '../../../lib/utility/ast-utils';
+import { ConstructorParam, Description, isClassDescription } from '../../types';
 
 /**
  * Will read the Abstract Syntax Tree of the `fileContents` and extract from that:
@@ -10,44 +11,67 @@ import { Description, isClassDescription, ConstructorParam } from '../../types';
  * class Test {
  *  constructor(service: MyService, param: string) { }
  *
- *  async future() {}
- *  now() {}
+ *  async future() {
+ *      const x = await this.service.getFromServer() // returns a Promise<string>
+ *
+ *      return x.length;
+ *  }
+ *
+ *  alsoFuture() {
+ *      return this.service.getFromServer$() // returns an Observable
+ *          .pipe(map(x => x.length))
+ *  }
  * }
  * // result would be
  * {
  *  name: 'Test',
- *  constructorParams: [{name: 'service', type:'MyService', importPath:'../../my.service.ts'}, {name: 'param', type:'string', importPath: '-----no-import-path----'}],
- *  publicMethods: ['future', 'now']
+ *  constructorParams: [{
+ *      name: 'service',
+ *      type:'MyService',
+ *      importPath:'../../my.service.ts'
+ *  }, {
+ *      name: 'param',
+ *      type:'string',
+ *      importPath: '-----no-import-path----'
+ *  }],
+ *  publicMethods: ['future', 'alsoFuture'],
+ *  depsCallsAndTypes: new Map([
+ *      ['MyService', new Map([
+ *          ['getFromServer', 'Promise<string>'],
+ *          ['getFromServer$', 'Observable<string>'],
+ *      ])]
+ *  ])
  * }
  * @param fileName the name of the file (required by ts API)
  * @param fileContents contents of the file
  */
 export function describeSource(fileName: string, fileContents: string): Description[] {
-    const sourceFile = ts.createSourceFile(fileName, fileContents, ts.ScriptTarget.ES2015, true);
-
-    const description = read(sourceFile);
-    const enrichedDescription = description.map(r =>
+    return read(ts.createSourceFile(fileName, fileContents, ts.ScriptTarget.ES2015, true)).map((r) =>
         isClassDescription(r)
             ? {
                   ...r,
-                  constructorParams: addImportPaths(r.constructorParams, fileContents)
+                  constructorParams: addImportPaths(r.constructorParams, fileContents),
               }
             : r
     );
-    return enrichedDescription;
 }
 
 function read(node: ts.Node) {
     let result: Description[] = [];
     if (isExportedClass(node)) {
-        const classDeclaration = node as ts.ClassDeclaration;
+        const classDeclaration = node;
+        const constructorParams = readConstructorParams(classDeclaration);
         result = [
             {
                 type: 'class',
                 name: classDeclaration.name != null ? classDeclaration.name.getText() : 'default',
-                constructorParams: readConstructorParams(node as ts.ClassDeclaration),
-                publicMethods: readPublicMethods(node as ts.ClassDeclaration)
-            }
+                constructorParams: constructorParams,
+                publicMethods: readPublicMethods(classDeclaration),
+                depsCallsAndTypes: readDependencyCalls(
+                    classDeclaration,
+                    constructorParams
+                ),
+            },
         ];
     }
 
@@ -56,11 +80,11 @@ function read(node: ts.Node) {
         result = [
             {
                 type: 'function',
-                name: func.name != null ? func.name.getText() : 'anonymousFunction'
-            }
+                name: func.name != null ? func.name.getText() : 'anonymousFunction',
+            },
         ];
     }
-    ts.forEachChild(node, n => {
+    ts.forEachChild(node, (n) => {
         const r = read(n);
         if (r && r.length > 0) {
             result = result.concat(r);
@@ -73,13 +97,13 @@ function read(node: ts.Node) {
 function readConstructorParams(node: ts.ClassDeclaration): ConstructorParam[] {
     let params: ConstructorParam[] = [];
 
-    ts.forEachChild(node, node => {
+    ts.forEachChild(node, (node) => {
         if (node.kind === ts.SyntaxKind.Constructor) {
             const constructor = node as ts.ConstructorDeclaration;
 
-            params = constructor.parameters.map(p => ({
+            params = constructor.parameters.map((p) => ({
                 name: p.name.getText(),
-                type: (p.type && p.type.getText()) || 'any' // the type of constructor param or any if not passe
+                type: (p.type && p.type.getText()) || 'any', // the type of constructor param or any if not passe
             }));
         }
     });
@@ -89,7 +113,7 @@ function readConstructorParams(node: ts.ClassDeclaration): ConstructorParam[] {
 function readPublicMethods(node: ts.ClassDeclaration): string[] {
     let publicMethods: string[] = [];
 
-    ts.forEachChild(node, node => {
+    ts.forEachChild(node, (node) => {
         if (node.kind === ts.SyntaxKind.MethodDeclaration) {
             const method = node as ts.MethodDeclaration;
 
@@ -99,6 +123,57 @@ function readPublicMethods(node: ts.ClassDeclaration): string[] {
         }
     });
     return publicMethods;
+}
+
+function readDependencyCalls(
+    n: ts.Node,
+    constructorParams: ConstructorParam[]
+): Map<string, Map<string, string>> | undefined {
+    const sourceFileName = n.getSourceFile().fileName;
+    const nodeFullText = n.getFullText();
+    const prog = ts.createProgram([sourceFileName], {
+        target: ts.ScriptTarget.ES2015,
+        module: ts.ModuleKind.CommonJS,
+    });
+    const checker = prog.getTypeChecker();
+    let dependencyUseTypes = new Map<string, Map<string, string>>();
+    const srcFile = prog.getSourceFile(sourceFileName);
+    if(srcFile == null) {
+        return undefined;
+    }
+
+    const node = findNodes(srcFile, ts.isClassDeclaration).find(n => n.getFullText() === nodeFullText)
+    if(node == null) {
+        return undefined;
+    }
+
+    ts.forEachChild(node, (methodMaybe) => {
+        if (methodMaybe.kind === ts.SyntaxKind.MethodDeclaration) {
+            findNodes(methodMaybe, ts.SyntaxKind.PropertyAccessExpression, 20, true).forEach(
+                (n) => {
+                    const type = checker.typeToString(checker.getTypeAtLocation(n));
+                    const p = constructorParams.find(p => p.type === type);
+
+
+                    if(p != null && n.getText().includes(p.name)) {
+                        const parent = checker.getTypeAtLocation(n.parent);
+                        if(!dependencyUseTypes.has(p.type)){
+                            dependencyUseTypes.set(p.type, new Map());
+                        }
+
+                        parent.getCallSignatures().forEach(s => {
+                            const dec = s.getDeclaration()
+                            if(ts.isMethodDeclaration(dec)) {
+                                dependencyUseTypes.get(p.type)!.set(dec.name.getText(), checker.typeToString(s.getReturnType()))
+                            }
+                        })
+                    }
+
+                }
+            );
+        }
+    });
+    return dependencyUseTypes;
 }
 
 function methodIsPublic(methodNode: ts.MethodDeclaration) {
@@ -111,17 +186,19 @@ function methodIsPublic(methodNode: ts.MethodDeclaration) {
 }
 
 function addImportPaths(params: ConstructorParam[], fullText: string) {
-    return params.map(p => {
+    return params.map((p) => {
         const match = fullText.match(new RegExp(`import.*${p.type}.*from.*('|")(.*)('|")`)) || [];
         return { ...p, importPath: match[2] }; // take the 2 match     1-st^^^  ^^2-nd
     });
 }
 
+
 function isExported(node: ts.Node, kind: ts.SyntaxKind): boolean {
     return (
-        node.kind === kind &&
-        node.modifiers != null &&
-        node.modifiers.some(m => m.kind === ts.SyntaxKind.ExportKeyword)
+        node?.kind === kind &&
+        /** True if this is visible outside this file, false otherwise */
+        ((ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Export) !== 0 ||
+        (!!node.parent && node.parent.kind === ts.SyntaxKind.SourceFile))
     );
 }
 
@@ -131,3 +208,5 @@ function isExportedClass(node: ts.Node): node is ts.ClassDeclaration {
 function isExportedFunction(node: ts.Node): node is ts.FunctionDeclaration {
     return isExported(node, ts.SyntaxKind.FunctionDeclaration);
 }
+
+
