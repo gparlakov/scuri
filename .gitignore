@@ -23,5 +23,6 @@ yarn-error.log*
 # Project specific
 !jest.config.js
 **/*.skip-me.ts
-!/dist/lib/**/*.*
+/dist
 /dist-spec
+
