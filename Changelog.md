@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - add default values for promise and observable returning method spies [#148](https://github.com/gparlakov/scuri/issues/148)
+- add support for strict TS for autospy
 
 ## [1.2.0] - 2021-11-23
 
