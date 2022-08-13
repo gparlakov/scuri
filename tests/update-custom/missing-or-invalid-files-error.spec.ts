@@ -1,10 +1,8 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import * as path from 'path';
 import { Options } from '../../src/update-custom/index';
 import { listenLogger, subscribe } from '../get-logger-errors';
-
-const collectionPath = path.join(__dirname, '../../src/collection.json');
+import { collectionPath } from '../spec/common';
 
 describe('update-custom', () => {
     let tree: Tree;
