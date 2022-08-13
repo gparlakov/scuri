@@ -3,18 +3,18 @@
   "schematics": {
     "spec": {
       "description": "Create or update a spec for a .ts file with a class in it.",
-      "factory": "./spec/index#spec",
-      "schema": "./spec/schema.json"
+      "factory": "./src/spec/index#spec",
+      "schema": "./src/spec/schema.json"
     },
     "autospy": {
       "description": "Create an autoSpy function. Supports jest and jasmine types",
-      "factory": "./autospy/index",
-      "schema": "./autospy/schema.json"
+      "factory": "./src/autospy/index",
+      "schema": "./src/autospy/schema.json"
     },
     "update-custom": {
       "description": "A blank schematic.",
-      "factory": "./update-custom/index#updateCustom",
-      "schema": "./update-custom/schema.json"
+      "factory": "./src/update-custom/index#updateCustom",
+      "schema": "./src/update-custom/schema.json"
     }
   }
 }
