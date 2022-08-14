@@ -31,5 +31,5 @@ cp -f example/to-update.componen*.ts ./src/app/
 npx ng g scuri:spec --name ./src/app/to-update.component.ts --class-template './example/__normalizedName__.custom.spec.ts.template' --update
 
 #npm test
-
+mkdir ./example/results
 cp -f src/app/*.spec.ts src/app/**/*.spec.ts ./example/results
