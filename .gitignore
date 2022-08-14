@@ -26,4 +26,4 @@ yarn-error.log*
 /dist
 /dist-spec
 example/results
-e2e/results
+e2e/results/*.spec.ts
