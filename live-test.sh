@@ -17,8 +17,9 @@ if test -z "${DEBUG_LIVE_TEST}";  then
 else
   FLAGS='-it'
   ENTRYPOINT=/bin/sh
-  ENTRYPOINT=$APP_DIR/$EXAMPLE_FOLDER/run-plus.sh
 fi
+
+echo docker run $FLAGS -v $(pwd)/example:$APP_DIR/example --entrypoint $ENTRYPOINT gparlakov/scuri:angular-14-app-v2
 
 docker run $FLAGS -v $(pwd)/example:$APP_DIR/example --entrypoint $ENTRYPOINT gparlakov/scuri:angular-14-app-v2
 
