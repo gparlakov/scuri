@@ -272,7 +272,7 @@ function createNewSpec(
                         return [key, value];
                     })
                     .filter(([_, value]) => value.match(/Promise</))
-                    .map(([key]) => `${p.name}.${key}.and.returnValue(new Promise())`)
+                    .map(([key]) => `${p.name}.${key}.and.returnValue(new Promise(res => {}))`)
                     .join(joiner);
                 return `${typeof joinWith === 'string'? joinWith : ''}${observables}${joiner}${promises}`;
             }
