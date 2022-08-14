@@ -18,13 +18,13 @@ steps:
           versionSpec: '14.x'
       displayName: 'Install Node.js'
 
-    - script: ./live-test.sh
-      displayName: 'Run the e2e tests'
-
     - script: npm i -g npm@7.5.6
 
     - script: npm i
       displayName: 'Install deps'
+
+    - script: ./live-test.sh
+      displayName: 'Run the e2e tests'
 
     - script: npm run build
       displayName: 'Run the build'
