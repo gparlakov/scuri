@@ -23,6 +23,6 @@ describe('spec for a class with a method calling a dependency method', () => {
         const specFile = result!.readContent(depsCallsReturnTypesFile.replace('.ts', '.spec.ts'));
         expect(specFile).toBeDefined();
         expect(specFile).toMatch('service.observableReturning.and.returnValue(EMPTY)')
-        expect(specFile).toMatch('service.promiseReturning.and.returnValue(new Promise())');
+        expect(specFile).toMatch('service.promiseReturning.and.returnValue(new Promise(res => {}))');
     });
 });
