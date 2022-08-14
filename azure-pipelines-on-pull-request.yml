@@ -7,6 +7,9 @@ pr:
     - master
     - release/*
 
+push:
+    - master
+
 trigger: none
 
 pool:
