@@ -23,9 +23,6 @@ steps:
     - script: npm i
       displayName: 'Install deps'
 
-    - script: ./live-test.sh
-      displayName: 'Run the e2e tests'
-
     - script: npm run build
       displayName: 'Run the build'
 
@@ -34,4 +31,7 @@ steps:
 
     - script: npm run test
       displayName: 'Run the tests'
+
+    - script: ./live-test.sh
+      displayName: 'Run the e2e tests'
 

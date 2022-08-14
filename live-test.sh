@@ -6,7 +6,7 @@ set -e
 npm run build
 
 mv $(npm pack) ./example/scuri.next.tgz
-
+docker pull gparlakov/scuri:angular-14-app-v2
 APP_DIR="$(docker inspect --format='{{.Config.WorkingDir}}' gparlakov/scuri:angular-14-app-v2)"
 
 export EXAMPLE_FOLDER='example'
