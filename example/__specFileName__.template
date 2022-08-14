@@ -10,7 +10,6 @@
  *  <% }) %>
  *  specFileName: <%= specFileName %>
  *  normalizedName: <%= normalizedName %>
- *  normalizedName: <%= normalizedName %>
  *  className: <%= className %>
  *  publicMethods: <%= publicMethods %>
  *  declaration: <%= declaration %>

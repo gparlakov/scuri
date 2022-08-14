@@ -31,3 +31,6 @@ steps:
 
     - script: npm run test
       displayName: 'Run the tests'
+
+    - script: ./live-test.sh
+      displayName: 'Run the e2e tests'
