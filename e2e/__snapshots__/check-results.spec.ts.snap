@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`spec should check results against snapshot: my-com-expected 1`] = `
+"/**
+ *  CUSTOM TEMPLATE
+ *
+ *  AVAILABLE PROPERTIES:
+ *
+ *  params: {importPath: string, type: string} 
+ *  name: router
+ *  importPath: @angular/router
+ *  type: Router
+ *  
+ *  specFileName: my-com.component.spec.ts
+ *  normalizedName: my-com.component
+ *  className: MyComComponent
+ *  publicMethods: ngOnInit
+ *  declaration: const router = autoSpy(Router);
+ *  builderExports: router,
+ *  constructorParams: router
+ *  shorthand: m
+ *  
+ *  AVAILABLE FUNCTIONS
+ *
+ *  classify: MyComComponent
+ *
+ *  decamelize: my_com_component
+ *  dasherize: my-com-component
+ *  camelize: myComComponent
+ *  classify: MyComComponent
+ *  underscore: my_com_component
+ *  capitalize: MyComComponent
+ *  levenshtein: 13
+ *
+ *
+ */
+import { Router } from '@angular/router';
+import { MyComComponent } from './my-com.component';
+import { autoSpy } from 'autoSpy';
+
+describe('MyComComponent', () => {
+  it('when ngOnInit is called it should', () => {
+    // arrange
+    const { build } = setup().default();
+    const m = build();
+    // act
+    m.ngOnInit();
+    // assert
+    // expect(m).toEqual
+  });
+  
+});
+
+// tslint-disable-type
+function setup() {
+  const router = autoSpy(Router);const builder = {
+    router,default() {
+      return builder;
+    },
+    build() {
+      return new MyComComponent(router);
+    }
+  };
+
+  return builder;
+}"
+`;
+
+exports[`spec should check results against snapshot: other-expected 1`] = `
+"import { Service } from '../service';
+import { OtherComponent } from './other.component';
+import { autoSpy } from 'autoSpy';
+import { EMPTY } from 'rxjs';
+
+describe('OtherComponent', () => {
+  it('when anotherMethod is called it should', () => {
+    // arrange
+    const { build } = setup().default();
+    const o = build();
+    // act
+    o.anotherMethod();
+    // assert
+    // expect(o).toEqual
+  });
+  it('when method is called it should', () => {
+    // arrange
+    const { build } = setup().default();
+    const o = build();
+    // act
+    o.method();
+    // assert
+    // expect(o).toEqual
+  });
+  
+});
+
+function setup() {
+  const s = autoSpy(Service);
+s.observableReturning.and.returnValue(EMPTY)
+s.promiseReturning.and.returnValue(new Promise(res => {}))
+  const builder = {
+    s,
+    default() {
+      return builder;
+    },
+    build() {
+      return new OtherComponent(s);
+    }
+  };
+
+  return builder;
+}
+"
+`;
+
+exports[`spec should check results against snapshot: to-update-expected 1`] = `
+"import { ToUpdateComponent } from './to-update.component';
+import { autoSpy, spyInject } from 'jasmine-auto-spies';
+
+describe('ToUpdateComponent', () => {
+
+    let serviceSpy: Service;
+     let routerSpy: Router;
+     let justSpy: Just;
+    // scuri:lets
+
+    beforeEach(
+        waitForAsync(() => {
+            TestBed.configureTestingModule({
+                providers: [
+                    MyDirective,
+
+                    { provide: Service, useClass: autoSpy(Service, 'Service') },
+                     { provide: Router, useClass: autoSpy(Router, 'Router') },
+                     { provide: Just, useClass: autoSpy(Just, 'Just') },
+                    // scuri:injectables
+                ]
+            });
+
+            directive = TestBed.inject(MyDirective);
+
+            serviceSpy = spyInject<Service>(TestBed.inject(Service));
+             routerSpy = spyInject<Router>(TestBed.inject(Router));
+             justSpy = spyInject<Just>(TestBed.inject(Just));
+            // scuri:get-instances
+
+        })
+    );
+
+    it('when myMethod is called it should', () => {
+        // arrange
+        // act
+        t.myMethod();
+        // assert
+        // expect(t).toEqual
+    });
+
+});
+it('when mySecondMethod is called it should', () => {
+     // arrange
+        // act
+        t.mySecondMethod();
+        // assert
+        // expect(t).toEqual
+    });
+    
+
+"
+`;
