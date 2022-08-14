@@ -19,7 +19,7 @@ else
   ENTRYPOINT=/bin/sh
 fi
 
-echo docker run $FLAGS -v $(pwd)/example:$APP_DIR/example --entrypoint $ENTRYPOINT gparlakov/scuri:angular-14-app-v2
+echo 'docker run $FLAGS -v $(pwd)/example:$APP_DIR/example --entrypoint $ENTRYPOINT gparlakov/scuri:angular-14-app-v2'
 
 docker run $FLAGS -v $(pwd)/example:$APP_DIR/example --entrypoint $ENTRYPOINT gparlakov/scuri:angular-14-app-v2
 
