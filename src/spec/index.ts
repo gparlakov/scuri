@@ -17,6 +17,7 @@ import { cosmiconfigSync } from 'cosmiconfig';
 import { EOL } from 'os';
 import { resolve } from 'path';
 import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
+import { addDefaultObservableAndPromiseToSpy } from '../common/add-observable-promise-stubs';
 import { getSpecFilePathName } from '../common/get-spec-file-name';
 import { paths } from '../common/paths';
 import { describeSource } from '../common/read/read';
@@ -25,8 +26,7 @@ import {
     ClassDescription,
     FunctionDescription,
     isClassDescription,
-    ClassTemplateData,
-    ConstructorParam,
+    ClassTemplateData
 } from '../types';
 import { addMissing, update as doUpdate } from './update/update';
 class SpecOptions {
@@ -117,7 +117,7 @@ function updateExistingSpec(fullName: string, tree: Tree, logger: Logger) {
         } else {
             const specFilePath = existingSpecFile.path;
             // if a spec exists we'll try to update it
-            const { params, name, publicMethods } = getFirstClass(specFileName, content);
+            const { params, name, publicMethods, depsCallsAndTypes } = getFirstClass(specFileName, content);
             const shorthand = typeShorthand(name);
             logger.debug(`Class name ${name} ${EOL}Constructor(${params}) {${publicMethods}}`);
 
@@ -138,7 +138,8 @@ function updateExistingSpec(fullName: string, tree: Tree, logger: Logger) {
                 name,
                 'remove',
                 publicMethods,
-                shorthand
+                shorthand,
+                depsCallsAndTypes
             );
             applyChanges(tree, specFilePath, removeChanges, 'remove');
 
@@ -150,7 +151,8 @@ function updateExistingSpec(fullName: string, tree: Tree, logger: Logger) {
                 name,
                 'add',
                 publicMethods,
-                shorthand
+                shorthand,
+                depsCallsAndTypes
             );
             applyChanges(tree, specFilePath, changesToAdd, 'add');
 
@@ -254,28 +256,7 @@ function createNewSpec(
                           .join(',' + EOL)
                           .concat(',')
                     : '';
-            }
-
-            function addDefaultObservableAndPromiseToSpy(p: ConstructorParam, deps: ClassDescription['depsCallsAndTypes'], joinWith?: string): string {
-                if(!deps?.has(p.type)) {
-                    return ''
-                }
-                const joiner = typeof joinWith === 'string' ? joinWith : EOL;
-                const dep = deps.get(p.type);
-                const observables = Array.from(dep!.entries())
-                    .filter(([_, value]) => value.match(/Observable<|Subject</))
-                    .map(([key,]) => `${p.name}.${key}.and.returnValue(EMPTY)`)
-                    .join(joiner)
-
-                const promises = Array.from(dep!.entries())
-                    .map(([key, value]) => {
-                        return [key, value];
-                    })
-                    .filter(([_, value]) => value.match(/Promise</))
-                    .map(([key]) => `${p.name}.${key}.and.returnValue(new Promise(res => {}))`)
-                    .join(joiner);
-                return `${typeof joinWith === 'string'? joinWith : ''}${observables}${joiner}${promises}`;
-            }
+            }            
         } catch (e) {
             if (e != null && e.message === 'No classes found to be spec-ed!') {
                 const funktion = getFirstFunction(fileNameRaw, content);

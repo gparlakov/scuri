@@ -2,20 +2,19 @@ import { EOL } from 'os';
 import * as ts from 'typescript';
 import {
     findNodes,
-    insertAfterLastOccurrence,
     isImported,
     insertImport
 } from '../../../lib/utility/ast-utils';
 import { Change, InsertChange, RemoveChange } from '../../../lib/utility/change';
-import { ConstructorParam } from '../../types';
-
-export const i = insertAfterLastOccurrence;
+import { addDefaultObservableAndPromiseToSpy } from '../../common/add-observable-promise-stubs';
+import { ConstructorParam, DependencyMethodReturnTypes } from '../../types';
 
 export function addMissing(
     path: string,
     fileContent: string,
     _dependencies: ConstructorParam[],
-    classUnderTestName: string
+    classUnderTestName: string,
+    
 ) {
     const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
 
@@ -52,7 +51,8 @@ export function update(
     classUnderTestName: string,
     action: 'add' | 'remove',
     publicMethods: string[],
-    shorthand: string
+    shorthand: string,
+    deps?: DependencyMethodReturnTypes
 ): Change[] {
     const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
 
@@ -69,7 +69,7 @@ export function update(
     return action === 'remove'
         ? remove(paramsToRemove, setupFunctionNode, path)
         : [
-              ...add(paramsToAdd, setupFunctionNode, path, classUnderTestName),
+              ...add(paramsToAdd, setupFunctionNode, path, classUnderTestName, deps),
               ...addMethods(publicMethods, path, fileContent, source, shorthand),
               ...addMissingImports(dependencies, path, source),
               ...addProviders(
@@ -150,7 +150,8 @@ function add(
     toAdd: ConstructorParam[],
     setupFunction: ts.FunctionDeclaration,
     path: string,
-    classUnderTestName: string
+    classUnderTestName: string,
+    deps?: DependencyMethodReturnTypes
 ): Change[] {
     // children of the setup include the block - that's what we want to change
     const block = setupFunction.getChildren().find(c => c.kind === ts.SyntaxKind.Block) as ts.Block;
@@ -159,17 +160,17 @@ function add(
     }
 
     return [
-        ...declareNewDependencies(block, toAdd, path),
+        ...declareNewDependencies(block, toAdd, path, deps),
         ...exposeNewDependencies(block, toAdd, path),
         ...useNewDependenciesInConstructor(block, toAdd, path, classUnderTestName)
     ];
 }
-
+const typesLikelyToChange = ['string', 'boolean', 'number', 'any', 'unknown', 'Object']
 function declareNewDependencies(
     block: ts.Block,
     toAdd: ConstructorParam[],
     path: string,
-    _indentation?: string
+    deps?: DependencyMethodReturnTypes
 ) {
     // children of the block are the opening { [at index [0]], the block content (SyntaxList) [at index[1]] and the closing } [index [2]]
     // we want to update the SyntaxList
@@ -186,13 +187,9 @@ function declareNewDependencies(
             new InsertChange(
                 path,
                 position,
-                p.type === 'string' ||
-                p.type === 'number' ||
-                p.type === 'any' ||
-                p.type === 'unknown' ||
-                p.type === 'Object'
+                typesLikelyToChange.includes(p.type)
                     ? `let ${p.name}: ${p.type};` + leadingIndent
-                    : `const ${p.name} = autoSpy(${p.type});` + leadingIndent
+                    : `const ${p.name} = autoSpy(${p.type});` + leadingIndent + addDefaultObservableAndPromiseToSpy(p, deps, `${EOL}${leadingIndent}`)
             )
     );
 }

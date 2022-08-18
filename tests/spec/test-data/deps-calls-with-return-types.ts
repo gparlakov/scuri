@@ -2,7 +2,6 @@
 import { switchMap } from 'rxjs/operators';
 import { ServiceWithMethods } from './deps-calls-with-return-types.dependency';
 
-
 export class ExampleComponent {
     constructor(private readonly service:ServiceWithMethods) {}
 

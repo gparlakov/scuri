@@ -12,13 +12,15 @@ export type DepType = string & {___type?: 'DepType'};
 export type MethodName = string & {___type?: 'MethodName'}; ;
 export type ReturnType = string & {___type?: 'ReturnType'};
 
+export type DependencyMethodReturnTypes = Map<DepType, Map<MethodName, ReturnType>>;
+
 export type ClassDescription = {
     type: 'class';
     name: string;
     constructorParams: ConstructorParam[];
     publicMethods: string[];
 
-    depsCallsAndTypes?: Map<DepType, Map<MethodName, ReturnType>>;
+    depsCallsAndTypes?: DependencyMethodReturnTypes;
 };
 
 export type ConstructorParam = {
