@@ -72,9 +72,9 @@ export function update(
             ...add(paramsToAdd, setupFunctionNode, path, classUnderTestName, deps),
             // 2 additions to the setup function again
             ...addMissingDependencyReturns(paramsToAdd, paramsToRemove, deps, dependencies, setupFunctionNode),
-            // 3 methods - each of them will generate a it test case  
+            // 3 methods - each of them will generate a it test case
             ...addMethods(publicMethods, path, fileContent, source, shorthand),
-            // 4 providers - if TestBed is used it will get the providers from a = setup().default() and provide them the classic Angular way 
+            // 4 providers - if TestBed is used it will get the providers from a = setup().default() and provide them the classic Angular way
             ...addProvidersForTestBed(
                 source,
                 dependencies,
@@ -193,10 +193,10 @@ function declareNewDependencies(
                 path,
                 position,
                 typesLikelyToChange.includes(p.type)
-                    ? `let ${p.name}: ${p.type};` + leadingIndent
-                    : `const ${p.name} = autoSpy(${p.type});` + leadingIndent + addDefaultObservableAndPromiseToSpyJoined(p, deps, { joiner: `${EOL}${leadingIndent}` })
+                    ? `let ${p.name}: ${p.type};${EOL}${leadingIndent}`
+                    : `const ${p.name} = autoSpy(${p.type});${ addDefaultObservableAndPromiseToSpyJoined(p, deps, { joiner: `${EOL}${leadingIndent}`})}${EOL}${leadingIndent}`
             )
-    );
+        );
 }
 
 function exposeNewDependencies(block: ts.Block, toAdd: ConstructorParam[], path: string) {
@@ -214,7 +214,7 @@ function exposeNewDependencies(block: ts.Block, toAdd: ConstructorParam[], path:
     const indentation = getIndentationMinusComments(builderObjectLiteral.getChildAt(1));
 
     const positionToAdd = builderObjectLiteral.getChildAt(0).getEnd();
-    return toAdd.map(a => new InsertChange(path, positionToAdd, `${indentation}${a.name},`));
+    return toAdd.map(a => new InsertChange(path, positionToAdd, `${EOL}${indentation}${a.name},`));
 }
 
 function useNewDependenciesInConstructor(
@@ -241,7 +241,7 @@ function useNewDependenciesInConstructor(
                 (hasOtherParams ? ', ' : '') + toAdd.map(p => p.name).join(', ')
             )
         ]
-        : []; // dont add params in constructor if no need to
+        : []; // don't add params in constructor if no need to
 }
 
 function addMethods(
@@ -252,7 +252,7 @@ function addMethods(
     shorthand: string
 ): Change[] {
     const methodsThatHaveNoTests = publicMethods.filter(
-        // search for invokations of the method (c.myMethod) - these are inevitable if one wants to actually test the method...
+        // search for invocations of the method (c.myMethod) - these are inevitable if one wants to actually test the method...
         m => !fileContent.match(new RegExp(`.${m}`))
     );
 
@@ -402,24 +402,40 @@ function getIndentationMinusComments(node: ts.Node) {
         return '';
     }
     const leadingTrivia = node.getFullText().replace(node.getText(), '');
-    let index = leadingTrivia.indexOf(EOL);
-    return index < 0 ? leadingTrivia : leadingTrivia.slice(index);
+    const lastWhitespace = leadingTrivia.match(/[^\r\n]*$/g);
+    return lastWhitespace ? lastWhitespace[0] : '';
 }
-function addMissingDependencyReturns(paramsToAdd: ConstructorParam[], paramsToRemove: string[], deps: DependencyMethodReturnTypes | undefined, allParams: ConstructorParam[], setupFunctionNode: ts.FunctionDeclaration): InsertChange[] {
+
+function addMissingDependencyReturns(
+    paramsToAdd: ConstructorParam[],
+    paramsToRemove: string[],
+    deps: DependencyMethodReturnTypes | undefined,
+    allParams: ConstructorParam[],
+    setupFunctionNode: ts.FunctionDeclaration
+): InsertChange[] {
     const setupText = setupFunctionNode.getFullText();
-    const pos = findNodes(setupFunctionNode, ts.SyntaxKind.VariableDeclaration).find(n => n.getText().includes('builder'))?.pos ?? setupFunctionNode.getFirstToken()?.pos ?? setupFunctionNode.pos + 50;
-    return allParams
-        // skip the add ones as they'll get their own methods in the exposeDeps above
-        .filter(p => !paramsToAdd.some(toAdd => toAdd.name === p.name))
-        // skip the remove ones as they'll get removed and adding their deps is moot
-        .filter(p => !paramsToRemove.includes(p.name))
-        // for the params that are part of the deps map 
-        .filter(p => deps?.has(p.type))
-        // create the lines of code to return a default value => `${p.name}.${dep.methdod}.and.returnValue({promise|observable default})
-        .flatMap(p => addDefaultObservableAndPromiseToSpy(p, deps))
-        // only take the ones that are not already there
-        .filter(defaultReturnExpression => !setupText.includes(defaultReturnExpression))
-        // and create InsertChange-s for them
-        .map(defaultReturnExpression => new InsertChange('', pos, defaultReturnExpression));
+
+    const builderStatement = findNodes(setupFunctionNode, ts.SyntaxKind.VariableStatement).find((n) =>
+        n.getText().includes('builder')
+    )
+    const pos = builderStatement?.pos ?? (setupFunctionNode.pos + 65);
+
+    const indent = builderStatement ? getIndentationMinusComments(builderStatement) : '    ';
+
+    return (
+        allParams
+            // skip the add ones as they'll get their own methods in the exposeDeps above
+            .filter((p) => !paramsToAdd.some((toAdd) => toAdd.name === p.name))
+            // skip the remove ones as they'll get removed and adding their deps is moot
+            .filter((p) => !paramsToRemove.includes(p.name))
+            // for the params that are part of the deps map
+            .filter((p) => deps?.has(p.type))
+            // create the lines of code to return a default value => `${p.name}.${dep.method}.and.returnValue({promise|observable default})
+            .flatMap((p) => addDefaultObservableAndPromiseToSpy(p, deps))
+            // only take the ones that are not already there
+            .filter((defaultReturnExpression) => !setupText.includes(defaultReturnExpression))
+            // and create InsertChange-s for them
+            .map((defaultReturnExpression, i, arr) => new InsertChange('', pos, `${EOL}${indent}${defaultReturnExpression}${arr.length-1 === i ? `${EOL}${indent}` : ''}`))
+    );
 }
 

@@ -6,7 +6,7 @@ export function addDefaultObservableAndPromiseToSpyJoined(p: ConstructorParam, d
         return ''
     }
     const joiner = typeof options?.joiner === 'string' ? options?.joiner : EOL;
-    
+
     return `${typeof joiner === 'string'? joiner : ''}${addDefaultObservableAndPromiseToSpy(p, deps, options).join(joiner)}`;
 }
 
@@ -18,14 +18,14 @@ export function addDefaultObservableAndPromiseToSpy(p: ConstructorParam, deps?: 
     const dep = deps.get(p.type);
     const observables = Array.from(dep!.entries())
         .filter(([_, value]) => value.match(/Observable<|Subject</))
-        .map(([key,]) => `${p.name}.${key}${spyReturn('EMPTY')}`);
+        .map(([key,]) => `${p.name}.${key}${spyReturn('EMPTY')};`);
 
     const promises = Array.from(dep!.entries())
         .map(([key, value]) => {
             return [key, value];
         })
         .filter(([_, value]) => value.match(/Promise</))
-        .map(([key]) => `${p.name}.${key}${spyReturn('new Promise(res => {})')}`);
+        .map(([key]) => `${p.name}.${key}${spyReturn('new Promise(res => {})')};`);
     return [...observables, ...promises];
 }
 
