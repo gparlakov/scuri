@@ -25,6 +25,11 @@ steps:
           npm run build
       displayName: 'npm install and build'
 
+    - script: npm test
+
+    - script: ./live-test.sh
+      displayName: 'Run the e2e tests'
+
     - script: npm pack
 
     - task: CopyFiles@2
