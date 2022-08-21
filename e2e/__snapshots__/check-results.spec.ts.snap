@@ -96,8 +96,8 @@ describe('OtherComponent', () => {
 
 function setup() {
   const s = autoSpy(Service);
-s.observableReturning.and.returnValue(EMPTY)
-s.promiseReturning.and.returnValue(new Promise(res => {}))
+s.observableReturning.and.returnValue(EMPTY);
+s.promiseReturning.and.returnValue(new Promise(res => {}));
   const builder = {
     s,
     default() {
