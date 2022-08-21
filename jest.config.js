@@ -14,5 +14,6 @@ module.exports = {
         '^src/(.*)$': '<rootDir>/src/$1'
     },
     transformIgnorePatterns: ['node_modules/(?!@ngrx)', 'node_modules/(?!(jest-test))'],
-    roots: ['tests', 'src']
+    roots: ['tests', 'src'],
+    testPathIgnorePatterns: ['<rootDir>/tests/spec/test-data']
 };

@@ -1,12 +1,10 @@
 import { EOL } from 'os';
 import * as ts from 'typescript';
 import {
-    findNodes,
-    isImported,
-    insertImport
+    findNodes, insertImport, isImported
 } from '../../../lib/utility/ast-utils';
 import { Change, InsertChange, RemoveChange } from '../../../lib/utility/change';
-import { addDefaultObservableAndPromiseToSpy } from '../../common/add-observable-promise-stubs';
+import { addDefaultObservableAndPromiseToSpy, addDefaultObservableAndPromiseToSpyJoined } from '../../common/add-observable-promise-stubs';
 import { ConstructorParam, DependencyMethodReturnTypes } from '../../types';
 
 export function addMissing(
@@ -14,7 +12,7 @@ export function addMissing(
     fileContent: string,
     _dependencies: ConstructorParam[],
     classUnderTestName: string,
-    
+
 ) {
     const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
 
@@ -69,16 +67,23 @@ export function update(
     return action === 'remove'
         ? remove(paramsToRemove, setupFunctionNode, path)
         : [
-              ...add(paramsToAdd, setupFunctionNode, path, classUnderTestName, deps),
-              ...addMethods(publicMethods, path, fileContent, source, shorthand),
-              ...addMissingImports(dependencies, path, source),
-              ...addProviders(
-                  source,
-                  dependencies,
-                  setupFunctionNode.name!.getText() || 'setup',
-                  path
-              )
-          ];
+            // ordered as additions from the bottom of the file up
+            // 1 the lowest - additions to the setup function
+            ...add(paramsToAdd, setupFunctionNode, path, classUnderTestName, deps),
+            // 2 additions to the setup function again
+            ...addMissingDependencyReturns(paramsToAdd, paramsToRemove, deps, dependencies, setupFunctionNode),
+            // 3 methods - each of them will generate a it test case  
+            ...addMethods(publicMethods, path, fileContent, source, shorthand),
+            // 4 providers - if TestBed is used it will get the providers from a = setup().default() and provide them the classic Angular way 
+            ...addProvidersForTestBed(
+                source,
+                dependencies,
+                setupFunctionNode.name!.getText() || 'setup',
+                path
+            ),
+            // 5 add the missing imports on the top
+            ...addMissingImports(dependencies, path, source)
+        ];
 }
 
 function readSetupFunction(source: ts.Node) {
@@ -189,7 +194,7 @@ function declareNewDependencies(
                 position,
                 typesLikelyToChange.includes(p.type)
                     ? `let ${p.name}: ${p.type};` + leadingIndent
-                    : `const ${p.name} = autoSpy(${p.type});` + leadingIndent + addDefaultObservableAndPromiseToSpy(p, deps, `${EOL}${leadingIndent}`)
+                    : `const ${p.name} = autoSpy(${p.type});` + leadingIndent + addDefaultObservableAndPromiseToSpyJoined(p, deps, { joiner: `${EOL}${leadingIndent}` })
             )
     );
 }
@@ -230,12 +235,12 @@ function useNewDependenciesInConstructor(
     const hasOtherParams = constrParams.getChildCount() > 0;
     return toAdd && toAdd.length > 0
         ? [
-              new InsertChange(
-                  path,
-                  classUnderTestConstruction.end - 1,
-                  (hasOtherParams ? ', ' : '') + toAdd.map(p => p.name).join(', ')
-              )
-          ]
+            new InsertChange(
+                path,
+                classUnderTestConstruction.end - 1,
+                (hasOtherParams ? ', ' : '') + toAdd.map(p => p.name).join(', ')
+            )
+        ]
         : []; // dont add params in constructor if no need to
 }
 
@@ -296,7 +301,7 @@ function addMissingImports(dependencies: ConstructorParam[], path: string, sourc
         }
     );
 
-    return dependencies
+    return [...dependencies, { name: 'EMPTY', type: 'Observable<void>', importPath: 'rxjs' }]
         .filter(d => d.importPath != null)
         .filter(d => duplicateMap.get(d) === 'first')
         .filter(d => !isImported(source, d.type, d.importPath!))
@@ -314,7 +319,7 @@ function addMissingImports(dependencies: ConstructorParam[], path: string, sourc
  * @param setupFunctionName what's the setup function name (default setup)
  * @param path the path to the file
  */
-function addProviders(
+function addProvidersForTestBed(
     source: ts.SourceFile,
     params: ConstructorParam[],
     setupFunctionName: string,
@@ -354,12 +359,12 @@ function addProviders(
         // insert a call to setup function
         const inserts: InsertChange[] = !hasANamedSetupInstance
             ? [
-                  new InsertChange(
-                      path,
-                      openingBracketPosition,
-                      `${firstChildIndentation}const ${a} = ${setupFunctionName}().default();`
-                  )
-              ]
+                new InsertChange(
+                    path,
+                    openingBracketPosition,
+                    `${firstChildIndentation}const ${a} = ${setupFunctionName}().default();`
+                )
+            ]
             : [];
 
         // calculate which dependencies we need to add
@@ -400,3 +405,21 @@ function getIndentationMinusComments(node: ts.Node) {
     let index = leadingTrivia.indexOf(EOL);
     return index < 0 ? leadingTrivia : leadingTrivia.slice(index);
 }
+function addMissingDependencyReturns(paramsToAdd: ConstructorParam[], paramsToRemove: string[], deps: DependencyMethodReturnTypes | undefined, allParams: ConstructorParam[], setupFunctionNode: ts.FunctionDeclaration): InsertChange[] {
+    const setupText = setupFunctionNode.getFullText();
+    const pos = findNodes(setupFunctionNode, ts.SyntaxKind.VariableDeclaration).find(n => n.getText().includes('builder'))?.pos ?? setupFunctionNode.getFirstToken()?.pos ?? setupFunctionNode.pos + 50;
+    return allParams
+        // skip the add ones as they'll get their own methods in the exposeDeps above
+        .filter(p => !paramsToAdd.some(toAdd => toAdd.name === p.name))
+        // skip the remove ones as they'll get removed and adding their deps is moot
+        .filter(p => !paramsToRemove.includes(p.name))
+        // for the params that are part of the deps map 
+        .filter(p => deps?.has(p.type))
+        // create the lines of code to return a default value => `${p.name}.${dep.methdod}.and.returnValue({promise|observable default})
+        .flatMap(p => addDefaultObservableAndPromiseToSpy(p, deps))
+        // only take the ones that are not already there
+        .filter(defaultReturnExpression => !setupText.includes(defaultReturnExpression))
+        // and create InsertChange-s for them
+        .map(defaultReturnExpression => new InsertChange('', pos, defaultReturnExpression));
+}
+

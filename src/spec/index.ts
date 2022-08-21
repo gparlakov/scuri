@@ -17,7 +17,7 @@ import { cosmiconfigSync } from 'cosmiconfig';
 import { EOL } from 'os';
 import { resolve } from 'path';
 import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
-import { addDefaultObservableAndPromiseToSpy } from '../common/add-observable-promise-stubs';
+import { addDefaultObservableAndPromiseToSpyJoined } from '../common/add-observable-promise-stubs';
 import { getSpecFilePathName } from '../common/get-spec-file-name';
 import { paths } from '../common/paths';
 import { describeSource } from '../common/read/read';
@@ -87,8 +87,7 @@ export function spec({ name, update, classTemplate, functionTemplate, config }: 
             e = e || {};
             logger.error(e.message || 'An error occurred');
             logger.debug(
-                `---Error--- ${EOL}${e.message || 'Empty error message'} ${
-                    e.stack || 'Empty stack.'
+                `---Error--- ${EOL}${e.message || 'Empty error message'} ${e.stack || 'Empty stack.'
                 }`
             );
         }
@@ -245,18 +244,18 @@ function createNewSpec(
                     .map((p) =>
                         p.type === 'string' || p.type === 'number'
                             ? `let ${p.name}:${p.type};`
-                            : `const ${p.name} = autoSpy(${p.type});${addDefaultObservableAndPromiseToSpy(p, depsCallsAndTypes, EOL)}`
+                            : `const ${p.name} = autoSpy(${p.type});${addDefaultObservableAndPromiseToSpyJoined(p, depsCallsAndTypes, { joiner: EOL, spyReturnType: 'jasmine' })}`
                     )
                     .join(EOL);
             }
             function toBuilderExports() {
                 return params.length > 0
                     ? params
-                          .map((p) => p.name)
-                          .join(',' + EOL)
-                          .concat(',')
+                        .map((p) => p.name)
+                        .join(',' + EOL)
+                        .concat(',')
                     : '';
-            }            
+            }
         } catch (e) {
             if (e != null && e.message === 'No classes found to be spec-ed!') {
                 const funktion = getFirstFunction(fileNameRaw, content);
