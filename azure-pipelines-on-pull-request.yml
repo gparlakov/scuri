@@ -27,7 +27,7 @@ steps:
     - script: npm run build
       displayName: 'Run the build'
 
-    - script: npm run lint
+    - script: npm run lint -- --fix
       displayName: 'Run linting'
 
     - script: npm run test
