@@ -17,7 +17,7 @@ describe('update-custom', () => {
         tree.create(classTemplate, template());
     });
 
-    fit('should add new and not repeat existing lines', async () => {
+    it('should add new and not repeat existing lines', async () => {
         const runner = new SchematicTestRunner('schematics', collectionPath);
         const treeAfter = await runner
             .runSchematicAsync('update-custom', <Options>{ name, classTemplate }, tree)
