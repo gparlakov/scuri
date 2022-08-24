@@ -116,7 +116,7 @@ export function updateWithCustomTemplate(
 
     return parts
         .map((p) => {
-            const mark = `// scuri:${p.mark.replace(skip, '')}`;
+            const mark = `// scuri:${p.mark.replace(new RegExp(skip, 'i'), '')}`.toLowerCase();
             const template: FileEntry = {
                 path: normalize('.'),
                 content: Buffer.from(p.template),
@@ -138,7 +138,8 @@ export function updateWithCustomTemplate(
                 .filter((c) => skipDeDupe || !templateData.specFileContents.includes(c))
                 .join(`${EOL}${spaces}`);
 
-            const position = templateData.specFileContents.indexOf(mark);
+            const position = templateData.specFileContents.toLowerCase().indexOf(mark);
+            context.logger.debug(`Mark ${mark} (original ${p.mark}) found at position(${position})`)
             // add the space at the end
             return { position, content: `${deDupedContent}${EOL}${spaces}` };
         })

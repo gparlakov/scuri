@@ -155,15 +155,17 @@ describe('ToUpdateComponent', () => {
         // expect(t).toEqual
     });
 
+    it('when mySecondMethod is called it should', () => {
+         // arrange
+            // act
+            t.mySecondMethod();
+            // assert
+            // expect(t).toEqual
+        });
+        
+    // scuri:methods
+
 });
-it('when mySecondMethod is called it should', () => {
-     // arrange
-        // act
-        t.mySecondMethod();
-        // assert
-        // expect(t).toEqual
-    });
-    
 
 "
 `;
