@@ -1,5 +1,6 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
+import { Subject } from 'rxjs';
 import { Options } from '../../src/update-custom/index';
 import { listenLogger, subscribe } from '../get-logger-errors';
 import { collectionPath } from '../spec/common';
@@ -8,6 +9,7 @@ describe('update-custom', () => {
     const name = 'example.ts';
     const specFileName = 'example.spec.ts';
     const classTemplate = '__specFileName__.template';
+    let stop$: Subject<void>;
 
     beforeEach(() => {
         tree = Tree.empty();
@@ -15,83 +17,102 @@ describe('update-custom', () => {
         tree.create(name, fileContent());
         tree.create(specFileName, specFileContent());
         tree.create(classTemplate, template());
+
+        stop$ = new Subject<void>();
     });
+
+    afterEach(() => { stop$.next() });
 
     it('should debug-output the skipped methods and the template results prior to dedupe', async () => {
         const runner = new SchematicTestRunner('schematics', collectionPath);
-        const logs = subscribe(listenLogger(runner.logger, { level: 'debug' }), 5); // expecting 5 entries
+        const logs = subscribe(listenLogger(runner.logger, { level: 'debug' }), 9);
 
         await runner
-            .runSchematicAsync('update-custom', <Options>{ name, classTemplate, specFileContents: specFileContent() }, tree)
+            .runSchematicAsync(
+                'update-custom',
+                <Options>{ name, classTemplate, specFileContents: specFileContent() },
+                tree
+            )
             .toPromise();
 
         // skipping methods
-        expect(logs[0]).toEqual('Skipping methods: [myMethod] as they seem to be already in the spec.');
-
-        // dedupe lets
-        expect(logs[1]).toEqual(`Template result before de-duplication: [let serviceSpy: Service;
-let routerSpy: Router;
-let justSpy: Just;
-]`);
-
-        // dedupe providers
-        expect(logs[2]).toEqual(`Template result before de-duplication: [{ provide: Service, useClass: autoSpy(Service, 'Service') },
-{ provide: Router, useClass: autoSpy(Router, 'Router') },
-{ provide: Just, useClass: autoSpy(Just, 'Just') },
-]`);
-
-        // dedupe instances
-        expect(logs[3]).toEqual(`Template result before de-duplication: [serviceSpy = spyInject<Service>(TestBed.inject(Service));
-routerSpy = spyInject<Router>(TestBed.inject(Router));
-justSpy = spyInject<Just>(TestBed.inject(Just));
-]`);
-
-        // dedupe methods
-        expect(logs[4]).toEqual(`Template result before de-duplication: [it('when yourMethod is called it should', () => {
-    // arrange
-    // act
-    e.yourMethod();
-    // assert
-    // expect(e).toEqual
-});
-it('when theirMethod is called it should', () => {
-    // arrange
-    // act
-    e.theirMethod();
-    // assert
-    // expect(e).toEqual
-});
-]`);
+        expect(logs).toMatchInlineSnapshot(`
+            Array [
+              "Skipping methods: [myMethod] as they seem to be already in the spec.",
+              "Template result before de-duplication: [let serviceSpy: Service;
+            let routerSpy: Router;
+            let justSpy: Just;
+            ]",
+              "Mark // scuri:lets (original lets) found at position(142)",
+              "Template result before de-duplication: [{ provide: Service, useClass: autoSpy(Service, 'Service') },
+            { provide: Router, useClass: autoSpy(Router, 'Router') },
+            { provide: Just, useClass: autoSpy(Just, 'Just') },
+            ]",
+              "Mark // scuri:injectables (original injectables) found at position(410)",
+              "Template result before de-duplication: [serviceSpy = spyInject<Service>(TestBed.inject(Service));
+            routerSpy = spyInject<Router>(TestBed.inject(Router));
+            justSpy = spyInject<Just>(TestBed.inject(Just));
+            ]",
+              "Mark // scuri:get-instances (original get-instances) found at position(531)",
+              "Template result before de-duplication: [it('when yourMethod is called it should', () => {
+                // arrange
+                // act
+                e.yourMethod();
+                // assert
+                // expect(e).toEqual
+            });
+            it('when theirMethod is called it should', () => {
+                // arrange
+                // act
+                e.theirMethod();
+                // assert
+                // expect(e).toEqual
+            });
+            ]",
+              "Mark // scuri:methods (original methods-skipDeDupe) found at position(741)",
+            ]
+        `);
     });
 
     it('should debug-output the empty template results', async () => {
-        const r = tree.beginUpdate(classTemplate)
+        const r = tree.beginUpdate(classTemplate);
         r.insertRight(1813, '/**scuri:template:empty-template:*/');
         tree.commitUpdate(r);
         const runner = new SchematicTestRunner('schematics', collectionPath);
-        const logs = subscribe(listenLogger(runner.logger, { level: 'debug' }), 6); // expecting 5 entries
+        const logs = subscribe(listenLogger(runner.logger, { level: 'debug' }), stop$);
 
         await runner
-            .runSchematicAsync('update-custom', <Options>{ name, classTemplate, specFileContents: specFileContent() }, tree)
+            .runSchematicAsync(
+                'update-custom',
+                <Options>{ name, classTemplate, specFileContents: specFileContent() },
+                tree
+            )
             .toPromise();
 
-        expect(logs[5]).toEqual('No result from applying template for empty-template.');
+        expect(logs).toContain('No result from applying template for empty-template.');
     });
 
     it('should error on failed template', async () => {
-        const r = tree.beginUpdate(classTemplate)
-        r.insertRight(1813, '/**scuri:template:empty-template:<%= test.forEach %> <% sharans.forEach(s => {%> tt<%=s <% }%>*/');
+        const r = tree.beginUpdate(classTemplate);
+        r.insertRight(
+            1813,
+            '/**scuri:template:empty-template:<%= test.forEach %> <% sharans.forEach(s => {%> tt<%=s <% }%>*/'
+        );
         tree.commitUpdate(r);
         const runner = new SchematicTestRunner('schematics', collectionPath);
-        const logs = subscribe(listenLogger(runner.logger, { level: 'error' }), 5); // expecting 5 entries
+        const logs = subscribe(listenLogger(runner.logger, { level: 'error' }), stop$); 
 
         await runner
-            .runSchematicAsync('update-custom', <Options>{ name, classTemplate, specFileContents: specFileContent() }, tree)
+            .runSchematicAsync(
+                'update-custom',
+                <Options>{ name, classTemplate, specFileContents: specFileContent() },
+                tree
+            )
             .toPromise()
-            .catch(e => {
+            .catch((e) => {
                 expect(logs).toEqual([]);
-                expect(e).toEqual(new SyntaxError('Unexpected token \'%\''));
-            })
+                expect(e).toEqual(new SyntaxError("Unexpected token '%'"));
+            });
     });
 });
 
