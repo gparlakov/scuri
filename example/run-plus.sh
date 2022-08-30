@@ -10,7 +10,7 @@ export NG_CLI_ANALYTICS=false
 
 
 # install the tarballed version of scuri
-npm i ./example/scuri.next.tgz
+npm install scuri
 # use headless chrome in karma config
 node ./switch-to-chrome-headless.js ./karma.conf.js
 node ./switch-to-chrome-headless.js ./src/karma.conf.js
