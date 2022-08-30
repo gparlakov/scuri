@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 1.3.0 - 2022-08-30
+
 ### Added
 
 - add default values for promise and observable returning method spies [#148](https://github.com/gparlakov/scuri/issues/148)
 - add support for strict TS for autospy
+- add e2e testing using verdaccio (local npm registry), verifying new version of npm actually installs and runs the create and update on changes
 
 ## [1.2.0] - 2021-11-23
 
