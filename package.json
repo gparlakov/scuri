@@ -17,7 +17,7 @@
     "lint": "npm run tslint -- -p tsconfig.test.json -c tslint.json",
     "pretty-quick": "pretty-quick",
     "deprecated_prepublish": "npm run build",
-    "prepare": "husky install"
+    "prepare": "npx husky install"
   },
   "keywords": [
     "test",
