@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -o
 
 #do not kill the script if a command fails
 

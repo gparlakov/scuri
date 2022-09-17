@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 # kill the script if a command fails
 set -e
 
@@ -29,6 +29,10 @@ npx ng g scuri:spec --name src/app/my-com/my-com.component.ts --class-template '
 # update a test with a template and template-functions
 cp -f example/to-update.componen*.ts ./src/app/
 npx ng g scuri:spec --name ./src/app/to-update.component.ts --class-template './example/__normalizedName__.custom.spec.ts.template' --update
+
+# overwrite an existing test
+npx ng g c test-overwrite
+npx ng g scuri:spec --name ./src/app/test-overwrite/test-overwrite.component.ts
 
 # copy results for external e2e test to run
 mkdir ./example/results || true
