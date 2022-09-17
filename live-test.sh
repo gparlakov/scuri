@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 
 rm -rf dist
 rm e2e/results/*.spec.ts

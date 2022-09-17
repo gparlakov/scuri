@@ -3,6 +3,7 @@ import { Logger } from '@angular-devkit/core/src/logger';
 import {
     apply,
     applyTemplates,
+    MergeStrategy,
     mergeWith,
     move,
     Rule,
@@ -227,7 +228,7 @@ function createNewSpec(
 
             const templateSource = apply(src, [applyTemplates(templateVariables), move(path)]);
 
-            return mergeWith(templateSource);
+            return mergeWith(templateSource, MergeStrategy.Overwrite);
 
             /**
              * End of the create function
