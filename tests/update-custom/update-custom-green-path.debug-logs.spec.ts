@@ -21,7 +21,9 @@ describe('update-custom', () => {
         stop$ = new Subject<void>();
     });
 
-    afterEach(() => { stop$.next() });
+    afterEach(() => {
+        stop$.next();
+    });
 
     it('should debug-output the skipped methods and the template results prior to dedupe', async () => {
         const runner = new SchematicTestRunner('schematics', collectionPath);
@@ -38,6 +40,7 @@ describe('update-custom', () => {
         // skipping methods
         expect(logs).toMatchInlineSnapshot(`
             Array [
+              "Cut the template to parts [{\\"mark\\":\\"lets\\",\\"template\\":\\"<%params.forEach(p => {%>let <%= camelize(p.type) %>Spy: <%= p.type %>;\\\\n<% }) %>\\"},{\\"mark\\":\\"injectables\\",\\"template\\":\\"<%params.forEach(p => {%>{ provide: <%= p.type %>, useClass: autoSpy(<%= p.type %>, '<%= p.type %>') },\\\\n<% }) %>\\"},{\\"mark\\":\\"get-instances\\",\\"template\\":\\"<%params.forEach(p => {%><%= camelize(p.type) %>Spy = spyInject<<%= p.type %>>(TestBed.inject(<%= p.type %>));\\\\n<% }) %>\\"},{\\"mark\\":\\"methods-skipDeDupe\\",\\"template\\":\\"<% publicMethods.forEach(meth=> {if(meth != '') { %>it('when <%= meth %> is called it should', () => {\\\\n    // arrange\\\\n    // act\\\\n    <%= shorthand %>.<%= meth %>();\\\\n    // assert\\\\n    // expect(<%= shorthand %>).toEqual\\\\n});\\\\n<% }}) %>\\"}]",
               "Skipping methods: [myMethod] as they seem to be already in the spec.",
               "Template result before de-duplication: [let serviceSpy: Service;
             let routerSpy: Router;
@@ -69,7 +72,6 @@ describe('update-custom', () => {
                 // expect(e).toEqual
             });
             ]",
-              "Mark // scuri:methods (original methods-skipDeDupe) found at position(741)",
             ]
         `);
     });
@@ -100,7 +102,7 @@ describe('update-custom', () => {
         );
         tree.commitUpdate(r);
         const runner = new SchematicTestRunner('schematics', collectionPath);
-        const logs = subscribe(listenLogger(runner.logger, { level: 'error' }), stop$); 
+        const logs = subscribe(listenLogger(runner.logger, { level: 'error' }), stop$);
 
         await runner
             .runSchematicAsync(

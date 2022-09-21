@@ -22,7 +22,7 @@ import { addDefaultObservableAndPromiseToSpyJoined } from '../common/add-observa
 import { getSpecFilePathName } from '../common/get-spec-file-name';
 import { paths } from '../common/paths';
 import { describeSource } from '../common/read/read';
-import { updateCustomTemplateCut } from '../common/scuri-custom-update-template';
+import { scuriTemplateMark, updateCustomTemplateCut } from '../common/scuri-custom-update-template';
 import {
     ClassDescription,
     FunctionDescription,
@@ -75,11 +75,14 @@ export function spec({ name, update, classTemplate, functionTemplate, config }: 
                 )}] but that file seems to be missing.`
             );
         }
+
         try {
             if (update) {
-                if (classTemplate) {
+                if (classTemplate && tree.exists(classTemplate) && tree.read(classTemplate)?.toString()?.includes(scuriTemplateMark)) {
+                    logger.debug(`Switching to update custom ${classTemplate}`)
                     return schematic('update-custom', { name, classTemplate });
                 }
+                logger.debug(`Updating name ${name}`);
                 return updateExistingSpec(name, tree, logger);
             } else {
                 return createNewSpec(name, tree, logger, { classTemplate, functionTemplate });
