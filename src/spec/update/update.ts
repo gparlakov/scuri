@@ -362,7 +362,7 @@ function addProvidersForTestBed(
                 new InsertChange(
                     path,
                     openingBracketPosition,
-                    `${firstChildIndentation}const ${a} = ${setupFunctionName}().default();`
+                    `${EOL}${firstChildIndentation}const ${a} = ${setupFunctionName}().default();`
                 )
             ]
             : [];

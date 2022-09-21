@@ -10,7 +10,7 @@ import { EOL } from 'os';
 import { getSpecFileCustomName } from '../common/get-spec-file-name';
 import { paths } from '../common/paths';
 import { describeSource } from '../common/read/read';
-import { updateCustomTemplateCut } from '../common/scuri-custom-update-template';
+import { scuriTemplateMark, updateCustomTemplateCut } from '../common/scuri-custom-update-template';
 import { ClassTemplateData, Description, isClassDescription } from '../types';
 
 export type Options = {
@@ -96,7 +96,11 @@ export function updateWithCustomTemplate(
     context: SchematicContext
 ): { position: number; content: string }[] {
     const [_, parts] = updateCustomTemplateCut(templateData.templateContents);
-
+    context.logger.debug(`Cut the template to parts ${JSON.stringify(parts)}`);
+    if(parts == null || parts.length === 0) {
+        throw new Error(`The custom template seems to be missing the ${scuriTemplateMark} mark. Perhaps you need the standard update?`)
+    }
+    
     const originalMethods = templateData.publicMethods;
     // skip methods that already have tests
     templateData.publicMethods = originalMethods.filter(
@@ -128,10 +132,10 @@ export function updateWithCustomTemplate(
             } else {
                 context.logger.debug(`Template result before de-duplication: [${templateResult}]`);
             }
-
+            
             const spaces = getWhitespaceBefore(templateData.specFileContents, mark);
             // skip de-duplication for the whole section (mark)
-            const skipDeDupe = p.mark.includes(skip);
+            const skipDeDupe = p.mark.toLowerCase().includes(skip.toLowerCase());
             const deDupedContent = templateResult
                 .split(/\r\n|\r|\n/g)
                 // remove lines of code that are already in the spec

@@ -31,8 +31,8 @@ describe('update-custom', () => {
             describe('ToUpdateComponent', () => {
 
                 let serviceSpy: Service;
-                 let routerSpy: Router;
-                 let justSpy: Just;
+                let routerSpy: Router;
+                let justSpy: Just;
                 // scuri:lets
 
                 beforeEach(
@@ -42,8 +42,8 @@ describe('update-custom', () => {
                                 MyDirective,
 
                                 { provide: Service, useClass: autoSpy(Service, 'Service') },
-                                 { provide: Router, useClass: autoSpy(Router, 'Router') },
-                                 { provide: Just, useClass: autoSpy(Just, 'Just') },
+                                { provide: Router, useClass: autoSpy(Router, 'Router') },
+                                { provide: Just, useClass: autoSpy(Just, 'Just') },
                                 // scuri:injectables
                             ]
                         });
@@ -51,8 +51,8 @@ describe('update-custom', () => {
                         directive = TestBed.inject(MyDirective);
 
                         serviceSpy = spyInject<Service>(TestBed.inject(Service));
-                         routerSpy = spyInject<Router>(TestBed.inject(Router));
-                         justSpy = spyInject<Just>(TestBed.inject(Just));
+                        routerSpy = spyInject<Router>(TestBed.inject(Router));
+                        justSpy = spyInject<Just>(TestBed.inject(Just));
                         // scuri:get-instances
 
                     })
@@ -68,7 +68,13 @@ describe('update-custom', () => {
 
 
                 it('when mySecondMethod is called it should', () => {
+                    // arrange
+                    // act
                     t.mySecondMethod();
+                    // assert
+                    // expect(t).toEqual
+                });
+
             // scuri:Methods
 
             });
@@ -176,18 +182,18 @@ describe('<%= className %>', () => {
 });
 
 /** scuri:template:lets:<%params.forEach(p => {%>let <%= camelize(p.type) %>Spy: <%= p.type %>;
- <% }) %>*/
+<% }) %>*/
     /** scuri:template:injectables:<%params.forEach(p => {%>{ provide: <%= p.type %>, useClass: autoSpy(<%= p.type %>, '<%= p.type %>') },
- <% }) %>*/
+<% }) %>*/
     /** scuri:template:get-instances:<%params.forEach(p => {%><%= camelize(p.type) %>Spy = spyInject<<%= p.type %>>(TestBed.inject(<%= p.type %>));
- <% }) %>*/
+<% }) %>*/
     /** scuri:template:methods-skipDedupe:<% publicMethods.forEach(meth=> {if(meth != '') { %>it('when <%= meth %> is called it should', () => {
-     // arrange
+        // arrange
         // act
         <%= shorthand %>.<%= meth %>();
         // assert
         // expect(<%= shorthand %>).toEqual
     });
-    <% }}) %>*/
+<% }}) %>*/
 `;
 }

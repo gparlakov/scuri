@@ -3,17 +3,19 @@ export interface Template {
     template: string;
 }
 
+const scuri = 'scuri:'
+const templateMark = 'template:';
+export const scuriTemplateMark = `${scuri}${templateMark}`
+
 export function updateCustomTemplateCut(classTemplate: string): [rest: string, templates: Template[]] {
-    const scuri = 'scuri:'
-    const templateMark = 'template:';
-    if (typeof classTemplate !== 'string' || !classTemplate.includes(`${scuri}${templateMark}`)) {
+    if (typeof classTemplate !== 'string' || !classTemplate.includes(`${scuriTemplateMark}`)) {
         return [classTemplate, []];
     }
 
     const splitBy = `/**${scuri}`;
     const fileSplit = classTemplate
-        // remove whitespaces /**  scuri:tempalte -> /**scuri:template
-        .replace(/\s*scuri:template:/g, `${scuri}${templateMark}`)
+        // remove white-spaces '/**  scuri:template ' -> '/**scuri:template:'
+        .replace(/\s*scuri:template:/g, `${scuriTemplateMark}`)
         .split(splitBy, 200);
 
     const contents = fileSplit.filter((f) => !f.includes(templateMark)).join('');
