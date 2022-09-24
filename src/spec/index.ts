@@ -40,7 +40,8 @@ class SpecOptions {
 
 type Config = Omit<SpecOptions, 'name' | 'update' | 'config'>;
 
-export function spec({ name, update, classTemplate, functionTemplate, config }: SpecOptions): Rule {
+export function spec({ name, update, classTemplate, functionTemplate, config}: SpecOptions): Rule {
+    const isForce = process.argv.find(e => e === 'force' || e === '--force') != null;
     return (tree: Tree, context: SchematicContext) => {
         const logger = context.logger.createChild('scuri.index');
         logger.debug(
@@ -85,7 +86,7 @@ export function spec({ name, update, classTemplate, functionTemplate, config }: 
                 logger.debug(`Updating name ${name}`);
                 return updateExistingSpec(name, tree, logger);
             } else {
-                return createNewSpec(name, tree, logger, { classTemplate, functionTemplate });
+                return createNewSpec(name, tree, logger, { classTemplate, functionTemplate, force: isForce });
             }
         } catch (e) {
             e = e || {};
@@ -188,7 +189,7 @@ function createNewSpec(
     fileNameRaw: string,
     tree: Tree,
     logger: Logger,
-    o?: { classTemplate?: string; functionTemplate?: string }
+    o?: { classTemplate?: string; functionTemplate?: string, force?: boolean }
 ) {
     const content = tree.read(fileNameRaw);
 
@@ -231,7 +232,7 @@ function createNewSpec(
 
             const templateSource = apply(src, [applyTemplates(templateVariables), move(path)]);
 
-            return mergeWith(templateSource, MergeStrategy.Overwrite);
+            return mergeWith(templateSource, o?.force ? MergeStrategy.AllowCreationConflict : undefined);
 
             /**
              * End of the create function

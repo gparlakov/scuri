@@ -32,7 +32,19 @@ npx ng g scuri:spec --name ./src/app/to-update.component.ts --class-template './
 
 # overwrite an existing test
 npx ng g c test-overwrite
+
+set +e
 npx ng g scuri:spec --name ./src/app/test-overwrite/test-overwrite.component.ts
+if [ "$?" -eq 0 ]
+    then
+        echo 'ng g should not overwrite without the --force flag'
+        exit 1;
+    else
+        echo 'ng g without --force did not overwrite the file and returned non-zero result'
+fi
+set -e
+# overwrite with force
+npx ng g scuri:spec --name ./src/app/test-overwrite/test-overwrite.component.ts --force
 
 # copy results for external e2e test to run
 mkdir ./example/results || true
