@@ -8,11 +8,20 @@ import {
     underscore,
 } from '@angular-devkit/core/src/utils/strings';
 
-export type DepType = string & {___type?: 'DepType'};
-export type MethodName = string & {___type?: 'MethodName'}; ;
-export type ReturnType = string & {___type?: 'ReturnType'};
+interface DependencyCallDescription {
+    name: string;
+    signature: 'function' | 'property';
+    type: 'observable' | 'promise' | 'other';
+    apparentType: string;
+}
 
-export type DependencyMethodReturnTypes = Map<DepType, Map<MethodName, ReturnType>>;
+export type DependencyTypeName = string;
+
+export type DependencyPropertyName = string;
+
+export type DependencyCall = string | DependencyCallDescription;
+
+export type DependencyMethodReturnTypes = Map<DependencyTypeName, Map<DependencyPropertyName, DependencyCall>>;
 
 export type ClassDescription = {
     type: 'class';

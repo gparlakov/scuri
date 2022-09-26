@@ -1,8 +1,14 @@
 /** starts on next line*/
-import { of } from 'rxjs';
-import { ClassDescription } from '../../../src/types'
+import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { ClassDescription } from '../../../src/types';
 
 export class ServiceWithMethods {
+
+    observable$: Observable<string>;
+    subject$: Subject<string>;
+    property$: BehaviorSubject<string>;
+    promiseProp: Promise<string>;
+
     constructor() {}
 
     observableReturning() {
@@ -14,4 +20,6 @@ export class ServiceWithMethods {
     justAMethod() {
         return <ClassDescription>{constructorParams: [], name: 'a name', publicMethods: ['asdad'], type: 'class'}
     }
+
+
 }

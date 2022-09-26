@@ -1,5 +1,5 @@
 /** starts on next line*/
-import { switchMap } from 'rxjs/operators';
+import { switchMap, switchMapTo } from 'rxjs/operators';
 import { ServiceWithMethods } from './deps-calls-with-return-types.dependency';
 
 export class ExampleComponent {
@@ -11,5 +11,13 @@ export class ExampleComponent {
         return this.service.observableReturning().pipe(
             switchMap(v => this.service.promiseReturning())
         );
+    }
+
+    async anotherMethod() {
+        this.service.property$.pipe(
+            switchMap(v => this.service.promiseProp),
+            switchMapTo(this.service.observable$),
+            switchMapTo(this.service.subject$),
+        )
     }
 }

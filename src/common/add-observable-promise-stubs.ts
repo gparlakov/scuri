@@ -17,14 +17,14 @@ export function addDefaultObservableAndPromiseToSpy(p: ConstructorParam, deps?: 
     const spyReturn = (v: string) => options?.spyReturnType === 'jest' ? `.mockReturnValue(${v})` : `.and.returnValue(${v})`;
     const dep = deps.get(p.type);
     const observables = Array.from(dep!.entries())
-        .filter(([_, value]) => value.match(/Observable<|Subject</))
+        .filter(([_, value]) => typeof value === 'string' ? value.match(/Observable<|Subject</) : (value?.type === 'observable' && value?.signature === 'function'))
         .map(([key,]) => `${p.name}.${key}${spyReturn('EMPTY')};`);
 
     const promises = Array.from(dep!.entries())
         .map(([key, value]) => {
             return [key, value];
         })
-        .filter(([_, value]) => value.match(/Promise</))
+        .filter(([_, value]) => typeof value === 'string' ? value.match(/Promise</) : (value?.type === 'promise' && value?.signature === 'function'))
         .map(([key]) => `${p.name}.${key}${spyReturn('new Promise(res => {})')};`);
     return [...observables, ...promises];
 }
