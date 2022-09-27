@@ -5,7 +5,7 @@ import {
 } from '../../../lib/utility/ast-utils';
 import { Change, InsertChange, RemoveChange } from '../../../lib/utility/change';
 import { addDefaultObservableAndPromiseToSpy, addDefaultObservableAndPromiseToSpyJoined } from '../../common/add-observable-promise-stubs';
-import { ConstructorParam, DependencyMethodReturnTypes } from '../../types';
+import { ConstructorParam, DependencyMethodReturnAndPropertyTypes } from '../../types';
 
 export function addMissing(
     path: string,
@@ -50,7 +50,7 @@ export function update(
     action: 'add' | 'remove',
     publicMethods: string[],
     shorthand: string,
-    deps?: DependencyMethodReturnTypes
+    deps?: DependencyMethodReturnAndPropertyTypes
 ): Change[] {
     const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
 
@@ -156,7 +156,7 @@ function add(
     setupFunction: ts.FunctionDeclaration,
     path: string,
     classUnderTestName: string,
-    deps?: DependencyMethodReturnTypes
+    deps?: DependencyMethodReturnAndPropertyTypes
 ): Change[] {
     // children of the setup include the block - that's what we want to change
     const block = setupFunction.getChildren().find(c => c.kind === ts.SyntaxKind.Block) as ts.Block;
@@ -175,7 +175,7 @@ function declareNewDependencies(
     block: ts.Block,
     toAdd: ConstructorParam[],
     path: string,
-    deps?: DependencyMethodReturnTypes
+    deps?: DependencyMethodReturnAndPropertyTypes
 ) {
     // children of the block are the opening { [at index [0]], the block content (SyntaxList) [at index[1]] and the closing } [index [2]]
     // we want to update the SyntaxList
@@ -409,7 +409,7 @@ function getIndentationMinusComments(node: ts.Node) {
 function addMissingDependencyReturns(
     paramsToAdd: ConstructorParam[],
     paramsToRemove: string[],
-    deps: DependencyMethodReturnTypes | undefined,
+    deps: DependencyMethodReturnAndPropertyTypes | undefined,
     allParams: ConstructorParam[],
     setupFunctionNode: ts.FunctionDeclaration
 ): InsertChange[] {

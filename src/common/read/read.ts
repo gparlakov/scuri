@@ -3,7 +3,7 @@ import { findNodes } from '../../../lib/utility/ast-utils';
 import {
     ConstructorParam,
     DependencyCall,
-    DependencyMethodReturnTypes,
+    DependencyMethodReturnAndPropertyTypes,
     DependencyPropertyName,
     DependencyTypeName,
     Description,
@@ -147,7 +147,7 @@ function readPublicMethods(node: ts.ClassDeclaration): string[] {
 function readDependencyCalls(
     n: ts.Node,
     constructorParams: ConstructorParam[]
-): DependencyMethodReturnTypes | undefined {
+): DependencyMethodReturnAndPropertyTypes | undefined {
     const sourceFileName = n.getSourceFile().fileName;
     const nodeFullText = n.getFullText();
     const prog = ts.createProgram([sourceFileName], {
@@ -203,11 +203,14 @@ function readDependencyCalls(
                                 propAccess.parent.getChildren().reverse()[0] as ts.Identifier
                             ).text;
 
+                            // console.log(checker.typeToString(parent, undefined, ts.TypeFormatFlags.UseTypeOfFunction));
+                            console.log('---has', parent.symbol.getDeclarations()![0].getChildAt(4).kind);
                             dependencyUseTypes.get(p.type)?.set(propName, {
-                                apparentType: checker.typeToString(parent),
+                                type: checker.typeToString(parent),
+                                // typeParams: checker.typeToString(parent).replace(),
                                 signature: 'property',
                                 name: propName,
-                                type: isObservable(parent)
+                                kind: isObservable(parent)
                                     ? 'observable'
                                     : isPromise(parent)
                                     ? 'promise'

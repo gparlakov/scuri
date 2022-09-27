@@ -8,11 +8,11 @@ import {
     underscore,
 } from '@angular-devkit/core/src/utils/strings';
 
-interface DependencyCallDescription {
+export interface DependencyCallDescription {
     name: string;
     signature: 'function' | 'property';
-    type: 'observable' | 'promise' | 'other';
-    apparentType: string;
+    kind: 'observable' | 'promise' | 'other';
+    type: string;
 }
 
 export type DependencyTypeName = string;
@@ -21,7 +21,7 @@ export type DependencyPropertyName = string;
 
 export type DependencyCall = string | DependencyCallDescription;
 
-export type DependencyMethodReturnTypes = Map<DependencyTypeName, Map<DependencyPropertyName, DependencyCall>>;
+export type DependencyMethodReturnAndPropertyTypes = Map<DependencyTypeName, Map<DependencyPropertyName, DependencyCall>>;
 
 export type ClassDescription = {
     type: 'class';
@@ -29,7 +29,7 @@ export type ClassDescription = {
     constructorParams: ConstructorParam[];
     publicMethods: string[];
 
-    depsCallsAndTypes?: DependencyMethodReturnTypes;
+    depsCallsAndTypes?: DependencyMethodReturnAndPropertyTypes;
 };
 
 export type ConstructorParam = {
