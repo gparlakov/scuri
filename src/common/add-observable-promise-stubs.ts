@@ -1,5 +1,7 @@
 import { EOL } from 'os';
-import { ConstructorParam, DependencyCall, DependencyCallDescription, DependencyMethodReturnAndPropertyTypes } from '../types';
+import { ConstructorParam, 
+    //DependencyCall, DependencyCallDescription, 
+    DependencyMethodReturnAndPropertyTypes } from '../types';
 
 export function addDefaultObservableAndPromiseToSpyJoined(p: ConstructorParam, deps?: DependencyMethodReturnAndPropertyTypes, options?: DefaultMethodReturnsOptions): string {
     if(!deps?.has(p.type)) {
@@ -38,14 +40,14 @@ export function listAllDefaultReturns(params: ConstructorParam[], deps?: Depende
     return params.flatMap(p => addDefaultObservableAndPromiseToSpy(p, deps, options))
 }
 
-export function addDefaultPropStubs(params: ConstructorParam[], deps?: DependencyMethodReturnAndPropertyTypes, options?: DefaultMethodReturnsOptions) {
+export function addDefaultPropStubs(params: ConstructorParam[], deps?: DependencyMethodReturnAndPropertyTypes, _?: DefaultMethodReturnsOptions) {
     if(deps == null || params?.length < 1) {
         return {}
     }
-    params.map(p => {
-        const d = deps.get(p.type) ?? new Map<string, DependencyCall> ();
-        const declarations = Array.from(d.entries())
-            .filter(([_, depCall]) => typeof depCall !== 'string' && depCall.signature === 'property')
-            .map(([prop, depCall]: [string, DependencyCallDescription]) => `const ${prop.replace('$', '')}$: ReplaySubject<${depCall.type}> = new ReplaySubject(1)`);
-    })
+    // params.map(p => {
+    //     const d = deps.get(p.type) ?? new Map<string, DependencyCall> ();
+    //     const declarations = Array.from(d.entries())
+    //         .filter(([_, depCall]) => typeof depCall !== 'string' && depCall.signature === 'property')
+    //         .map(([prop, depCall]: [string, DependencyCallDescription]) => `const ${prop.replace('$', '')}$: ReplaySubject<${depCall.type}> = new ReplaySubject(1)`);
+    // })
 }
