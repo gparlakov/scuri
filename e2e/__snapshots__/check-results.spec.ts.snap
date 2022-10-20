@@ -95,11 +95,19 @@ describe('OtherComponent', () => {
 });
 
 function setup() {
-  const s = autoSpy(Service);
-s.observableReturning.and.returnValue(EMPTY);
-s.promiseReturning.and.returnValue(new Promise(res => {}));
+  
+    const s = autoSpy(Service);
+    s.promiseReturning.and.returnValue(new Promise(res => {}));
   const builder = {
     s,
+    withSPromiseReturningReturn(p: Promise<string>) {
+        s.promiseReturning.and.returnValue(p);
+        return builder;
+    },
+    withSObservableReturningReturn(o: Observable<string>) {
+        s.observableReturning.and.returnValue(o);
+        return builder;
+    },
     default() {
       return builder;
     },

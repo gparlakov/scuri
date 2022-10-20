@@ -1,9 +1,9 @@
 /** starts on next line*/
 import { switchMap, switchMapTo, tap } from 'rxjs/operators';
-import { ServiceWithMethods } from './deps-calls-with-return-types.dependency';
+import { JustADep, ServiceWithMethods } from './dependency';
 
 export class ExampleComponent {
-    constructor(private readonly service:ServiceWithMethods) {}
+    constructor(private readonly service: ServiceWithMethods, private readonly dep1: JustADep) { }
 
     async aMethod() {
         const d = this.service.justAMethod();
@@ -19,7 +19,15 @@ export class ExampleComponent {
             switchMap(v => this.service.promiseProp),
             switchMapTo(this.service.observable$),
             switchMapTo(this.service.subject$),
-            tap({error: () => this.service.aNeverMethod()})
+            tap({ error: () => this.service.aNeverMethod() })
         )
+    }
+
+    async onButtonClick() {
+        if (this.dep1.getMyObject()) {
+            this.dep1.observable$.pipe(
+                switchMapTo(this.dep1.promiseProp)
+            );
+        }
     }
 }

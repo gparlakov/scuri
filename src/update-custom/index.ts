@@ -49,6 +49,7 @@ export function updateCustom(o: Options): Rule {
                     params: constructorParams,
                     publicMethods: publicMethods,
                     shorthand: (normalizedName ?? '')[0].toLowerCase(),
+                    setupMethods: []
                 }
 
                 const customSpecFileName = getSpecFileCustomName(classData, o.classTemplate);

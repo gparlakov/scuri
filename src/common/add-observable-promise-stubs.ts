@@ -1,39 +1,283 @@
+import { classify } from '@angular-devkit/core/src/utils/strings';
 import { EOL } from 'os';
-import { ConstructorParam, DependencyMethodReturnTypes } from '../types';
-
-export function addDefaultObservableAndPromiseToSpyJoined(p: ConstructorParam, deps?: DependencyMethodReturnTypes, options?: DefaultMethodReturnsOptions): string {
-    if(!deps?.has(p.type)) {
-        return ''
-    }
-    const joiner = typeof options?.joiner === 'string' ? options?.joiner : EOL;
-
-    return `${typeof joiner === 'string'? joiner : ''}${addDefaultObservableAndPromiseToSpy(p, deps, options).join(joiner)}`;
-}
-
-export function addDefaultObservableAndPromiseToSpy(p: ConstructorParam, deps?: DependencyMethodReturnTypes, options?: DefaultMethodReturnsOptions): string[] {
-    if(!deps?.has(p.type)) {
-        return []
-    }
-    const spyReturn = (v: string) => options?.spyReturnType === 'jest' ? `.mockReturnValue(${v})` : `.and.returnValue(${v})`;
-    const dep = deps.get(p.type);
-    const observables = Array.from(dep!.entries())
-        .filter(([_, value]) => value.match(/Observable<|Subject</))
-        .map(([key,]) => `${p.name}.${key}${spyReturn('EMPTY')};`);
-
-    const promises = Array.from(dep!.entries())
-        .map(([key, value]) => {
-            return [key, value];
-        })
-        .filter(([_, value]) => value.match(/Promise</))
-        .map(([key]) => `${p.name}.${key}${spyReturn('new Promise(res => {})')};`);
-    return [...observables, ...promises];
-}
+import {
+    ConstructorParam,
+    DependencyCallDescription,
+    DependencyMethodReturnAndPropertyTypes,
+    TemplateFunction,
+} from '../types';
+import { buildErrorForMissingSwitchCase } from './build-time-error-for-missing-switch-case';
 
 interface DefaultMethodReturnsOptions {
     joiner?: string;
     spyReturnType?: 'jasmine' | 'jest';
 }
 
-export function listAllDefaultReturns(params: ConstructorParam[], deps?: DependencyMethodReturnTypes, options?: DefaultMethodReturnsOptions) {
-    return params.flatMap(p => addDefaultObservableAndPromiseToSpy(p, deps, options))
+export function addDefaultObservableAndPromiseToSpyJoined(
+    p: ConstructorParam,
+    deps?: DependencyMethodReturnAndPropertyTypes,
+    options?: DefaultMethodReturnsOptions
+): string {
+    if (!deps?.has(p.type)) {
+        return '';
+    }
+    const joiner = typeof options?.joiner === 'string' ? options?.joiner : EOL;
+
+    return `${typeof joiner === 'string' ? joiner : ''}${addDefaultObservableAndPromiseToSpy(
+        p,
+        deps,
+        options
+    ).join(joiner)}`;
+}
+
+export function addDefaultObservableAndPromiseToSpy(
+    p: ConstructorParam,
+    deps?: DependencyMethodReturnAndPropertyTypes,
+    options?: DefaultMethodReturnsOptions
+): string[] {
+    if (!deps?.has(p.type) || deps.get(p.type) == null) {
+        return [];
+    }
+    // with the above we ensure the dep is in the map so we ! to tell that to TS
+    const dep = deps.get(p.type)!;
+
+    const spyReturn = getSpyReturnBasedOnTestingFramework(options);
+
+    const empty = '----------------empty-----------------';
+    return Array.from(dep.entries())
+        .map(([key, value]) => {
+            // only add for the functions (properties are added inline of the autoSpy)
+            if(value.signature != 'function') {
+                return empty;
+            }
+
+            switch (value.kind) {
+                case 'observable':
+                    return `${p.name}.${key}${spyReturn('EMPTY')};`;
+                case 'promise':
+                    return `${p.name}.${key}${spyReturn('new Promise(res => {})')};`;
+                case 'other':
+                    return empty;
+                default:
+                    buildErrorForMissingSwitchCase(value.kind, `unhandled kind ${value.kind}`);
+            }
+        })
+        .filter((v) => v !== empty);
+}
+
+export function propertyMocks(
+    p: ConstructorParam,
+    depsCallsAndTypes: DependencyMethodReturnAndPropertyTypes | undefined,
+    o?: DefaultMethodReturnsOptions
+): string {
+    if (depsCallsAndTypes?.get(p.type)?.entries() == null) {
+        return '';
+    }
+    const joiner = typeof o?.joiner === 'string' ? o.joiner : EOL;
+    const w = joinerWhitespace(joiner, '    ');
+
+    const dep = depsCallsAndTypes?.get(p.type);
+    return Array.from(dep!.keys())
+        .map((propOrMethod) => {
+            const depMeta = dep?.get(propOrMethod);
+
+            if (depMeta == null || depMeta.kind === 'other' || depMeta.signature === 'function') {
+                return undefined;
+            } else {
+                const { name } = depMeta;
+                const Name = `${classify(p.name)}${classify(name)}`;;
+                const name$ = `${p.name}${classify(observablePropName(name))}`;
+                const promiseName = `${p.name}${classify(name)}`;
+                const type = depMeta.typeParams[0];
+                const nl = joiner;
+                switch (depMeta.kind) {
+                    case 'observable':
+                        // prettier ignore
+                        return `const ${name$} = new ReplaySubject<${type}>(1);`;
+                    case 'promise':
+                        // prettier ignore
+                        return `const resolve${Name}: Function;${nl}const reject${Name}: Function;${nl}const ${promiseName} = new Promise((res, rej) => {${nl}${w}${resolveName(
+                            name
+                        )} = res;${nl}${w}${rejectName(name)} = rej;${nl}});`;
+                    default:
+                        return buildErrorForMissingSwitchCase(
+                            depMeta.kind,
+                            `unhandled kind of metadata ${depMeta.kind}`
+                        );
+                }
+            }
+        })
+        .filter((v) => v !== undefined)
+        .join(joiner)
+        .concat(joiner);
+}
+
+export function includePropertyMocks(
+    p: ConstructorParam,
+    depsCallsAndTypes: DependencyMethodReturnAndPropertyTypes | undefined,
+    skipWhen?:((dep: DependencyCallDescription | 'checkShouldSkipObjectWrapper') => boolean)
+): string {
+    if (depsCallsAndTypes?.get(p.type)?.entries() == null) {
+        return '';
+    }
+
+    const skip = typeof skipWhen === 'function' ? skipWhen : () => false;
+    const dep = depsCallsAndTypes?.get(p.type);
+    const r = Array.from(dep!.keys())
+        .map((propOrMethod) => {
+            const depMeta = dep?.get(propOrMethod);
+
+            if(depMeta == null || depMeta.kind === 'other' || depMeta.signature === 'function') {
+                return undefined;
+            }
+
+            if(skip(depMeta)){
+                return undefined;
+            }
+
+            return depMeta.kind === 'observable'
+                ? `${depMeta.name}: ${p.name}${classify(observablePropName(depMeta.name))}`
+                : `${depMeta.name}: ${p.name}${classify(depMeta.name)}`;
+        })
+        .filter((r) => r != undefined)
+        .join(', ');
+
+    if(r.length === 0) {
+        return '';
+    }
+    if(skip('checkShouldSkipObjectWrapper')) {
+        return `, ${r}`;
+    }
+
+    return `, { ${r} }`;
+}
+
+export function createSetupMethodsFn(
+    params: ConstructorParam[],
+    depsCallsAndTypes: DependencyMethodReturnAndPropertyTypes | undefined,
+    options?: DefaultMethodReturnsOptions & {shouldSkip?(methodName: string, propName: string): boolean}
+): TemplateFunction[] {
+
+    const skip = typeof options?.shouldSkip === 'function' ? options.shouldSkip : () => false;
+    // create an array of functions. Each of those will generate an array of methods
+    return params.map((p) => {
+        if (depsCallsAndTypes?.get(p.type)?.entries() == null) {
+            return () => '';
+        }
+
+        return (joiner: string) => {
+            const w = joinerWhitespace(joiner, '    ');
+
+            const dep = depsCallsAndTypes?.get(p.type);
+            const r = Array.from(dep!.keys())
+                // don't do work for missing or void|never methods|props
+                .filter((propOrMethod) => dep?.get(propOrMethod) != null && !(['void', 'never'].includes(dep.get(propOrMethod)!.type)))
+                .map((propOrMethod) => {
+                    const depMeta = dep?.get(propOrMethod)!;
+
+                    const { name, signature, kind, type, typeParams } = depMeta;
+                    const Name = `${classify(p.name)}${classify(name)}`;
+                    const otherName = `with${Name}Return`;
+                    const otherParam = propOrMethod;
+                    const observableName = `with${Name}Emit`;
+                    const name$ = observablePropName(name);
+
+                    const promiseName = `with${Name}`
+                    const promiseParam = resolveName(name);
+                    if(
+                        (kind === 'other' && skip(otherName, otherParam)) ||
+                        (kind === 'observable' && skip(observableName, name$)) ||
+                        (kind === 'promise' && skip(promiseName, promiseParam))
+                    ) {
+                        return undefined;
+                    }
+
+
+                    const n = name[0];
+                    const paramType = typeParams[0];
+                    const nl = joiner;
+
+                    if (signature === 'function') {
+                        // prettier-ignore
+                        return `with${Name}Return(${n}: ${type}) {${
+                            nl}${w}${p.name}.${propOrMethod}${getSpyReturnBasedOnTestingFramework(options)(n)};${
+                            nl}${w}return builder;${
+                        nl}}`;
+                    }
+
+                    switch (kind) {
+                        case 'observable':
+                            // prettier-ignore
+                            return `with${Name}Emit(${n}: ${paramType} | Error, action: 'emit' | 'error' | 'complete' = 'emit') {${
+                                    nl}${w}if (action === 'emit') {${
+                                        nl}${w}${w}${name$}.next(${n});${
+                                    nl}${w}} else if (action === 'error') {${
+                                        nl}${w}${w}${name$}.error(${n});${
+                                    nl}${w}} else {${
+                                        nl}${w}${w}${name$}.complete();${
+                                    nl}${w}}${
+                                    nl}${w}return builder;${
+                                nl}}`;
+                        case 'promise':
+                            // prettier-ignore
+                            return `with${Name}(${n}: ${paramType} | Error, action: 'resolve' | 'reject' = 'resolve') {${
+                                    nl}${w}if (action === 'resolve') {${
+                                        nl}${w}${w}${resolveName(name)}(${n});${
+                                    nl}${w}} else {${
+                                        nl}${w}${w}${rejectName(name)}(${n});${
+                                    nl}${w}}${
+                                    nl}${w}return builder;${
+                                nl}}`;
+
+                        case 'other':
+                            // prettier-ignore
+                            return `with${Name}(${n}: ${type}) {${
+                                nl}${w}${p.name}.${propOrMethod} = ${n};${
+                                nl}${w}return builder;${
+                            nl}}`;
+                        default:
+                            buildErrorForMissingSwitchCase(
+                                kind,
+                                `unhandled kind of metadata ${kind}`
+                            );
+                    }
+                });
+
+            return r.length > 0 ? r.filter(r => r != null && r != '').join(`,${joiner}`).concat(',') : '';
+        };
+    });
+}
+
+function joinerWhitespace(j: string, or: string = ''): string {
+    if (typeof j === 'string') {
+        const w = j.match(/(\w)/);
+        if (w != null) {
+            return w[1];
+        }
+    }
+
+    return or;
+}
+
+function observablePropName(name: string) {
+    return `${name.replace('$', '')}$`;
+}
+function rejectName(name: string) {
+    return `reject${classify(name)}`;
+}
+function resolveName(name: string) {
+    return `resolve${classify(name)}`;
+}
+
+function getSpyReturnBasedOnTestingFramework(options: DefaultMethodReturnsOptions | undefined) {
+    return (v: string) =>
+        options?.spyReturnType === 'jest' ? `.mockReturnValue(${v})` : `.and.returnValue(${v})`;
+}
+
+export function listAllDefaultReturns(
+    params: ConstructorParam[],
+    deps?: DependencyMethodReturnAndPropertyTypes,
+    options?: DefaultMethodReturnsOptions
+) {
+    return params.flatMap((p) => addDefaultObservableAndPromiseToSpy(p, deps, options));
 }

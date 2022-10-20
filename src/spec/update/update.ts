@@ -1,18 +1,45 @@
+import { classify } from '@angular-devkit/core/src/utils/strings';
 import { EOL } from 'os';
 import * as ts from 'typescript';
-import {
-    findNodes, insertImport, isImported
-} from '../../../lib/utility/ast-utils';
+import { findNodes, insertImport, isImported } from '../../../lib/utility/ast-utils';
 import { Change, InsertChange, RemoveChange } from '../../../lib/utility/change';
-import { addDefaultObservableAndPromiseToSpy, addDefaultObservableAndPromiseToSpyJoined } from '../../common/add-observable-promise-stubs';
-import { ConstructorParam, DependencyMethodReturnTypes } from '../../types';
+import {
+    addDefaultObservableAndPromiseToSpy,
+    addDefaultObservableAndPromiseToSpyJoined,
+    createSetupMethodsFn,
+    includePropertyMocks,
+    propertyMocks,
+} from '../../common/add-observable-promise-stubs';
+import { buildErrorForMissingSwitchCase } from '../../common/build-time-error-for-missing-switch-case';
+import { dependenciesWrap } from '../../common/deps-filtered';
+import { ConstructorParam, DependencyMethodReturnAndPropertyTypes } from '../../types';
+
+export interface UpdateOptions {
+    framework: 'jasmine' | 'jest';
+}
+
+export interface DepMethodsAdditionsOptions {
+    fileContent: string;
+    allParams: ConstructorParam[];
+    path: string;
+    deps: DependencyMethodReturnAndPropertyTypes | undefined;
+    framework: UpdateOptions['framework'];
+}
+
+export interface AddDepPropsMockOptions {
+    fileContent: string;
+    allParams: ConstructorParam[];
+    path: string;
+    deps: DependencyMethodReturnAndPropertyTypes | undefined;
+}
+
+
 
 export function addMissing(
     path: string,
     fileContent: string,
     _dependencies: ConstructorParam[],
-    classUnderTestName: string,
-
+    classUnderTestName: string
 ) {
     const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
 
@@ -42,15 +69,17 @@ function setup() {
     return missingThings;
 }
 
+
 export function update(
     path: string,
     fileContent: string,
     dependencies: ConstructorParam[],
     classUnderTestName: string,
-    action: 'add' | 'remove',
+    action: 'add' | 'remove' | 'add-spy-methods-and-props',
     publicMethods: string[],
     shorthand: string,
-    deps?: DependencyMethodReturnTypes
+    deps: DependencyMethodReturnAndPropertyTypes | undefined,
+    options: UpdateOptions
 ): Change[] {
     const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
 
@@ -61,17 +90,26 @@ export function update(
 
     const currentParams = readCurrentParameterNames(setupFunctionNode, classUnderTestName);
 
-    const paramsToRemove = currentParams.filter(p => !dependencies.some(d => d.name === p));
-    const paramsToAdd = dependencies.filter(d => !currentParams.some(c => c === d.name));
+    const paramsToRemove = currentParams.filter((p) => !dependencies.some((d) => d.name === p));
+    const paramsToAdd = dependencies.filter((d) => !currentParams.some((c) => c === d.name));
 
-    return action === 'remove'
-        ? remove(paramsToRemove, setupFunctionNode, path)
-        : [
+    switch (action) {
+
+        case 'remove': return remove(paramsToRemove, setupFunctionNode, path);
+
+        case 'add': return [
             // ordered as additions from the bottom of the file up
             // 1 the lowest - additions to the setup function
             ...add(paramsToAdd, setupFunctionNode, path, classUnderTestName, deps),
             // 2 additions to the setup function again
-            ...addMissingDependencyReturns(paramsToAdd, paramsToRemove, deps, dependencies, setupFunctionNode),
+            ...addMissingDependencyReturns(
+                paramsToAdd,
+                paramsToRemove,
+                deps,
+                dependencies,
+                setupFunctionNode,
+                options
+            ),
             // 3 methods - each of them will generate a it test case
             ...addMethods(publicMethods, path, fileContent, source, shorthand),
             // 4 providers - if TestBed is used it will get the providers from a = setup().default() and provide them the classic Angular way
@@ -82,14 +120,22 @@ export function update(
                 path
             ),
             // 5 add the missing imports on the top
-            ...addMissingImports(dependencies, path, source)
+            ...addMissingImports(dependencies, path, source),
         ];
+
+        case 'add-spy-methods-and-props': return [
+            ...addDepReturnsMethods({ allParams: dependencies, path, fileContent: fileContent, deps, framework: options.framework }),
+            ...addDepPropsMocks({ allParams: dependencies, path, fileContent, deps })
+        ]
+
+        default: buildErrorForMissingSwitchCase(action, `Unhandled action ${action}`);
+    }
 }
 
 function readSetupFunction(source: ts.Node) {
     // FunctionDeclaration -> function setup () {/*body*/ }
     return (findNodes(source, ts.SyntaxKind.FunctionDeclaration) as ts.FunctionDeclaration[]).find(
-        n => n.name != null && n.name.text.startsWith('setup')
+        (n) => n.name != null && n.name.text.startsWith('setup')
     );
 }
 
@@ -102,7 +148,7 @@ function readCurrentParameterNames(
         setupFunctionNode,
         ts.SyntaxKind.NewExpression
     ).find(
-        node =>
+        (node) =>
             node.kind === ts.SyntaxKind.NewExpression && node.getText().includes(classUnderTestName)
     ) as ts.NewExpression;
 
@@ -113,7 +159,7 @@ function readCurrentParameterNames(
     )[0] as ts.SyntaxList;
 
     // Array -> ['dep1', 'dep2']
-    const parameterNames = findNodes(parametersList, ts.SyntaxKind.Identifier).map(n =>
+    const parameterNames = findNodes(parametersList, ts.SyntaxKind.Identifier).map((n) =>
         n.getText()
     );
 
@@ -123,15 +169,15 @@ function remove(toRemove: string[], setupFunction: ts.FunctionDeclaration, path:
     // VariableStatement -> let dep:string; Or const service = autoSpy(Object);
     const instantiations = findNodes(setupFunction, ts.SyntaxKind.VariableStatement).filter(
         (n: ts.VariableStatement) =>
-            n.declarationList.declarations.some(v => toRemove.includes(v.name.getText()))
+            n.declarationList.declarations.some((v) => toRemove.includes(v.name.getText()))
     );
     const uses = findNodes(setupFunction, ts.SyntaxKind.Identifier)
-        .filter(i => !i.parent || i.parent.kind !== ts.SyntaxKind.VariableDeclaration)
-        .filter(i => toRemove.includes((i as ts.Identifier).getText()));
+        .filter((i) => !i.parent || i.parent.kind !== ts.SyntaxKind.VariableDeclaration)
+        .filter((i) => toRemove.includes((i as ts.Identifier).getText()));
 
     return instantiations
         .concat(uses)
-        .map(i => new RemoveChange(path, i.pos, getTextPlusCommaIfNextCharIsComma(i)));
+        .map((i) => new RemoveChange(path, i.pos, getTextPlusCommaIfNextCharIsComma(i)));
 }
 
 /**
@@ -156,37 +202,141 @@ function add(
     setupFunction: ts.FunctionDeclaration,
     path: string,
     classUnderTestName: string,
-    deps?: DependencyMethodReturnTypes
+    deps?: DependencyMethodReturnAndPropertyTypes,
 ): Change[] {
     // children of the setup include the block - that's what we want to change
-    const block = setupFunction.getChildren().find(c => c.kind === ts.SyntaxKind.Block) as ts.Block;
-    if (block == null) {
-        throw new Error('Could not find the block of the setup function.');
-    }
+    const block = getSetupFunctionBlock(setupFunction);
 
     return [
+        ...useNewDependenciesInConstructor(block, toAdd, path, classUnderTestName),
+        ...exposeNewDependencies(setupFunction, toAdd, path),
         ...declareNewDependencies(block, toAdd, path, deps),
-        ...exposeNewDependencies(block, toAdd, path),
-        ...useNewDependenciesInConstructor(block, toAdd, path, classUnderTestName)
     ];
 }
-const typesLikelyToChange = ['string', 'boolean', 'number', 'any', 'unknown', 'Object']
+
+
+function addDepReturnsMethods({
+    allParams,
+    fileContent: fileContents,
+    path,
+    deps,
+    framework
+}: DepMethodsAdditionsOptions
+): InsertChange[] {
+    // no dependency methods/properties used found - nothing to do here
+    if ([...deps?.entries() ?? []].length === 0) {
+        return [];
+    }
+
+    const source = ts.createSourceFile(path, fileContents, ts.ScriptTarget.Latest, true);
+
+    const setupFunctionNode = readSetupFunction(source);
+    if (setupFunctionNode == null) {
+        throw new Error("There is no setup function in the source file. We can't update that.");
+    }
+
+    const { indentation, endBracketPosition: position, builderObjectLiteral, syntaxListEndsWithComma, syntaxEndPosition } = getBuilderBlockMeta(setupFunctionNode);
+
+    const commaMaybe = new InsertChange(path, syntaxEndPosition, syntaxListEndsWithComma ? '' : `,${EOL}${indentation}`);
+    const blockText = builderObjectLiteral.getText();
+    return [
+        commaMaybe,
+        ...createSetupMethodsFn(
+            allParams,
+            deps,
+            {
+                spyReturnType: framework,
+                shouldSkip: (method, prop) => blockText.includes(method) || blockText.includes(prop),
+            })
+            .map((fn) => fn(`${EOL}${indentation}`))
+            .map(method => new InsertChange(path, position, method))
+    ];
+
+}
+
+function addDepPropsMocks({
+    allParams,
+    fileContent,
+    path,
+    deps
+}: AddDepPropsMockOptions): InsertChange[] {
+
+    // no dependency methods/properties used found - nothing to do here
+    if ([...deps?.entries() ?? []].length === 0) {
+        return [];
+    }
+
+    const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
+
+    const setupFunctionNode = readSetupFunction(source);
+    if (setupFunctionNode == null) {
+        throw new Error("There is no setup function in the source file. We can't update that.");
+    }
+    const ds = dependenciesWrap(deps);
+
+    return allParams
+        //finds the node with the dependency autoSpy (probably) declaration
+        .map(p => {
+            return [p, findNodes(
+                setupFunctionNode,
+                (n): n is ts.Node => n.kind === ts.SyntaxKind.VariableDeclaration
+            )
+                .find(n => n.getText().match(new RegExp(`${p.name}.*${p.type}`)))]
+        })
+        .filter((v): v is [ConstructorParam, ts.Node] => v[1] != null)
+        // order closest to the end of file first b/c we want to insert changes from the bottom up
+        .sort(([, n1], [,n2]) => (n2.pos ?? 0) - (n1?.pos ?? 0))
+
+        .flatMap(([p, n]) => {
+            const text = n.getText();
+            const somePropsAdded =  text.includes('{');
+            const insertPoint = (somePropsAdded
+                ? findNodes(n, ts.isObjectLiteralExpression)[0].getLastToken()?.getStart()
+                : n.getLastToken()?.getStart()
+            ) ?? (n.getEnd() - 2);
+            return [
+                // skip props that are already added in the setup fn
+                new InsertChange(path, n.parent.getStart(),
+                    propertyMocks(
+                        p,
+                        ds.skip(dep => text.includes(dep.name)), // when the name of the prop is part of the definition means it has already been provided to autoSpy and can be skipped
+                        {joiner: `${EOL}${getIndentationMinusComments(n!)}`}
+                    )
+                ),
+
+                // add the declared props to the autoSpy call expression and calculate whether to add ',{}' or just ','
+                new InsertChange(path,
+                    insertPoint,
+                    includePropertyMocks(
+                        p,
+                        deps,
+                        /*skipWhen*/ depOrObj => depOrObj === 'checkShouldSkipObjectWrapper'
+                            ? somePropsAdded
+                            : text.includes(`${p.name}${classify(depOrObj.name)}`)
+                    )
+                )
+            ];
+        });
+}
+
+const typesLikelyToChange = ['string', 'boolean', 'number', 'any', 'unknown', 'Object'];
+
 function declareNewDependencies(
-    block: ts.Block,
+    setupFnBlock: ts.Block,
     toAdd: ConstructorParam[],
     path: string,
-    deps?: DependencyMethodReturnTypes
+    deps?: DependencyMethodReturnAndPropertyTypes
 ) {
     // children of the block are the opening { [at index [0]], the block content (SyntaxList) [at index[1]] and the closing } [index [2]]
     // we want to update the SyntaxList
-    const setupBlockContent = block.getChildAt(1);
+    const setupBlockContent = setupFnBlock.getChildAt(1);
 
     // leading because it includes the end-of-line from previous line plus indentation on current line
     const leadingIndent = getIndentationMinusComments(setupBlockContent);
 
     const position = setupBlockContent.getStart();
     return toAdd.map(
-        p =>
+        (p) =>
             // if we are 'mocking' a simple/native type - let c: string; / let c: Object; - leave the instantiation till later
             // if it's a complex type -> const c = autoSpy(Service);
             new InsertChange(
@@ -194,14 +344,35 @@ function declareNewDependencies(
                 position,
                 typesLikelyToChange.includes(p.type)
                     ? `let ${p.name}: ${p.type};${EOL}${leadingIndent}`
-                    : `const ${p.name} = autoSpy(${p.type});${ addDefaultObservableAndPromiseToSpyJoined(p, deps, { joiner: `${EOL}${leadingIndent}`})}${EOL}${leadingIndent}`
+                    : `const ${p.name} = autoSpy(${p.type
+                    });${addDefaultObservableAndPromiseToSpyJoined(p, deps, {
+                        joiner: `${EOL}${leadingIndent}`,
+                    })}${EOL}${leadingIndent}`
             )
-        );
+    );
 }
 
-function exposeNewDependencies(block: ts.Block, toAdd: ConstructorParam[], path: string) {
-    const builderDeclaration = findNodes(block, ts.SyntaxKind.VariableDeclaration).find(v =>
-        (v as ts.VariableDeclaration).name.getFullText().includes('builder')
+function exposeNewDependencies(block: ts.FunctionDeclaration, toAdd: ConstructorParam[], path: string) {
+    const { positionToAdd, indentation } = getBuilderBlockMeta(block);
+    return toAdd.map(
+        (a) => new InsertChange(path, positionToAdd, `${EOL}${indentation}${a.name},`)
+    );
+}
+
+
+function getSetupFunctionBlock(setupFunction: ts.FunctionDeclaration) {
+    const block = setupFunction
+        .getChildren()
+        .find((c) => c.kind === ts.SyntaxKind.Block) as ts.Block;
+    if (block == null) {
+        throw new Error('Could not find the block of the setup function.');
+    }
+    return block;
+}
+
+function getBuilderBlockMeta(setupFunctionNode: ts.FunctionDeclaration) {
+    const setupBlock = getSetupFunctionBlock(setupFunctionNode);
+    const builderDeclaration = findNodes(setupBlock, ts.SyntaxKind.VariableDeclaration).find((v) => (v as ts.VariableDeclaration).name.getFullText().includes('builder')
     );
     const builderObjectLiteral = findNodes(
         builderDeclaration!,
@@ -214,7 +385,11 @@ function exposeNewDependencies(block: ts.Block, toAdd: ConstructorParam[], path:
     const indentation = getIndentationMinusComments(builderObjectLiteral.getChildAt(1));
 
     const positionToAdd = builderObjectLiteral.getChildAt(0).getEnd();
-    return toAdd.map(a => new InsertChange(path, positionToAdd, `${EOL}${indentation}${a.name},`));
+    const childrenReversed = builderObjectLiteral.getChildren().reverse();
+    const lastChildPosition = childrenReversed[0].getStart();
+    const syntaxListEndsWithComma = childrenReversed[1]?.getText()?.endsWith(',');
+    const syntaxEndPosition = childrenReversed[1].getEnd();
+    return { positionToAdd, indentation, builderDeclaration, builderObjectLiteral, endBracketPosition: lastChildPosition, syntaxListEndsWithComma, syntaxEndPosition };
 }
 
 function useNewDependenciesInConstructor(
@@ -238,8 +413,8 @@ function useNewDependenciesInConstructor(
             new InsertChange(
                 path,
                 classUnderTestConstruction.end - 1,
-                (hasOtherParams ? ', ' : '') + toAdd.map(p => p.name).join(', ')
-            )
+                (hasOtherParams ? ', ' : '') + toAdd.map((p) => p.name).join(', ')
+            ),
         ]
         : []; // don't add params in constructor if no need to
 }
@@ -253,15 +428,20 @@ function addMethods(
 ): Change[] {
     const methodsThatHaveNoTests = publicMethods.filter(
         // search for invocations of the method (c.myMethod) - these are inevitable if one wants to actually test the method...
-        m => !fileContent.match(new RegExp(`.${m}`))
+        (m) => !fileContent.match(new RegExp(`.${m}`))
     );
 
-    let lastClosingBracketPositionOfDescribe = findNodes(source, ts.SyntaxKind.CallExpression, 100, true)
-        .map(e => (e as ts.CallExpression).expression)
+    let lastClosingBracketPositionOfDescribe = findNodes(
+        source,
+        ts.SyntaxKind.CallExpression,
+        100,
+        true
+    )
+        .map((e) => (e as ts.CallExpression).expression)
         // we get all describes calls
-        .filter(i => i.getText() === 'describe')
+        .filter((i) => i.getText() === 'describe')
         // then their parent - the expression (it has the body with the curly brackets)
-        .map(c => c.parent)
+        .map((c) => c.parent)
         // then we flat the arrays of all close brace tokens from those bodies
         .reduce(
             (acc, c) => [...acc, ...findNodes(c, ts.SyntaxKind.CloseBraceToken, 100, true)],
@@ -273,7 +453,7 @@ function addMethods(
         }, 0);
 
     return methodsThatHaveNoTests.map(
-        m =>
+        (m) =>
             new InsertChange(
                 path,
                 lastClosingBracketPositionOfDescribe,
@@ -288,7 +468,7 @@ function addMissingImports(dependencies: ConstructorParam[], path: string, sourc
         (r, n) => {
             r.duplicateMap.set(
                 n,
-                r.previous.some(p => p.type === n.type && p.importPath === n.importPath)
+                r.previous.some((p) => p.type === n.type && p.importPath === n.importPath)
                     ? 'duplicate'
                     : 'first'
             );
@@ -297,15 +477,15 @@ function addMissingImports(dependencies: ConstructorParam[], path: string, sourc
         },
         {
             previous: [] as ConstructorParam[],
-            duplicateMap: new Map<ConstructorParam, 'duplicate' | 'first'>()
+            duplicateMap: new Map<ConstructorParam, 'duplicate' | 'first'>(),
         }
     );
 
     return [...dependencies, { name: 'EMPTY', type: 'Observable<void>', importPath: 'rxjs' }]
-        .filter(d => d.importPath != null)
-        .filter(d => duplicateMap.get(d) === 'first')
-        .filter(d => !isImported(source, d.type, d.importPath!))
-        .map(d => insertImport(source, path, d.type, d.importPath!));
+        .filter((d) => d.importPath != null)
+        .filter((d) => duplicateMap.get(d) === 'first')
+        .filter((d) => !isImported(source, d.type, d.importPath!))
+        .map((d) => insertImport(source, path, d.type, d.importPath!));
 }
 
 /**
@@ -328,7 +508,7 @@ function addProvidersForTestBed(
     const configureTestingModuleCall = findNodes(source, ts.SyntaxKind.CallExpression, 5000, true)
         // reverse to find the innermost callExpression (the configureTestingModule)
         .reverse()
-        .find(n => {
+        .find((n) => {
             const text = n.getText();
             return text.includes('configureTestingModule') && text.includes('TestBed');
         }) as ts.CallExpression | null;
@@ -344,7 +524,7 @@ function addProvidersForTestBed(
         const firstChildIndentation = getIndentationMinusComments(block.getChildAt(1));
 
         // if setup function is called - take the name
-        const setupInstance = findNodes(block, ts.SyntaxKind.VariableDeclaration).find(n =>
+        const setupInstance = findNodes(block, ts.SyntaxKind.VariableDeclaration).find((n) =>
             n.getText().includes('setup')
         );
 
@@ -363,18 +543,18 @@ function addProvidersForTestBed(
                     path,
                     openingBracketPosition,
                     `${EOL}${firstChildIndentation}const ${a} = ${setupFunctionName}().default();`
-                )
+                ),
             ]
             : [];
 
         // calculate which dependencies we need to add
         const configureText = configureTestingModuleCall.getText();
-        const depsToAdd = params.filter(p => !configureText.includes(p.type));
+        const depsToAdd = params.filter((p) => !configureText.includes(p.type));
 
         // and then add all missing deps in one configureTestingModule call with providers only
         if (depsToAdd.length > 0) {
             const newProviders = depsToAdd
-                .map(d => `{ provide: ${d.type}, useValue: ${a}.${d.name} }`)
+                .map((d) => `{ provide: ${d.type}, useValue: ${a}.${d.name} }`)
                 .join(',' + EOL + '            ');
             inserts.push(
                 new InsertChange(
@@ -409,19 +589,20 @@ function getIndentationMinusComments(node: ts.Node) {
 function addMissingDependencyReturns(
     paramsToAdd: ConstructorParam[],
     paramsToRemove: string[],
-    deps: DependencyMethodReturnTypes | undefined,
+    deps: DependencyMethodReturnAndPropertyTypes | undefined,
     allParams: ConstructorParam[],
-    setupFunctionNode: ts.FunctionDeclaration
+    setupFunctionNode: ts.FunctionDeclaration,
+    updateOptions: UpdateOptions
 ): InsertChange[] {
     const setupText = setupFunctionNode.getFullText();
 
-    const builderStatement = findNodes(setupFunctionNode, ts.SyntaxKind.VariableStatement).find((n) =>
-        n.getText().includes('builder')
-    )
-    const pos = builderStatement?.pos ?? (setupFunctionNode.pos + 65);
+    const builderStatement = findNodes(setupFunctionNode, ts.SyntaxKind.VariableStatement).find(
+        (n) => n.getText().includes('builder')
+    );
+    const pos = builderStatement?.pos ?? setupFunctionNode.pos + 65;
 
     const indent = builderStatement ? getIndentationMinusComments(builderStatement) : '    ';
-
+    const wrap = dependenciesWrap(deps);
     return (
         allParams
             // skip the add ones as they'll get their own methods in the exposeDeps above
@@ -431,11 +612,24 @@ function addMissingDependencyReturns(
             // for the params that are part of the deps map
             .filter((p) => deps?.has(p.type))
             // create the lines of code to return a default value => `${p.name}.${dep.method}.and.returnValue({promise|observable default})
-            .flatMap((p) => addDefaultObservableAndPromiseToSpy(p, deps))
+            .flatMap((p) => {
+                // skip dependencies that have already been included
+                const ds = wrap.skip(d => setupText.includes(`${p.name}.${d.name}`));
+                return addDefaultObservableAndPromiseToSpy(p, ds, {spyReturnType: updateOptions?.framework});
+            })
             // only take the ones that are not already there
             .filter((defaultReturnExpression) => !setupText.includes(defaultReturnExpression))
             // and create InsertChange-s for them
-            .map((defaultReturnExpression, i, arr) => new InsertChange('', pos, `${EOL}${indent}${defaultReturnExpression}${arr.length-1 === i ? `${EOL}${indent}` : ''}`))
+            .map(
+                (defaultReturnExpression, i, arr) =>
+                    new InsertChange(
+                        '',
+                        pos,
+                        `${EOL}${indent}${defaultReturnExpression}${arr.length - 1 === i ? `${EOL}${indent}` : ''
+                        }`
+                    )
+            )
     );
 }
 
+// function getPositionToInsert

@@ -30,6 +30,12 @@
       "type": "string",
       "alias": "c",
       "description": "config file path. If the default locations (package.json .scurirc .scurirc.json .scurirc.yml .scurirc.yaml scurirc.js scurirc.config.js) are not enough"
+    },
+    "framework": {
+      "type": "string",
+      "alias": "f",
+      "description": "Only needed for Update. Can be set in Config too. Testing framework (jasmine or jest), default is jasmine",
+      "default": "jasmine"
     }
   },
   "required": []
