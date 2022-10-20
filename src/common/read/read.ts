@@ -1,7 +1,28 @@
 import * as ts from 'typescript';
 import { findNodes } from '../../../lib/utility/ast-utils';
-import { ConstructorParam, Description, isClassDescription } from '../../types';
+import {
+    ConstructorParam,
+    DependencyCall,
+    DependencyMethodReturnAndPropertyTypes,
+    DependencyPropertyName,
+    DependencyTypeName,
+    Description,
+    isClassDescription,
+} from '../../types';
+const observableProps = [
+    '_isScalar',
+    'source',
+    'operator',
+    'lift',
+    'subscribe',
+    '_trySubscribe',
+    'forEach',
+    '_subscribe',
+    'pipe',
+    'toPromise',
+];
 
+const promiseProps = ['then', 'catch', 'finally'];
 /**
  * Will read the Abstract Syntax Tree of the `fileContents` and extract from that:
  *  - the names and types of all constructors' parameters
@@ -46,13 +67,14 @@ import { ConstructorParam, Description, isClassDescription } from '../../types';
  * @param fileContents contents of the file
  */
 export function describeSource(fileName: string, fileContents: string): Description[] {
-    return read(ts.createSourceFile(fileName, fileContents, ts.ScriptTarget.ES2015, true)).map((r) =>
-        isClassDescription(r)
-            ? {
-                  ...r,
-                  constructorParams: addImportPaths(r.constructorParams, fileContents),
-              }
-            : r
+    return read(ts.createSourceFile(fileName, fileContents, ts.ScriptTarget.ES2015, true)).map(
+        (r) =>
+            isClassDescription(r)
+                ? {
+                      ...r,
+                      constructorParams: addImportPaths(r.constructorParams, fileContents),
+                  }
+                : r
     );
 }
 
@@ -67,10 +89,7 @@ function read(node: ts.Node) {
                 name: classDeclaration.name != null ? classDeclaration.name.getText() : 'default',
                 constructorParams: constructorParams,
                 publicMethods: readPublicMethods(classDeclaration),
-                depsCallsAndTypes: readDependencyCalls(
-                    classDeclaration,
-                    constructorParams
-                ),
+                depsCallsAndTypes: readDependencyCalls(classDeclaration, constructorParams),
             },
         ];
     }
@@ -128,7 +147,7 @@ function readPublicMethods(node: ts.ClassDeclaration): string[] {
 function readDependencyCalls(
     n: ts.Node,
     constructorParams: ConstructorParam[]
-): Map<string, Map<string, string>> | undefined {
+): DependencyMethodReturnAndPropertyTypes | undefined {
     const sourceFileName = n.getSourceFile().fileName;
     const nodeFullText = n.getFullText();
     const prog = ts.createProgram([sourceFileName], {
@@ -136,44 +155,91 @@ function readDependencyCalls(
         module: ts.ModuleKind.CommonJS,
     });
     const checker = prog.getTypeChecker();
-    let dependencyUseTypes = new Map<string, Map<string, string>>();
+    let dependencyUseTypes = new Map<
+        DependencyTypeName,
+        Map<DependencyPropertyName, DependencyCall>
+    >();
     const srcFile = prog.getSourceFile(sourceFileName);
-    if(srcFile == null) {
+    if (srcFile == null) {
         return undefined;
     }
 
-    const node = findNodes(srcFile, ts.isClassDeclaration).find(n => n.getFullText() === nodeFullText)
-    if(node == null) {
+    const node = findNodes(srcFile, ts.isClassDeclaration).find(
+        (n) => n.getFullText() === nodeFullText
+    );
+    if (node == null) {
         return undefined;
     }
 
     ts.forEachChild(node, (methodMaybe) => {
         if (methodMaybe.kind === ts.SyntaxKind.MethodDeclaration) {
             findNodes(methodMaybe, ts.SyntaxKind.PropertyAccessExpression, 20, true).forEach(
-                (n) => {
-                    const type = checker.typeToString(checker.getTypeAtLocation(n));
-                    const p = constructorParams.find(p => p.type === type);
+                (propAccess) => {
+                    const type = checker.typeToString(checker.getTypeAtLocation(propAccess));
+                    const p = constructorParams.find((p) => p.type === type);
 
-
-                    if(p != null && n.getText().includes(p.name)) {
-                        const parent = checker.getTypeAtLocation(n.parent);
-                        if(!dependencyUseTypes.has(p.type)){
+                    if (p != null && propAccess.getText().includes(p.name)) {
+                        const parent = checker.getTypeAtLocation(propAccess.parent);
+                        if (!dependencyUseTypes.has(p.type)) {
                             dependencyUseTypes.set(p.type, new Map());
                         }
+                        const callSignatures = parent.getCallSignatures();
 
-                        parent.getCallSignatures().forEach(s => {
-                            const dec = s.getDeclaration()
-                            if(ts.isMethodDeclaration(dec)) {
-                                dependencyUseTypes.get(p.type)!.set(dec.name.getText(), checker.typeToString(s.getReturnType()))
-                            }
-                        })
+                        if (Array.isArray(callSignatures) && callSignatures.length > 0) {
+                            callSignatures.forEach((s) => {
+                                const dec = s.getDeclaration();
+                                const returnType = s.getReturnType();
+
+                                if (ts.isMethodDeclaration(dec)) {
+                                    dependencyUseTypes
+                                        .get(p.type)!
+                                        .set(
+                                            dec.name.getText(),
+                                            {
+                                                type: checker.typeToString(returnType),
+                                                typeParams:
+                                                    'typeArguments' in returnType
+                                                        ? checker
+                                                              .getTypeArguments(
+                                                                  <ts.TypeReference>returnType
+                                                              )
+                                                              .map((t) => checker.typeToString(t))
+                                                        : [],
+                                                signature: 'function',
+                                                name: dec.name.getText(),
+                                                kind: typeKind(returnType),
+                                            }
+                                        );
+                                }
+                            });
+                        } else {
+                            const propName = (
+                                propAccess.parent.getChildren().reverse()[0] as ts.Identifier
+                            ).text;
+
+                            dependencyUseTypes.get(p.type)?.set(propName, {
+                                type: checker.typeToString(parent),
+                                typeParams:
+                                    'typeArguments' in parent
+                                        ? checker
+                                              .getTypeArguments(<ts.TypeReference>parent)
+                                              .map((t) => checker.typeToString(t))
+                                        : [],
+                                signature: 'property',
+                                name: propName,
+                                kind: typeKind(parent),
+                            });
+                        }
                     }
-
                 }
             );
         }
     });
     return dependencyUseTypes;
+}
+
+function typeKind(parent: ts.Type): 'observable' | 'promise' | 'other' {
+    return isObservable(parent) ? 'observable' : isPromise(parent) ? 'promise' : 'other';
 }
 
 function methodIsPublic(methodNode: ts.MethodDeclaration) {
@@ -192,13 +258,12 @@ function addImportPaths(params: ConstructorParam[], fullText: string) {
     });
 }
 
-
 function isExported(node: ts.Node, kind: ts.SyntaxKind): boolean {
     return (
         node?.kind === kind &&
         /** True if this is visible outside this file, false otherwise */
         ((ts.getCombinedModifierFlags(node as ts.Declaration) & ts.ModifierFlags.Export) !== 0 ||
-        (!!node.parent && node.parent.kind === ts.SyntaxKind.SourceFile))
+            (!!node.parent && node.parent.kind === ts.SyntaxKind.SourceFile))
     );
 }
 
@@ -209,4 +274,16 @@ function isExportedFunction(node: ts.Node): node is ts.FunctionDeclaration {
     return isExported(node, ts.SyntaxKind.FunctionDeclaration);
 }
 
+function isPromise(t: ts.Type): boolean {
+    return (
+        t.getProperties().filter((p) => promiseProps.includes(p.name)).length ===
+        promiseProps.length
+    );
+}
 
+function isObservable(t: ts.Type): boolean {
+    return (
+        t.getProperties().filter((p) => observableProps.includes(p.name)).length ===
+        observableProps.length
+    );
+}

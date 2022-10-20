@@ -10,7 +10,7 @@ export function getSpecFilePathName(name: string) {
 }
 
 export function getSpecFileCustomName(
-    classData: Omit<ClassTemplateData, 'levenshtein' | 'params' | 'publicMethods'>,
+    classData: Omit<ClassTemplateData, 'levenshtein' | 'params' | 'publicMethods' | 'setupMethods'>,
     templateName: string
 ): string | undefined {
     const templateFile: FileEntry = {

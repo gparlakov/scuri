@@ -12,36 +12,36 @@ import {
     Source,
     source,
     Tree,
-    url,
+    url
 } from '@angular-devkit/schematics';
 import { cosmiconfigSync } from 'cosmiconfig';
 import { EOL } from 'os';
 import { resolve } from 'path';
 import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
-import { addDefaultObservableAndPromiseToSpyJoined } from '../common/add-observable-promise-stubs';
+import { addDefaultObservableAndPromiseToSpyJoined, includePropertyMocks, propertyMocks, createSetupMethodsFn } from '../common/add-observable-promise-stubs';
 import { getSpecFilePathName } from '../common/get-spec-file-name';
 import { paths } from '../common/paths';
 import { describeSource } from '../common/read/read';
 import { scuriTemplateMark, updateCustomTemplateCut } from '../common/scuri-custom-update-template';
 import {
-    ClassDescription,
-    FunctionDescription,
-    isClassDescription,
-    ClassTemplateData
+    ClassDescription, ClassTemplateData, FunctionDescription,
+    isClassDescription
 } from '../types';
-import { addMissing, update as doUpdate } from './update/update';
+import { addMissing, update as doUpdate, UpdateOptions } from './update/update';
 class SpecOptions {
     name: string;
     update?: boolean;
     classTemplate?: string;
     functionTemplate?: string;
     config?: string;
+    framework?: 'jest' | 'jasmine'
 }
 
 type Config = Omit<SpecOptions, 'name' | 'update' | 'config'>;
 
-export function spec({ name, update, classTemplate, functionTemplate, config}: SpecOptions): Rule {
+export function spec({ name, update, classTemplate, functionTemplate, config, framework}: SpecOptions): Rule {
     const isForce = process.argv.find(e => e === 'force' || e === '--force') != null;
+    const frm = framework ?? 'jasmine';
     return (tree: Tree, context: SchematicContext) => {
         const logger = context.logger.createChild('scuri.index');
         logger.debug(
@@ -84,7 +84,7 @@ export function spec({ name, update, classTemplate, functionTemplate, config}: S
                     return schematic('update-custom', { name, classTemplate });
                 }
                 logger.debug(`Updating name ${name}`);
-                return updateExistingSpec(name, tree, logger);
+                return updateExistingSpec(name, tree, logger, { framework: frm });
             } else {
                 return createNewSpec(name, tree, logger, { classTemplate, functionTemplate, force: isForce });
             }
@@ -106,7 +106,7 @@ function sliceSpecFromFileName(path: string) {
     }
 }
 
-function updateExistingSpec(fullName: string, tree: Tree, logger: Logger) {
+function updateExistingSpec(fullName: string, tree: Tree, logger: Logger, o: UpdateOptions) {
     const specFileName = sliceSpecFromFileName(fullName);
     const content = tree.read(specFileName);
     if (content == null) {
@@ -143,7 +143,8 @@ function updateExistingSpec(fullName: string, tree: Tree, logger: Logger) {
                 'remove',
                 publicMethods,
                 shorthand,
-                depsCallsAndTypes
+                depsCallsAndTypes,
+                o
             );
             applyChanges(tree, specFilePath, removeChanges, 'remove');
 
@@ -156,9 +157,23 @@ function updateExistingSpec(fullName: string, tree: Tree, logger: Logger) {
                 'add',
                 publicMethods,
                 shorthand,
-                depsCallsAndTypes
+                depsCallsAndTypes,
+                o
             );
             applyChanges(tree, specFilePath, changesToAdd, 'add');
+
+            const changesToAddAdditional = doUpdate(
+                specFilePath,
+                tree.read(specFilePath)!.toString('utf8'),
+                params,
+                name,
+                'add-spy-methods-and-props',
+                publicMethods,
+                shorthand,
+                depsCallsAndTypes,
+                o
+            );
+            applyChanges(tree, specFilePath, changesToAddAdditional, 'add');
 
             return tree;
         }
@@ -205,6 +220,7 @@ function createNewSpec(
             folderPathRaw: path,
             folderPathNormal: folder,
         } = paths(fileNameRaw);
+
         try {
             const { params, name, publicMethods, depsCallsAndTypes } = getFirstClass(fileNameRaw, content);
 
@@ -226,7 +242,8 @@ function createNewSpec(
                 declaration: toDeclaration(),
                 builderExports: toBuilderExports(),
                 constructorParams: toConstructorParams(),
-                shorthand: typeShorthand(name)
+                shorthand: typeShorthand(name),
+                setupMethods: createSetupMethodsFn(params, depsCallsAndTypes)
             };
             const src = maybeUseCustomTemplate(tree, url('./files/class'), o?.classTemplate);
 
@@ -249,7 +266,7 @@ function createNewSpec(
                     .map((p) =>
                         p.type === 'string' || p.type === 'number'
                             ? `let ${p.name}:${p.type};`
-                            : `const ${p.name} = autoSpy(${p.type});${addDefaultObservableAndPromiseToSpyJoined(p, depsCallsAndTypes, { joiner: EOL, spyReturnType: 'jasmine' })}`
+                            : `${propertyMocks(p, depsCallsAndTypes, {joiner: `${EOL}    `})}const ${p.name} = autoSpy(${p.type}${includePropertyMocks(p, depsCallsAndTypes)});${addDefaultObservableAndPromiseToSpyJoined(p, depsCallsAndTypes, { joiner: `${EOL}    `, spyReturnType: 'jasmine' })}`
                     )
                     .join(EOL);
             }
@@ -261,6 +278,8 @@ function createNewSpec(
                         .concat(',')
                     : '';
             }
+
+
         } catch (e) {
             if (e != null && e.message === 'No classes found to be spec-ed!') {
                 const funktion = getFirstFunction(fileNameRaw, content);

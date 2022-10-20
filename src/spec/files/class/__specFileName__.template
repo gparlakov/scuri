@@ -29,6 +29,7 @@ function setup() {
   <%= declaration %>
   const builder = {
     <%= builderExports %>
+    <% setupMethods.forEach(m => {%><%= m('\n    ') %><%}) %>
     default() {
       return builder;
     },

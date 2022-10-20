@@ -34,7 +34,9 @@ function setup() {
             'ExampleComponent',
             'remove',
             [],
-            'a'
+            'a',
+            undefined,
+            {framework: 'jasmine'}
         );
 
         const removes = result.filter((r) => r instanceof RemoveChange);

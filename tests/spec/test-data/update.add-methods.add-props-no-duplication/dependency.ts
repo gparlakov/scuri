@@ -1,6 +1,6 @@
 /** starts on next line*/
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
-interface ClassDescription {
+export interface ClassDescription {
     name: string;
     constructorParams: string[];
     publicMethods: string[];
@@ -31,6 +31,26 @@ export class ServiceWithMethods {
     }
 
     aNeverMethod() {
+        throw new Error('test')
+    }
+
+}
+export class JustADep {
+
+    observable$: Observable<Array<ClassDescription>>;
+    promiseProp: Promise<string>;
+
+    constructor() {}
+
+    getMyObject() {
+        return <ClassDescription>{constructorParams: [], name: 'a name', publicMethods: ['asdad'], type: 'class'}
+    }
+
+    doAVoidThing() {
+        this['test'] = 1;
+    }
+
+    doAThingThatThrows() {
         throw new Error('test')
     }
 

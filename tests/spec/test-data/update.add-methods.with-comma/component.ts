@@ -1,6 +1,6 @@
 /** starts on next line*/
 import { switchMap, switchMapTo, tap } from 'rxjs/operators';
-import { ServiceWithMethods } from './deps-calls-with-return-types.dependency';
+import { ServiceWithMethods } from './dependency';
 
 export class ExampleComponent {
     constructor(private readonly service:ServiceWithMethods) {}

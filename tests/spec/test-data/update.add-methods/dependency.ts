@@ -1,6 +1,6 @@
 /** starts on next line*/
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
-interface ClassDescription {
+export interface ClassDescription {
     name: string;
     constructorParams: string[];
     publicMethods: string[];
