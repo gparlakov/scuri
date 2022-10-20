@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- properties for promise and observable dependency properties in the autoSpy call e.g. autoSpy(MyService, {obs$: myServiceObs$, promProp: myServicePromProp})
+  - the promise can be rejected or resolved
+  - the observable can emit, error or complete
+- observable dependency methods now auto return an EMPTY to avoid the `.pipe is not a method on undefined` and `you've passed undefined where an Observable was expected` errors
+- promise dependency methods now auto return a new Promise() (that never resolves/rejects) to avoid the `.then is not a method on undefined` error
+- adds property stubs (ReplaySubject and a Promise with captures resolve and reject functions)
+- adds methods for resolve/reject the promise props
+- adds methods for emit/error/complete the promise and observable property stubs
+- adds methods for returning a value for each spy that's called
+- updates and adds only the needed things (methods, spies and spy-manipulation methods)
+
 ### Fixed
 
 - fixed error when trying to overwrite existing specs and using `--force` flag
