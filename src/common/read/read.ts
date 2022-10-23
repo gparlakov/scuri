@@ -10,15 +10,10 @@ import {
     isClassDescription,
 } from '../../types';
 const observableProps = [
-    '_isScalar',
     'source',
     'operator',
     'lift',
     'subscribe',
-    '_trySubscribe',
-    'forEach',
-    '_subscribe',
-    'pipe',
     'toPromise',
 ];
 
