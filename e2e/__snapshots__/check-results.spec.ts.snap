@@ -98,6 +98,7 @@ function setup() {
   
     const s = autoSpy(Service);
     s.promiseReturning.and.returnValue(new Promise(res => {}));
+    s.observableReturning.and.returnValue(EMPTY);
   const builder = {
     s,
     withSPromiseReturningReturn(p: Promise<string>) {
