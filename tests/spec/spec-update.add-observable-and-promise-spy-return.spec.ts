@@ -83,42 +83,34 @@ describe('spec for a class with a method calling a dependency method', () => {
                     service.promiseReturning.and.returnValue(p);
                     return builder;
                 },
-                withServiceProperty$Emit(p: string | Error, action: 'emit' | 'error' | 'complete' = 'emit') {
-                    if (action === 'emit') {
-                        property$.next(p);
-                    } else if (action === 'error') {
-                        property$.error(p);
-                    } else {
-                        property$.complete();
-                    }
+                withServiceProperty$(p$: Observable<string>) {
+                    p$.subscribe({
+                        next: (v) => serviceProperty$.next(v),
+                        error: (e) => serviceProperty$.error(e),
+                        complete: () => serviceProperty$.complete()
+                    });
                     return builder;
                 },
-                withServicePromiseProp(p: string | Error, action: 'resolve' | 'reject' = 'resolve') {
-                    if (action === 'resolve') {
-                        resolvePromiseProp(p);
-                    } else {
-                        rejectPromiseProp(p);
-                    }
+                withServicePromiseProp(p: Promise<string>) {
+                    p
+                        .then((v) => resolveServicePromiseProp(v))
+                        .catch((e) => rejectServicePromiseProp(e));
                     return builder;
                 },
-                withServiceObservable$Emit(o: ClassDescription[] | Error, action: 'emit' | 'error' | 'complete' = 'emit') {
-                    if (action === 'emit') {
-                        observable$.next(o);
-                    } else if (action === 'error') {
-                        observable$.error(o);
-                    } else {
-                        observable$.complete();
-                    }
+                withServiceObservable$(o$: Observable<ClassDescription[]>) {
+                    o$.subscribe({
+                        next: (v) => serviceObservable$.next(v),
+                        error: (e) => serviceObservable$.error(e),
+                        complete: () => serviceObservable$.complete()
+                    });
                     return builder;
                 },
-                withServiceSubject$Emit(s: string | Error, action: 'emit' | 'error' | 'complete' = 'emit') {
-                    if (action === 'emit') {
-                        subject$.next(s);
-                    } else if (action === 'error') {
-                        subject$.error(s);
-                    } else {
-                        subject$.complete();
-                    }
+                withServiceSubject$(s$: Observable<string>) {
+                    s$.subscribe({
+                        next: (v) => serviceSubject$.next(v),
+                        error: (e) => serviceSubject$.error(e),
+                        complete: () => serviceSubject$.complete()
+                    });
                     return builder;
                 },};
 
@@ -284,42 +276,34 @@ describe('spec for a class with a method calling a dependency method', () => {
                     service.promiseReturning.and.returnValue(p);
                     return builder;
                 },
-                withServiceProperty$Emit(p: string | Error, action: 'emit' | 'error' | 'complete' = 'emit') {
-                    if (action === 'emit') {
-                        property$.next(p);
-                    } else if (action === 'error') {
-                        property$.error(p);
-                    } else {
-                        property$.complete();
-                    }
+                withServiceProperty$(p$: Observable<string>) {
+                    p$.subscribe({
+                        next: (v) => serviceProperty$.next(v),
+                        error: (e) => serviceProperty$.error(e),
+                        complete: () => serviceProperty$.complete()
+                    });
                     return builder;
                 },
-                withServicePromiseProp(p: string | Error, action: 'resolve' | 'reject' = 'resolve') {
-                    if (action === 'resolve') {
-                        resolvePromiseProp(p);
-                    } else {
-                        rejectPromiseProp(p);
-                    }
+                withServicePromiseProp(p: Promise<string>) {
+                    p
+                        .then((v) => resolveServicePromiseProp(v))
+                        .catch((e) => rejectServicePromiseProp(e));
                     return builder;
                 },
-                withServiceObservable$Emit(o: ClassDescription[] | Error, action: 'emit' | 'error' | 'complete' = 'emit') {
-                    if (action === 'emit') {
-                        observable$.next(o);
-                    } else if (action === 'error') {
-                        observable$.error(o);
-                    } else {
-                        observable$.complete();
-                    }
+                withServiceObservable$(o$: Observable<ClassDescription[]>) {
+                    o$.subscribe({
+                        next: (v) => serviceObservable$.next(v),
+                        error: (e) => serviceObservable$.error(e),
+                        complete: () => serviceObservable$.complete()
+                    });
                     return builder;
                 },
-                withServiceSubject$Emit(s: string | Error, action: 'emit' | 'error' | 'complete' = 'emit') {
-                    if (action === 'emit') {
-                        subject$.next(s);
-                    } else if (action === 'error') {
-                        subject$.error(s);
-                    } else {
-                        subject$.complete();
-                    }
+                withServiceSubject$(s$: Observable<string>) {
+                    s$.subscribe({
+                        next: (v) => serviceSubject$.next(v),
+                        error: (e) => serviceSubject$.error(e),
+                        complete: () => serviceSubject$.complete()
+                    });
                     return builder;
                 },};
 
@@ -417,42 +401,34 @@ describe('spec for a class with a method calling a dependency method', () => {
                     service.promiseReturning.and.returnValue(p);
                     return builder;
                 },
-                withServiceProperty$Emit(p: string | Error, action: 'emit' | 'error' | 'complete' = 'emit') {
-                    if (action === 'emit') {
-                        property$.next(p);
-                    } else if (action === 'error') {
-                        property$.error(p);
-                    } else {
-                        property$.complete();
-                    }
+                withServiceProperty$(p$: Observable<string>) {
+                    p$.subscribe({
+                        next: (v) => serviceProperty$.next(v),
+                        error: (e) => serviceProperty$.error(e),
+                        complete: () => serviceProperty$.complete()
+                    });
                     return builder;
                 },
-                withServicePromiseProp(p: string | Error, action: 'resolve' | 'reject' = 'resolve') {
-                    if (action === 'resolve') {
-                        resolvePromiseProp(p);
-                    } else {
-                        rejectPromiseProp(p);
-                    }
+                withServicePromiseProp(p: Promise<string>) {
+                    p
+                        .then((v) => resolveServicePromiseProp(v))
+                        .catch((e) => rejectServicePromiseProp(e));
                     return builder;
                 },
-                withServiceObservable$Emit(o: ClassDescription[] | Error, action: 'emit' | 'error' | 'complete' = 'emit') {
-                    if (action === 'emit') {
-                        observable$.next(o);
-                    } else if (action === 'error') {
-                        observable$.error(o);
-                    } else {
-                        observable$.complete();
-                    }
+                withServiceObservable$(o$: Observable<ClassDescription[]>) {
+                    o$.subscribe({
+                        next: (v) => serviceObservable$.next(v),
+                        error: (e) => serviceObservable$.error(e),
+                        complete: () => serviceObservable$.complete()
+                    });
                     return builder;
                 },
-                withServiceSubject$Emit(s: string | Error, action: 'emit' | 'error' | 'complete' = 'emit') {
-                    if (action === 'emit') {
-                        subject$.next(s);
-                    } else if (action === 'error') {
-                        subject$.error(s);
-                    } else {
-                        subject$.complete();
-                    }
+                withServiceSubject$(s$: Observable<string>) {
+                    s$.subscribe({
+                        next: (v) => serviceSubject$.next(v),
+                        error: (e) => serviceSubject$.error(e),
+                        complete: () => serviceSubject$.complete()
+                    });
                     return builder;
                 },};
 

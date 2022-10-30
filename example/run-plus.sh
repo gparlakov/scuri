@@ -30,6 +30,11 @@ npx ng g scuri:spec --name src/app/my-com/my-com.component.ts --class-template '
 cp -f example/to-update.componen*.ts ./src/app/
 npx ng g scuri:spec --name ./src/app/to-update.component.ts --class-template './example/__normalizedName__.custom.spec.ts.template' --update
 
+# check observable and promise create
+cp -f example/service.ts ./src/app/
+cp -f example/promise-and-observable.component.ts ./src/app/
+npx ng g scuri:spec --name ./src/app/promise-and-observable.component.ts
+
 # overwrite an existing test
 npx ng g c test-overwrite
 

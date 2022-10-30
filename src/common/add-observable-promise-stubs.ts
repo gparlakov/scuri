@@ -47,7 +47,7 @@ export function addDefaultObservableAndPromiseToSpy(
     return Array.from(dep.entries())
         .map(([key, value]) => {
             // only add for the functions (properties are added inline of the autoSpy)
-            if(value.signature != 'function') {
+            if (value.signature != 'function') {
                 return empty;
             }
 
@@ -85,9 +85,9 @@ export function propertyMocks(
                 return undefined;
             } else {
                 const { name } = depMeta;
-                const Name = `${classify(p.name)}${classify(name)}`;;
-                const name$ = `${p.name}${classify(observablePropName(name))}`;
-                const promiseName = `${p.name}${classify(name)}`;
+                const Name = `${classify(p.name)}${classify(name)}`;
+                const name$ = observablePropName(p.name, depMeta.name);
+                const promiseName = promisePropName(p.name, depMeta.name);
                 const type = depMeta.typeParams[0];
                 const nl = joiner;
                 switch (depMeta.kind) {
@@ -115,7 +115,7 @@ export function propertyMocks(
 export function includePropertyMocks(
     p: ConstructorParam,
     depsCallsAndTypes: DependencyMethodReturnAndPropertyTypes | undefined,
-    skipWhen?:((dep: DependencyCallDescription | 'checkShouldSkipObjectWrapper') => boolean)
+    skipWhen?: (dep: DependencyCallDescription | 'checkShouldSkipObjectWrapper') => boolean
 ): string {
     if (depsCallsAndTypes?.get(p.type)?.entries() == null) {
         return '';
@@ -127,25 +127,25 @@ export function includePropertyMocks(
         .map((propOrMethod) => {
             const depMeta = dep?.get(propOrMethod);
 
-            if(depMeta == null || depMeta.kind === 'other' || depMeta.signature === 'function') {
+            if (depMeta == null || depMeta.kind === 'other' || depMeta.signature === 'function') {
                 return undefined;
             }
 
-            if(skip(depMeta)){
+            if (skip(depMeta)) {
                 return undefined;
             }
 
             return depMeta.kind === 'observable'
-                ? `${depMeta.name}: ${p.name}${classify(observablePropName(depMeta.name))}`
-                : `${depMeta.name}: ${p.name}${classify(depMeta.name)}`;
+                ? `${depMeta.name}: ${observablePropName(p.name, depMeta.name)}`
+                : `${depMeta.name}: ${promisePropName(p.name, depMeta.name)}`;
         })
         .filter((r) => r != undefined)
         .join(', ');
 
-    if(r.length === 0) {
+    if (r.length === 0) {
         return '';
     }
-    if(skip('checkShouldSkipObjectWrapper')) {
+    if (skip('checkShouldSkipObjectWrapper')) {
         return `, ${r}`;
     }
 
@@ -155,9 +155,10 @@ export function includePropertyMocks(
 export function createSetupMethodsFn(
     params: ConstructorParam[],
     depsCallsAndTypes: DependencyMethodReturnAndPropertyTypes | undefined,
-    options?: DefaultMethodReturnsOptions & {shouldSkip?(methodName: string, propName: string): boolean}
+    options?: DefaultMethodReturnsOptions & {
+        shouldSkip?(methodName: string, propName: string): boolean;
+    }
 ): TemplateFunction[] {
-
     const skip = typeof options?.shouldSkip === 'function' ? options.shouldSkip : () => false;
     // create an array of functions. Each of those will generate an array of methods
     return params.map((p) => {
@@ -171,7 +172,11 @@ export function createSetupMethodsFn(
             const dep = depsCallsAndTypes?.get(p.type);
             const r = Array.from(dep!.keys())
                 // don't do work for missing or void|never methods|props
-                .filter((propOrMethod) => dep?.get(propOrMethod) != null && !(['void', 'never'].includes(dep.get(propOrMethod)!.type)))
+                .filter(
+                    (propOrMethod) =>
+                        dep?.get(propOrMethod) != null &&
+                        !['void', 'never'].includes(dep.get(propOrMethod)!.type)
+                )
                 .map((propOrMethod) => {
                     const depMeta = dep?.get(propOrMethod)!;
 
@@ -179,19 +184,19 @@ export function createSetupMethodsFn(
                     const Name = `${classify(p.name)}${classify(name)}`;
                     const otherName = `with${Name}Return`;
                     const otherParam = propOrMethod;
-                    const observableName = `with${Name}Emit`;
-                    const name$ = observablePropName(name);
+                    const observableMethodName = `with${Name}`;
+                    const name$ = observablePropName(p.name, name);
 
-                    const promiseName = `with${Name}`
+                    const promiseProp = promisePropName(p.name, name);
+                    const promiseMethodName = `with${promiseProp}`;
                     const promiseParam = resolveName(name);
-                    if(
+                    if (
                         (kind === 'other' && skip(otherName, otherParam)) ||
-                        (kind === 'observable' && skip(observableName, name$)) ||
-                        (kind === 'promise' && skip(promiseName, promiseParam))
+                        (kind === 'observable' && skip(observableMethodName, name$)) ||
+                        (kind === 'promise' && skip(promiseMethodName, promiseParam))
                     ) {
                         return undefined;
                     }
-
 
                     const n = name[0];
                     const paramType = typeParams[0];
@@ -208,24 +213,20 @@ export function createSetupMethodsFn(
                     switch (kind) {
                         case 'observable':
                             // prettier-ignore
-                            return `with${Name}Emit(${n}: ${paramType} | Error, action: 'emit' | 'error' | 'complete' = 'emit') {${
-                                    nl}${w}if (action === 'emit') {${
-                                        nl}${w}${w}${name$}.next(${n});${
-                                    nl}${w}} else if (action === 'error') {${
-                                        nl}${w}${w}${name$}.error(${n});${
-                                    nl}${w}} else {${
-                                        nl}${w}${w}${name$}.complete();${
-                                    nl}${w}}${
+                            return `with${Name}(${n}$: Observable<${paramType}>) {${
+                                    nl}${w}${n}$.subscribe({${
+                                        nl}${w}${w}next: (v) => ${name$}.next(v),${
+                                        nl}${w}${w}error: (e) => ${name$}.error(e),${
+                                        nl}${w}${w}complete: () => ${name$}.complete()${
+                                    nl}${w}});${
                                     nl}${w}return builder;${
                                 nl}}`;
                         case 'promise':
                             // prettier-ignore
-                            return `with${Name}(${n}: ${paramType} | Error, action: 'resolve' | 'reject' = 'resolve') {${
-                                    nl}${w}if (action === 'resolve') {${
-                                        nl}${w}${w}${resolveName(name)}(${n});${
-                                    nl}${w}} else {${
-                                        nl}${w}${w}${rejectName(name)}(${n});${
-                                    nl}${w}}${
+                            return `with${Name}(${n}: Promise<${paramType}>) {${
+                                    nl}${w}${n}${
+                                        nl}${w}${w}.then((v) => ${resolveName(promiseProp)}(v))${
+                                        nl}${w}${w}.catch((e) => ${rejectName(promiseProp)}(e));${
                                     nl}${w}return builder;${
                                 nl}}`;
 
@@ -243,7 +244,12 @@ export function createSetupMethodsFn(
                     }
                 });
 
-            return r.length > 0 ? r.filter(r => r != null && r != '').join(`,${joiner}`).concat(',') : '';
+            return r.length > 0
+                ? r
+                      .filter((r) => r != null && r != '')
+                      .join(`,${joiner}`)
+                      .concat(',')
+                : '';
         };
     });
 }
@@ -259,8 +265,14 @@ function joinerWhitespace(j: string, or: string = ''): string {
     return or;
 }
 
-function observablePropName(name: string) {
+function ensure$(name: string) {
     return `${name.replace('$', '')}$`;
+}
+function observablePropName(depName: string, propName: string) {
+    return `${depName}${classify(ensure$(propName))}`;
+}
+function promisePropName(depName: string, propName: string) {
+    return `${depName}${classify(propName)}`;
 }
 function rejectName(name: string) {
     return `reject${classify(name)}`;
