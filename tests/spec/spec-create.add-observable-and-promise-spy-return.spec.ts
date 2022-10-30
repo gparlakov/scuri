@@ -1,9 +1,12 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
+import { filter } from 'rxjs/operators';
 import {
     collectionPath,
     depsCallsReturnTypesFile,
     depsCallsReturnTypesFileContents,
+    getTestFile,
+    getTestFileContents,
     splitLines,
 } from './common';
 
@@ -23,9 +26,8 @@ describe('spec for a class with a method calling a dependency method', () => {
         const specFile = result!.readContent(depsCallsReturnTypesFile.replace('.ts', '.spec.ts'));
         expect(specFile).toBeDefined();
         expect(specFile).toMatch('service.observableReturning.and.returnValue(EMPTY)');
-        expect(specFile).toMatch(
-            'service.promiseReturning.and.returnValue(new Promise(res => {}))'
-        );
+        // prettier-ignore
+        expect(specFile).toMatch('service.promiseReturning.and.returnValue(new Promise(res => {}))');
     });
 
     it('should add ReplaySubject/Promise for the dep property of types observable/promise', async () => {
@@ -249,5 +251,61 @@ describe('spec for a class with a method calling a dependency method', () => {
             }
             "
         `);
+    });
+
+    it('when dependencies used without accessing props or methods it should not throw and add properties and methods for dependency params of type <Observable>  and <Promise> not having undefined as prop name and dep name', async () => {
+        // arrange
+        const tree = Tree.empty();
+        const fileName = getTestFile('create.when-used-in-if-expressions/component.ts');
+        const specName = fileName.replace('.ts', '.spec.ts');
+
+        tree.create(fileName, getTestFileContents(fileName));
+        const runner = new SchematicTestRunner('schematics', collectionPath);
+        // act
+        const result = await runner
+            .runSchematicAsync('spec', { name: fileName, update: false }, tree)
+            .toPromise();
+
+        // assert
+        const specFile = result.readContent(specName);
+        expect(specFile).toBeDefined();
+
+        const ls = splitLines(specFile);
+
+        let i = ls.findIndex((l) => l.includes('function setup()')) + 1;
+
+        expect(ls[i++]).toEqual(
+            '  const serviceObservable$ = new ReplaySubject<ClassDescription[]>(1);'
+        );
+        expect(ls[i++]).toEqual(
+            '    const service = autoSpy(ServiceWithMethods, { observable$: serviceObservable$ });'
+        );
+        expect(ls[i++]).toEqual('    service.observableReturning.and.returnValue(EMPTY);');
+        expect(ls[i++]).toEqual('  const builder = {');
+        expect(ls[i++]).toEqual('    service,');
+        expect(ls[i++]).toEqual(
+            '    withServiceObservableReturningReturn(o: Observable<string>) {'
+        );
+        expect(ls[i++]).toEqual('        service.observableReturning.and.returnValue(o);');
+        expect(ls[i++]).toEqual('        return builder;');
+        expect(ls[i++]).toEqual('    },');
+        expect(ls[i++]).toEqual('    withServiceObservable$(o$: Observable<ClassDescription[]>) {');
+        expect(ls[i++]).toEqual('        o$.subscribe({');
+        expect(ls[i++]).toEqual('            next: (v) => serviceObservable$.next(v),');
+        expect(ls[i++]).toEqual('            error: (e) => serviceObservable$.error(e),');
+        expect(ls[i++]).toEqual('            complete: () => serviceObservable$.complete()');
+        expect(ls[i++]).toEqual('        });');
+        expect(ls[i++]).toEqual('        return builder;');
+        expect(ls[i++]).toEqual('    },');
+        expect(ls[i++]).toEqual('    default() {');
+        expect(ls[i++]).toEqual('      return builder;');
+        expect(ls[i++]).toEqual('    },');
+        expect(ls[i++]).toEqual('    build() {');
+        expect(ls[i++]).toEqual('      return new ExampleComponentForIfExpressions(service);');
+        expect(ls[i++]).toEqual('    }');
+        expect(ls[i++]).toEqual('  };');
+        expect(ls[i++]).toEqual('');
+        expect(ls[i++]).toEqual('  return builder;');
+        expect(ls[i++]).toEqual('}');
     });
 });

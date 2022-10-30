@@ -7,15 +7,12 @@ import {
     DependencyPropertyName,
     DependencyTypeName,
     Description,
-    isClassDescription,
+    isClassDescription
 } from '../../types';
-const observableProps = [
-    'source',
-    'operator',
-    'lift',
-    'subscribe',
-    'toPromise',
-];
+import { getLogger } from '../logger';
+import { getKindAndText, printKindAndText } from '../print-node';
+
+const observableProps = ['source', 'operator', 'lift', 'subscribe', 'toPromise'];
 
 const promiseProps = ['then', 'catch', 'finally'];
 /**
@@ -143,6 +140,7 @@ function readDependencyCalls(
     n: ts.Node,
     constructorParams: ConstructorParam[]
 ): DependencyMethodReturnAndPropertyTypes | undefined {
+    const l = getLogger(readDependencyCalls.name);
     const sourceFileName = n.getSourceFile().fileName;
     const nodeFullText = n.getFullText();
     const prog = ts.createProgram([sourceFileName], {
@@ -153,9 +151,12 @@ function readDependencyCalls(
     let dependencyUseTypes = new Map<
         DependencyTypeName,
         Map<DependencyPropertyName, DependencyCall>
-    >();
+    >(
+        constructorParams.map(p => ([p.type, new Map()])) // init the Map (hash) for each constructor param type
+    );
     const srcFile = prog.getSourceFile(sourceFileName);
     if (srcFile == null) {
+        l.debug('missing src file');
         return undefined;
     }
 
@@ -163,73 +164,94 @@ function readDependencyCalls(
         (n) => n.getFullText() === nodeFullText
     );
     if (node == null) {
+        l.debug('missing class description node');
         return undefined;
     }
 
-    ts.forEachChild(node, (methodMaybe) => {
-        if (methodMaybe.kind === ts.SyntaxKind.MethodDeclaration) {
-            findNodes(methodMaybe, ts.SyntaxKind.PropertyAccessExpression, 20, true).forEach(
-                (propAccess) => {
-                    const type = checker.typeToString(checker.getTypeAtLocation(propAccess));
-                    const p = constructorParams.find((p) => p.type === type);
+    findNodes(node, ts.isPropertyAccessExpression, 10000, true)
+        .filter((accessExpr) =>
+            constructorParams.some(
+                (param) =>
+                    param.name === accessExpr.name.text &&
+                    checker.typeToString(checker.getTypeAtLocation(accessExpr)) === param.type
+            )
+        )
+        .filter(
+            (accessExpr) =>
+                ts.isPropertyAccessExpression(accessExpr.parent) ||
+                ts.isElementAccessExpression(accessExpr.parent)
+        )
+        .forEach((accessExpr) => {
+            const p = constructorParams.find(
+                (param) =>
+                    param.name === accessExpr.name.text &&
+                    checker.typeToString(checker.getTypeAtLocation(accessExpr)) === param.type
+            )!;
 
-                    if (p != null && propAccess.getText().includes(p.name)) {
-                        const parent = checker.getTypeAtLocation(propAccess.parent);
-                        if (!dependencyUseTypes.has(p.type)) {
-                            dependencyUseTypes.set(p.type, new Map());
-                        }
-                        const callSignatures = parent.getCallSignatures();
+            const callType = checker.getTypeAtLocation(accessExpr.parent);
+            l.debug(`processing,${getKindAndText(accessExpr.parent)}: ${checker.typeToString(callType)}`);
+            const callSignatures = callType.getCallSignatures();
 
-                        if (Array.isArray(callSignatures) && callSignatures.length > 0) {
-                            callSignatures.forEach((s) => {
-                                const dec = s.getDeclaration();
-                                const returnType = s.getReturnType();
+            if (callSignatures?.length > 0) {
+                callSignatures.forEach((signature) => {
+                    const declaration = signature.getDeclaration();
+                    const returnType = signature.getReturnType();
 
-                                if (ts.isMethodDeclaration(dec)) {
-                                    dependencyUseTypes
-                                        .get(p.type)!
-                                        .set(
-                                            dec.name.getText(),
-                                            {
-                                                type: checker.typeToString(returnType),
-                                                typeParams:
-                                                    'typeArguments' in returnType
-                                                        ? checker
-                                                              .getTypeArguments(
-                                                                  <ts.TypeReference>returnType
-                                                              )
-                                                              .map((t) => checker.typeToString(t))
-                                                        : [],
-                                                signature: 'function',
-                                                name: dec.name.getText(),
-                                                kind: typeKind(returnType),
-                                            }
-                                        );
-                                }
-                            });
-                        } else {
-                            const propName = (
-                                propAccess.parent.getChildren().reverse()[0] as ts.Identifier
-                            ).text;
+                    if (ts.isMethodDeclaration(declaration)) {
+                        const declName = declaration.name.getText();
 
-                            dependencyUseTypes.get(p.type)?.set(propName, {
-                                type: checker.typeToString(parent),
-                                typeParams:
-                                    'typeArguments' in parent
-                                        ? checker
-                                              .getTypeArguments(<ts.TypeReference>parent)
-                                              .map((t) => checker.typeToString(t))
-                                        : [],
-                                signature: 'property',
-                                name: propName,
-                                kind: typeKind(parent),
-                            });
-                        }
+                        l.debug(
+                            `method: ${accessExpr.name.text}.${declName} of type: ${checker.typeToString(
+                                checker.getTypeAtLocation(accessExpr.parent)
+                            )}`
+                        );
+
+                        dependencyUseTypes.get(p.type)!.set(declName, {
+                            type: checker.typeToString(returnType),
+                            typeParams:
+                                'typeArguments' in returnType
+                                    ? checker
+                                          .getTypeArguments(<ts.TypeReference>returnType)
+                                          .map((t) => checker.typeToString(t))
+                                    : [],
+                            signature: 'function',
+                            name: declName,
+                            kind: typeKind(returnType),
+                        });
                     }
-                }
-            );
-        }
-    });
+                });
+            } else if (
+                ts.isPropertyAccessExpression(accessExpr.parent) ||
+                ts.isElementAccessExpression(accessExpr.parent)
+            ) {
+                const propName = getPropName(accessExpr.parent);
+                l.debug(
+                    `property: ${accessExpr.name.text}.${propName} of type: ${checker.typeToString(
+                        checker.getTypeAtLocation(accessExpr.parent)
+                    )}`
+                );
+
+                dependencyUseTypes.get(p.type)?.set(propName, {
+                    type: checker.typeToString(callType),
+                    typeParams:
+                        'typeArguments' in callType
+                            ? checker
+                                  .getTypeArguments(<ts.TypeReference>callType)
+                                  .map((t) => checker.typeToString(t))
+                            : [],
+                    signature: 'property',
+                    name: propName,
+                    kind: typeKind(callType),
+                });
+            } else {
+                l.debug(
+                    `not a prop and not a method: ${accessExpr.name.text}.${printKindAndText(accessExpr)} of type: ${checker.typeToString(
+                        checker.getTypeAtLocation(accessExpr.parent)
+                    )}`
+                );
+            }
+        });
+
     return dependencyUseTypes;
 }
 
@@ -281,4 +303,10 @@ function isObservable(t: ts.Type): boolean {
         t.getProperties().filter((p) => observableProps.includes(p.name)).length ===
         observableProps.length
     );
+}
+
+function getPropName(p: ts.PropertyAccessExpression | ts.ElementAccessExpression): string {
+    // PropertyAccessExpression children [ expression or identifier, dot, identifier] - want the name of identifier
+    // ElementAccessExpression children [ expression, open-bracket, stringLiteral, close-bracket ]
+    return p.getChildAt(2).getText().replace(/['"`]/g, ''); // clean up the quotes from string literal if
 }
