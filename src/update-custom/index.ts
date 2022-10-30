@@ -8,6 +8,7 @@ import {
 } from '@angular-devkit/schematics';
 import { EOL } from 'os';
 import { getSpecFileCustomName } from '../common/get-spec-file-name';
+import { setLogger } from '../common/logger';
 import { paths } from '../common/paths';
 import { describeSource } from '../common/read/read';
 import { scuriTemplateMark, updateCustomTemplateCut } from '../common/scuri-custom-update-template';
@@ -20,6 +21,7 @@ export type Options = {
 
 export function updateCustom(o: Options): Rule {
     return (tree: Tree, context: SchematicContext) => {
+        setLogger(context.logger.createChild('scuri:update-custom'));
         const template = tree.read(o.classTemplate)?.toString('utf8');
         const fileUnderTestContent = tree.read(o.name)?.toString('utf8');
 
@@ -101,7 +103,7 @@ export function updateWithCustomTemplate(
     if(parts == null || parts.length === 0) {
         throw new Error(`The custom template seems to be missing the ${scuriTemplateMark} mark. Perhaps you need the standard update?`)
     }
-    
+
     const originalMethods = templateData.publicMethods;
     // skip methods that already have tests
     templateData.publicMethods = originalMethods.filter(
@@ -133,7 +135,7 @@ export function updateWithCustomTemplate(
             } else {
                 context.logger.debug(`Template result before de-duplication: [${templateResult}]`);
             }
-            
+
             const spaces = getWhitespaceBefore(templateData.specFileContents, mark);
             // skip de-duplication for the whole section (mark)
             const skipDeDupe = p.mark.toLowerCase().includes(skip.toLowerCase());
