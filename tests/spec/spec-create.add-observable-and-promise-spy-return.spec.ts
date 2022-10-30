@@ -100,52 +100,40 @@ describe('spec for a class with a method calling a dependency method', () => {
         expect(ls[i++]).toEqual('    },');
 
         // prettier-ignore
-        expect(ls[i++]).toEqual(`    withServiceProperty$Emit(p: string | Error, action: 'emit' | 'error' | 'complete' = 'emit') {`
-        );
-        expect(ls[i++]).toEqual(`        if (action === 'emit') {`);
-        expect(ls[i++]).toEqual('            property$.next(p);');
-        expect(ls[i++]).toEqual(`        } else if (action === 'error') {`);
-        expect(ls[i++]).toEqual('            property$.error(p);');
-        expect(ls[i++]).toEqual(`        } else {`);
-        expect(ls[i++]).toEqual('            property$.complete();');
-        expect(ls[i++]).toEqual('        }');
+        expect(ls[i++]).toEqual(`    withServiceProperty$(p$: Observable<string>) {`);
+        expect(ls[i++]).toEqual(`        p$.subscribe({`);
+        expect(ls[i++]).toEqual('            next: (v) => serviceProperty$.next(v),');
+        expect(ls[i++]).toEqual('            error: (e) => serviceProperty$.error(e),');
+        expect(ls[i++]).toEqual('            complete: () => serviceProperty$.complete()');
+        expect(ls[i++]).toEqual('        });');
         expect(ls[i++]).toEqual('        return builder;');
         expect(ls[i++]).toEqual('    },');
 
-        expect(ls[i++]).toEqual(
-            `    withServicePromiseProp(p: string | Error, action: 'resolve' | 'reject' = 'resolve') {`
-        );
-        expect(ls[i++]).toEqual(`        if (action === 'resolve') {`);
-        expect(ls[i++]).toEqual('            resolvePromiseProp(p);');
-        expect(ls[i++]).toEqual(`        } else {`);
-        expect(ls[i++]).toEqual('            rejectPromiseProp(p);');
-        expect(ls[i++]).toEqual('        }');
+        // prettier-ignore
+        expect(ls[i++]).toEqual(`    withServicePromiseProp(p: Promise<string>) {`);
+        expect(ls[i++]).toEqual(`        p`);
+        expect(ls[i++]).toEqual('            .then((v) => resolveServicePromiseProp(v))');
+        expect(ls[i++]).toEqual('            .catch((e) => rejectServicePromiseProp(e));');
         expect(ls[i++]).toEqual('        return builder;');
         expect(ls[i++]).toEqual('    },');
 
-        expect(ls[i++]).toEqual(
-            `    withServiceObservable$Emit(o: ClassDescription[] | Error, action: 'emit' | 'error' | 'complete' = 'emit') {`
-        );
-        expect(ls[i++]).toEqual(`        if (action === 'emit') {`);
-        expect(ls[i++]).toEqual('            observable$.next(o);');
-        expect(ls[i++]).toEqual(`        } else if (action === 'error') {`);
-        expect(ls[i++]).toEqual('            observable$.error(o);');
-        expect(ls[i++]).toEqual(`        } else {`);
-        expect(ls[i++]).toEqual('            observable$.complete();');
-        expect(ls[i++]).toEqual('        }');
+        // prettier-ignore
+        expect(ls[i++]).toEqual(`    withServiceObservable$(o$: Observable<ClassDescription[]>) {`);
+        expect(ls[i++]).toEqual(`        o$.subscribe({`);
+        expect(ls[i++]).toEqual('            next: (v) => serviceObservable$.next(v),');
+        expect(ls[i++]).toEqual('            error: (e) => serviceObservable$.error(e),');
+        expect(ls[i++]).toEqual('            complete: () => serviceObservable$.complete()');
+        expect(ls[i++]).toEqual('        });');
         expect(ls[i++]).toEqual('        return builder;');
         expect(ls[i++]).toEqual('    },');
 
-        expect(ls[i++]).toEqual(
-            `    withServiceSubject$Emit(s: string | Error, action: 'emit' | 'error' | 'complete' = 'emit') {`
-        );
-        expect(ls[i++]).toEqual(`        if (action === 'emit') {`);
-        expect(ls[i++]).toEqual('            subject$.next(s);');
-        expect(ls[i++]).toEqual(`        } else if (action === 'error') {`);
-        expect(ls[i++]).toEqual('            subject$.error(s);');
-        expect(ls[i++]).toEqual(`        } else {`);
-        expect(ls[i++]).toEqual('            subject$.complete();');
-        expect(ls[i++]).toEqual('        }');
+        // prettier-ignore
+        expect(ls[i++]).toEqual(`    withServiceSubject$(s$: Observable<string>) {`);
+        expect(ls[i++]).toEqual(`        s$.subscribe({`);
+        expect(ls[i++]).toEqual('            next: (v) => serviceSubject$.next(v),');
+        expect(ls[i++]).toEqual('            error: (e) => serviceSubject$.error(e),');
+        expect(ls[i++]).toEqual('            complete: () => serviceSubject$.complete()');
+        expect(ls[i++]).toEqual('        });');
         expect(ls[i++]).toEqual('        return builder;');
         expect(ls[i++]).toEqual('    },');
     });
@@ -219,42 +207,34 @@ describe('spec for a class with a method calling a dependency method', () => {
                     service.promiseReturning.and.returnValue(p);
                     return builder;
                 },
-                withServiceProperty$Emit(p: string | Error, action: 'emit' | 'error' | 'complete' = 'emit') {
-                    if (action === 'emit') {
-                        property$.next(p);
-                    } else if (action === 'error') {
-                        property$.error(p);
-                    } else {
-                        property$.complete();
-                    }
+                withServiceProperty$(p$: Observable<string>) {
+                    p$.subscribe({
+                        next: (v) => serviceProperty$.next(v),
+                        error: (e) => serviceProperty$.error(e),
+                        complete: () => serviceProperty$.complete()
+                    });
                     return builder;
                 },
-                withServicePromiseProp(p: string | Error, action: 'resolve' | 'reject' = 'resolve') {
-                    if (action === 'resolve') {
-                        resolvePromiseProp(p);
-                    } else {
-                        rejectPromiseProp(p);
-                    }
+                withServicePromiseProp(p: Promise<string>) {
+                    p
+                        .then((v) => resolveServicePromiseProp(v))
+                        .catch((e) => rejectServicePromiseProp(e));
                     return builder;
                 },
-                withServiceObservable$Emit(o: ClassDescription[] | Error, action: 'emit' | 'error' | 'complete' = 'emit') {
-                    if (action === 'emit') {
-                        observable$.next(o);
-                    } else if (action === 'error') {
-                        observable$.error(o);
-                    } else {
-                        observable$.complete();
-                    }
+                withServiceObservable$(o$: Observable<ClassDescription[]>) {
+                    o$.subscribe({
+                        next: (v) => serviceObservable$.next(v),
+                        error: (e) => serviceObservable$.error(e),
+                        complete: () => serviceObservable$.complete()
+                    });
                     return builder;
                 },
-                withServiceSubject$Emit(s: string | Error, action: 'emit' | 'error' | 'complete' = 'emit') {
-                    if (action === 'emit') {
-                        subject$.next(s);
-                    } else if (action === 'error') {
-                        subject$.error(s);
-                    } else {
-                        subject$.complete();
-                    }
+                withServiceSubject$(s$: Observable<string>) {
+                    s$.subscribe({
+                        next: (v) => serviceSubject$.next(v),
+                        error: (e) => serviceSubject$.error(e),
+                        complete: () => serviceSubject$.complete()
+                    });
                     return builder;
                 },
                 default() {

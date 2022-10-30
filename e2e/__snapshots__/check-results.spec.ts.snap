@@ -122,6 +122,82 @@ function setup() {
 "
 `;
 
+exports[`spec should check results against snapshot: promise-and-observable 1`] = `
+"import { Service } from './service';
+import { PromiseAndObservableComponent } from './promise-and-observable.component';
+import { autoSpy } from 'autoSpy';
+import { EMPTY } from 'rxjs';
+
+describe('PromiseAndObservableComponent', () => {
+  it('when myMethod is called it should', () => {
+    // arrange
+    const { build } = setup().default();
+    const p = build();
+    // act
+    p.myMethod();
+    // assert
+    // expect(p).toEqual
+  });
+  it('when mySecondMethod is called it should', () => {
+    // arrange
+    const { build } = setup().default();
+    const p = build();
+    // act
+    p.mySecondMethod();
+    // assert
+    // expect(p).toEqual
+  });
+  
+});
+
+function setup() {
+  const serviceUserName$ = new ReplaySubject<string>(1);
+    const resolveServiceComments: Function;
+    const rejectServiceComments: Function;
+    const serviceComments = new Promise((res, rej) => {
+        resolveComments = res;
+        rejectComments = rej;
+    });
+    const service = autoSpy(Service, { userName$: serviceUserName$, comments: serviceComments });
+    service.getComment.and.returnValue(new Promise(res => {}));
+    service.getUser.and.returnValue(EMPTY);
+  const builder = {
+    service,
+    withServiceUserName$(u$: Observable<string>) {
+        u$.subscribe({
+            next: (v) => serviceUserName$.next(v),
+            error: (e) => serviceUserName$.error(e),
+            complete: () => serviceUserName$.complete()
+        });
+        return builder;
+    },
+    withServiceComments(c: Promise<Comment[]>) {
+        c
+            .then((v) => resolveServiceComments(v))
+            .catch((e) => rejectServiceComments(e));
+        return builder;
+    },
+    withServiceGetCommentReturn(g: Promise<Comment>) {
+        service.getComment.and.returnValue(g);
+        return builder;
+    },
+    withServiceGetUserReturn(g: Observable<User>) {
+        service.getUser.and.returnValue(g);
+        return builder;
+    },
+    default() {
+      return builder;
+    },
+    build() {
+      return new PromiseAndObservableComponent(service);
+    }
+  };
+
+  return builder;
+}
+"
+`;
+
 exports[`spec should check results against snapshot: to-update-expected 1`] = `
 "import { ToUpdateComponent } from './to-update.component';
 import { autoSpy, spyInject } from 'jasmine-auto-spies';
