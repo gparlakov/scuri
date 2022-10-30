@@ -20,6 +20,7 @@ import { resolve } from 'path';
 import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
 import { addDefaultObservableAndPromiseToSpyJoined, includePropertyMocks, propertyMocks, createSetupMethodsFn } from '../common/add-observable-promise-stubs';
 import { getSpecFilePathName } from '../common/get-spec-file-name';
+import { setLogger } from '../common/logger';
 import { paths } from '../common/paths';
 import { describeSource } from '../common/read/read';
 import { scuriTemplateMark, updateCustomTemplateCut } from '../common/scuri-custom-update-template';
@@ -44,6 +45,7 @@ export function spec({ name, update, classTemplate, functionTemplate, config, fr
     const frm = framework ?? 'jasmine';
     return (tree: Tree, context: SchematicContext) => {
         const logger = context.logger.createChild('scuri.index');
+        setLogger(logger);
         logger.debug(
             `Params: name: ${name} update: ${update} classTemplate: ${classTemplate} config: ${config}`
         );
