@@ -15,7 +15,9 @@ exports[`spec should check results against snapshot: my-com-expected 1`] = `
  *  normalizedName: my-com.component
  *  className: MyComComponent
  *  publicMethods: ngOnInit
- *  declaration: const router = autoSpy(Router);
+ *  declaration: 
+    const router = autoSpy(Router);
+    
  *  builderExports: router,
  *  constructorParams: router
  *  shorthand: m
@@ -53,7 +55,9 @@ describe('MyComComponent', () => {
 
 // tslint-disable-type
 function setup() {
-  const router = autoSpy(Router);const builder = {
+  
+    const router = autoSpy(Router);
+    const builder = {
     router,default() {
       return builder;
     },

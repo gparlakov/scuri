@@ -27,12 +27,12 @@ describe('update-custom', () => {
 
     it('should debug-output the skipped methods and the template results prior to dedupe', async () => {
         const runner = new SchematicTestRunner('schematics', collectionPath);
-        const logs = subscribe(listenLogger(runner.logger, { level: 'debug' }), 9);
+        const logs = subscribe(listenLogger(runner.logger, { level: 'debug' }), 10);
 
         await runner
             .runSchematicAsync(
                 'update-custom',
-                <Options>{ name, classTemplate, specFileContents: specFileContent() },
+                <Options>{ name, classTemplate },
                 tree
             )
             .toPromise();
@@ -40,6 +40,7 @@ describe('update-custom', () => {
         // skipping methods
         expect(logs).toMatchInlineSnapshot(`
             Array [
+              "missing src file",
               "Cut the template to parts [{\\"mark\\":\\"lets\\",\\"template\\":\\"<%params.forEach(p => {%>let <%= camelize(p.type) %>Spy: <%= p.type %>;\\\\n<% }) %>\\"},{\\"mark\\":\\"injectables\\",\\"template\\":\\"<%params.forEach(p => {%>{ provide: <%= p.type %>, useClass: autoSpy(<%= p.type %>, '<%= p.type %>') },\\\\n<% }) %>\\"},{\\"mark\\":\\"get-instances\\",\\"template\\":\\"<%params.forEach(p => {%><%= camelize(p.type) %>Spy = spyInject<<%= p.type %>>(TestBed.inject(<%= p.type %>));\\\\n<% }) %>\\"},{\\"mark\\":\\"methods-skipDeDupe\\",\\"template\\":\\"<% publicMethods.forEach(meth=> {if(meth != '') { %>it('when <%= meth %> is called it should', () => {\\\\n    // arrange\\\\n    // act\\\\n    <%= shorthand %>.<%= meth %>();\\\\n    // assert\\\\n    // expect(<%= shorthand %>).toEqual\\\\n});\\\\n<% }}) %>\\"}]",
               "Skipping methods: [myMethod] as they seem to be already in the spec.",
               "Template result before de-duplication: [let serviceSpy: Service;
@@ -86,7 +87,7 @@ describe('update-custom', () => {
         await runner
             .runSchematicAsync(
                 'update-custom',
-                <Options>{ name, classTemplate, specFileContents: specFileContent() },
+                <Options>{ name, classTemplate },
                 tree
             )
             .toPromise();
@@ -107,7 +108,7 @@ describe('update-custom', () => {
         await runner
             .runSchematicAsync(
                 'update-custom',
-                <Options>{ name, classTemplate, specFileContents: specFileContent() },
+                <Options>{ name, classTemplate },
                 tree
             )
             .toPromise()
