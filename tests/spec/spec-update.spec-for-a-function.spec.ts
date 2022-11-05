@@ -36,11 +36,9 @@ describe('add', () => {
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
         // assert
-        const errors: Error[] = [];
-        runner.logger.pipe(filter(v => v.level === 'error')).subscribe(v => errors.push(v));
-        await runner.runSchematicAsync('spec', { name: source, update: true }, tree).toPromise();
-        // assert
-        expect(errors.length).toBe(1);
-        expect(errors[0].message).toEqual('No classes found to be spec-ed!');
+        await runner.runSchematicAsync('spec', { name: source, update: true }, tree)
+            .toPromise()
+            // assert
+            .catch(e => expect(e?.message).toEqual('No classes found to be spec-ed!'));
     });
 });

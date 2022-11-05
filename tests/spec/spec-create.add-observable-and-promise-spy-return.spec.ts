@@ -157,8 +157,8 @@ describe('spec for a class with a method calling a dependency method', () => {
         expect(specFile).toMatchInlineSnapshot(`
             "import { ServiceWithMethods } from './deps-calls-with-return-types.dependency';
             import { ExampleComponent } from './deps-calls-with-return-types';
+            import { EMPTY, Observable, ReplaySubject } from 'rxjs';
             import { autoSpy } from 'autoSpy';
-            import { EMPTY } from 'rxjs';
 
             describe('ExampleComponent', () => {
               it('when aMethod is called it should', () => {

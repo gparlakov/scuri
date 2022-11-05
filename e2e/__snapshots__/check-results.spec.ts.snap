@@ -73,8 +73,8 @@ function setup() {
 exports[`spec should check results against snapshot: other-expected 1`] = `
 "import { Service } from '../service';
 import { OtherComponent } from './other.component';
+import { EMPTY, Observable } from 'rxjs';
 import { autoSpy } from 'autoSpy';
-import { EMPTY } from 'rxjs';
 
 describe('OtherComponent', () => {
   it('when anotherMethod is called it should', () => {
@@ -129,8 +129,8 @@ function setup() {
 exports[`spec should check results against snapshot: promise-and-observable 1`] = `
 "import { Service } from './service';
 import { PromiseAndObservableComponent } from './promise-and-observable.component';
+import { EMPTY, Observable, ReplaySubject } from 'rxjs';
 import { autoSpy } from 'autoSpy';
-import { EMPTY } from 'rxjs';
 
 describe('PromiseAndObservableComponent', () => {
   it('when myMethod is called it should', () => {

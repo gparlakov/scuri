@@ -24,6 +24,7 @@ describe('spec for a class with a method calling a dependency method', () => {
             "import { ServiceWithMethods } from './deps-calls-with-return-types.dependency';
             import { ExampleComponent } from './deps-calls-with-return-types';
             import { autoSpy } from 'autoSpy';
+            import { EMPTY, Observable, ReplaySubject } from 'rxjs';
 
             describe('ExampleComponent', () => {
                 it('when aMethod is called it should', () => {
@@ -141,6 +142,7 @@ describe('spec for a class with a method calling a dependency method', () => {
             "import { ServiceWithMethods } from './deps-calls-with-return-types.dependency';
             import { ExampleComponent } from './deps-calls-with-return-types';
             import { autoSpy } from 'autoSpy';
+            import { EMPTY, Observable } from 'rxjs';
 
             describe('ExampleComponent', () => {
                 it('when aMethod is called it should', () => {
@@ -211,6 +213,7 @@ describe('spec for a class with a method calling a dependency method', () => {
             import { ExampleComponent } from './component';
             import { autoSpy } from 'autoSpy';
             import { ServiceWithMethods } from './dependency';
+            import { EMPTY, Observable, ReplaySubject } from 'rxjs';
 
             describe('ExampleComponent', () => {
                 it('when aMethod is called it should', () => {
@@ -337,6 +340,7 @@ describe('spec for a class with a method calling a dependency method', () => {
             import { ExampleComponent } from './component';
             import { autoSpy } from 'autoSpy';
             import { ServiceWithMethods } from './dependency';
+            import { EMPTY, Observable, ReplaySubject } from 'rxjs';
 
             describe('ExampleComponent', () => {
                 it('when aMethod is called it should', () => {

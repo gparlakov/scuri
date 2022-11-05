@@ -1,8 +1,8 @@
 import { basename, normalize, strings } from '@angular-devkit/core';
-import { Logger } from '@angular-devkit/core/src/logger';
 import {
     apply,
     applyTemplates,
+    chain,
     MergeStrategy,
     mergeWith,
     move,
@@ -12,22 +12,31 @@ import {
     Source,
     source,
     Tree,
-    url
+    url,
 } from '@angular-devkit/schematics';
 import { cosmiconfigSync } from 'cosmiconfig';
 import { EOL } from 'os';
 import { resolve } from 'path';
 import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
-import { addDefaultObservableAndPromiseToSpyJoined, includePropertyMocks, propertyMocks, createSetupMethodsFn } from '../common/add-observable-promise-stubs';
+import {
+    addDefaultObservableAndPromiseToSpyJoined,
+    includePropertyMocks,
+    propertyMocks,
+    createSetupMethodsFn,
+} from '../common/add-observable-promise-stubs';
 import { getSpecFilePathName } from '../common/get-spec-file-name';
-import { setLogger } from '../common/logger';
+import { getLogger, setLogger } from '../common/logger';
 import { paths } from '../common/paths';
 import { describeSource } from '../common/read/read';
 import { scuriTemplateMark, updateCustomTemplateCut } from '../common/scuri-custom-update-template';
+import { getSpecFileName } from '../common/spec-file-name';
 import {
-    ClassDescription, ClassTemplateData, FunctionDescription,
-    isClassDescription
+    ClassDescription,
+    ClassTemplateData,
+    FunctionDescription,
+    isClassDescription,
 } from '../types';
+import { addMissingImports } from './add-missing-imports/add-missing-imports.rule';
 import { addMissing, update as doUpdate, UpdateOptions } from './update/update';
 class SpecOptions {
     name: string;
@@ -35,13 +44,20 @@ class SpecOptions {
     classTemplate?: string;
     functionTemplate?: string;
     config?: string;
-    framework?: 'jest' | 'jasmine'
+    framework?: 'jest' | 'jasmine';
 }
 
 type Config = Omit<SpecOptions, 'name' | 'update' | 'config'>;
 
-export function spec({ name, update, classTemplate, functionTemplate, config, framework}: SpecOptions): Rule {
-    const isForce = process.argv.find(e => e === 'force' || e === '--force') != null;
+export function spec({
+    name,
+    update,
+    classTemplate,
+    functionTemplate,
+    config,
+    framework,
+}: SpecOptions): Rule {
+    const isForce = process.argv.find((e) => e === 'force' || e === '--force') != null;
     const frm = framework ?? 'jasmine';
     return (tree: Tree, context: SchematicContext) => {
         const logger = context.logger.createChild('scuri.index');
@@ -81,20 +97,35 @@ export function spec({ name, update, classTemplate, functionTemplate, config, fr
 
         try {
             if (update) {
-                if (classTemplate && tree.exists(classTemplate) && tree.read(classTemplate)?.toString()?.includes(scuriTemplateMark)) {
-                    logger.debug(`Switching to update custom ${classTemplate}`)
+                if (
+                    classTemplate &&
+                    tree.exists(classTemplate) &&
+                    tree.read(classTemplate)?.toString()?.includes(scuriTemplateMark)
+                ) {
+                    logger.debug(`Switching to update custom ${classTemplate}`);
                     return schematic('update-custom', { name, classTemplate });
                 }
                 logger.debug(`Updating name ${name}`);
-                return updateExistingSpec(name, tree, logger, { framework: frm });
+                return chain([
+                    updateExistingSpec(name, { framework: frm }),
+                    addMissingImports(getSpecFileName(name)),
+                ]);
             } else {
-                return createNewSpec(name, tree, logger, { classTemplate, functionTemplate, force: isForce });
+                return chain([
+                    createNewSpec(name, {
+                        classTemplate,
+                        functionTemplate,
+                        force: isForce,
+                    }),
+                    addMissingImports(getSpecFileName(name)),
+                ]);
             }
         } catch (e) {
             e = e || {};
             logger.error(e.message || 'An error occurred');
             logger.debug(
-                `---Error--- ${EOL}${e.message || 'Empty error message'} ${e.stack || 'Empty stack.'
+                `---Error--- ${EOL}${e.message || 'Empty error message'} ${
+                    e.stack || 'Empty stack.'
                 }`
             );
         }
@@ -108,78 +139,84 @@ function sliceSpecFromFileName(path: string) {
     }
 }
 
-function updateExistingSpec(fullName: string, tree: Tree, logger: Logger, o: UpdateOptions) {
+function updateExistingSpec(fullName: string, o: UpdateOptions): Rule {
     const specFileName = sliceSpecFromFileName(fullName);
-    const content = tree.read(specFileName);
-    if (content == null) {
-        logger.error(`The file ${specFileName} is missing or empty.`);
-    } else {
-        // the new spec full file name contents - null if file not exist
-        const existingSpecFile = tree.get(getSpecFilePathName(specFileName));
-        if (existingSpecFile == null) {
-            logger.error(
-                `Can not update spec (for ${specFileName}) since it does not exist. Try running without the --update flag.`
-            );
+    const logger = getLogger(updateExistingSpec.name);
+    return (tree, _context) => {
+        const content = tree.read(specFileName);
+        if (content == null) {
+            logger.error(`The file ${specFileName} is missing or empty.`);
         } else {
-            const specFilePath = existingSpecFile.path;
-            // if a spec exists we'll try to update it
-            const { params, name, publicMethods, depsCallsAndTypes } = getFirstClass(specFileName, content);
-            const shorthand = typeShorthand(name);
-            logger.debug(`Class name ${name} ${EOL}Constructor(${params}) {${publicMethods}}`);
+            // the new spec full file name contents - null if file not exist
+            const existingSpecFile = tree.get(getSpecFilePathName(specFileName));
+            if (existingSpecFile == null) {
+                logger.error(
+                    `Can not update spec (for ${specFileName}) since it does not exist. Try running without the --update flag.`
+                );
+            } else {
+                const specFilePath = existingSpecFile.path;
+                // if a spec exists we'll try to update it
+                const { params, name, publicMethods, depsCallsAndTypes } = getFirstClass(
+                    specFileName,
+                    content
+                );
+                const shorthand = typeShorthand(name);
+                logger.debug(`Class name ${name} ${EOL}Constructor(${params}) {${publicMethods}}`);
 
-            // start by adding missing things (like the setup function)
-            const addMissingChanges = addMissing(
-                specFilePath,
-                tree.read(specFilePath)!.toString('utf8'),
-                params,
-                name
-            );
-            applyChanges(tree, specFilePath, addMissingChanges, 'add');
+                // start by adding missing things (like the setup function)
+                const addMissingChanges = addMissing(
+                    specFilePath,
+                    tree.read(specFilePath)!.toString('utf8'),
+                    params,
+                    name
+                );
+                applyChanges(tree, specFilePath, addMissingChanges, 'add');
 
-            // then on the resulting tree - remove unneeded deps
-            const removeChanges = doUpdate(
-                specFilePath,
-                tree.read(specFilePath)!.toString('utf8'),
-                params,
-                name,
-                'remove',
-                publicMethods,
-                shorthand,
-                depsCallsAndTypes,
-                o
-            );
-            applyChanges(tree, specFilePath, removeChanges, 'remove');
+                // then on the resulting tree - remove unneeded deps
+                const removeChanges = doUpdate(
+                    specFilePath,
+                    tree.read(specFilePath)!.toString('utf8'),
+                    params,
+                    name,
+                    'remove',
+                    publicMethods,
+                    shorthand,
+                    depsCallsAndTypes,
+                    o
+                );
+                applyChanges(tree, specFilePath, removeChanges, 'remove');
 
-            // then add what needs to be added (new deps in the instantiation, 'it' for new methods, etc.)
-            const changesToAdd = doUpdate(
-                specFilePath,
-                tree.read(specFilePath)!.toString('utf8'),
-                params,
-                name,
-                'add',
-                publicMethods,
-                shorthand,
-                depsCallsAndTypes,
-                o
-            );
-            applyChanges(tree, specFilePath, changesToAdd, 'add');
+                // then add what needs to be added (new deps in the instantiation, 'it' for new methods, etc.)
+                const changesToAdd = doUpdate(
+                    specFilePath,
+                    tree.read(specFilePath)!.toString('utf8'),
+                    params,
+                    name,
+                    'add',
+                    publicMethods,
+                    shorthand,
+                    depsCallsAndTypes,
+                    o
+                );
+                applyChanges(tree, specFilePath, changesToAdd, 'add');
 
-            const changesToAddAdditional = doUpdate(
-                specFilePath,
-                tree.read(specFilePath)!.toString('utf8'),
-                params,
-                name,
-                'add-spy-methods-and-props',
-                publicMethods,
-                shorthand,
-                depsCallsAndTypes,
-                o
-            );
-            applyChanges(tree, specFilePath, changesToAddAdditional, 'add');
+                const changesToAddAdditional = doUpdate(
+                    specFilePath,
+                    tree.read(specFilePath)!.toString('utf8'),
+                    params,
+                    name,
+                    'add-spy-methods-and-props',
+                    publicMethods,
+                    shorthand,
+                    depsCallsAndTypes,
+                    o
+                );
+                applyChanges(tree, specFilePath, changesToAddAdditional, 'add');
 
-            return tree;
+                return tree;
+            }
         }
-    }
+    };
 }
 
 function applyChanges(tree: Tree, specFilePath: string, changes: Change[], act: 'add' | 'remove') {
@@ -204,115 +241,130 @@ function applyChanges(tree: Tree, specFilePath: string, changes: Change[], act: 
 
 function createNewSpec(
     fileNameRaw: string,
-    tree: Tree,
-    logger: Logger,
-    o?: { classTemplate?: string; functionTemplate?: string, force?: boolean }
-) {
-    const content = tree.read(fileNameRaw);
+    o?: { classTemplate?: string; functionTemplate?: string; force?: boolean }
+): Rule {
+    const logger = getLogger('createNewSpec');
+    return (tree, _context) => {
+        const content = tree.read(fileNameRaw);
 
-    if (content == null) {
-        logger.error(`The file ${fileNameRaw} is missing or empty.`);
-    } else {
-        // we aim at creating a spec from the class/function under test (name)
-        // for the spec name we'll need to parse the base file name and its extension and calculate the path
+        if (content == null) {
+            logger.error(`The file ${fileNameRaw} is missing or empty.`);
+            return tree;
+        } else {
+            // we aim at creating a spec from the class/function under test (name)
+            // for the spec name we'll need to parse the base file name and its extension and calculate the path
 
-        const {
-            specFileName,
-            fileName,
-            folderPathRaw: path,
-            folderPathNormal: folder,
-        } = paths(fileNameRaw);
-
-        try {
-            const { params, name, publicMethods, depsCallsAndTypes } = getFirstClass(fileNameRaw, content);
-
-            // if there are no methods in the class - let's add one test case anyway
-            if (Array.isArray(publicMethods) && publicMethods.length === 0) {
-                publicMethods.push('');
-            }
-
-            const templateVariables: ClassTemplateData = {
-                ...strings,
-                // the name of the new spec file
+            const {
                 specFileName,
-                normalizedName: fileName,
-                name,
-                className: name,
-                folder,
-                publicMethods,
-                params,
-                declaration: toDeclaration(),
-                builderExports: toBuilderExports(),
-                constructorParams: toConstructorParams(),
-                shorthand: typeShorthand(name),
-                setupMethods: createSetupMethodsFn(params, depsCallsAndTypes)
-            };
-            const src = maybeUseCustomTemplate(tree, url('./files/class'), o?.classTemplate);
+                fileName,
+                folderPathRaw: path,
+                folderPathNormal: folder,
+            } = paths(fileNameRaw);
 
-            const templateSource = apply(src, [applyTemplates(templateVariables), move(path)]);
-
-            return mergeWith(templateSource, o?.force ? MergeStrategy.AllowCreationConflict : undefined);
-
-            /**
-             * End of the create function
-             * Below are the in-scope functions
-             */
-
-            // functions defined in the scope of the else to use params and such
-            // for getting called in the template - todo - just call the functions and get the result
-            function toConstructorParams() {
-                return params.map((p) => p.name).join(',');
-            }
-            function toDeclaration() {
-                return params
-                    .map((p) =>
-                        p.type === 'string' || p.type === 'number'
-                            ? `let ${p.name}:${p.type};`
-                            : `${propertyMocks(p, depsCallsAndTypes, {joiner: `${EOL}    `})}const ${p.name} = autoSpy(${p.type}${includePropertyMocks(p, depsCallsAndTypes)});${addDefaultObservableAndPromiseToSpyJoined(p, depsCallsAndTypes, { joiner: `${EOL}    `, spyReturnType: 'jasmine' })}`
-                    )
-                    .join(EOL);
-            }
-            function toBuilderExports() {
-                return params.length > 0
-                    ? params
-                        .map((p) => p.name)
-                        .join(',' + EOL)
-                        .concat(',')
-                    : '';
-            }
-
-
-        } catch (e) {
-            if (e != null && e.message === 'No classes found to be spec-ed!') {
-                const funktion = getFirstFunction(fileNameRaw, content);
-                if (funktion == null) {
-                    throw new Error('No exported class or function to be spec-ed!');
-                }
-
-                const src = maybeUseCustomTemplate(
-                    tree,
-                    url('./files/function'),
-                    o?.functionTemplate
+            try {
+                const { params, name, publicMethods, depsCallsAndTypes } = getFirstClass(
+                    fileNameRaw,
+                    content
                 );
 
-                const templateSource = apply(src, [
-                    applyTemplates({
-                        ...strings,
-                        // the name of the new spec file
-                        specFileName,
-                        fileName,
-                        normalizedName: fileName,
-                        name: funktion.name,
-                    }),
-                    move(path),
-                ]);
+                // if there are no methods in the class - let's add one test case anyway
+                if (Array.isArray(publicMethods) && publicMethods.length === 0) {
+                    publicMethods.push('');
+                }
 
-                return mergeWith(templateSource);
-            } else {
-                throw e;
+                const templateVariables: ClassTemplateData = {
+                    ...strings,
+                    // the name of the new spec file
+                    specFileName,
+                    normalizedName: fileName,
+                    name,
+                    className: name,
+                    folder,
+                    publicMethods,
+                    params,
+                    declaration: toDeclaration(),
+                    builderExports: toBuilderExports(),
+                    constructorParams: toConstructorParams(),
+                    shorthand: typeShorthand(name),
+                    setupMethods: createSetupMethodsFn(params, depsCallsAndTypes),
+                };
+                const src = maybeUseCustomTemplate(tree, url('./files/class'), o?.classTemplate);
+
+                const templateSource = apply(src, [applyTemplates(templateVariables), move(path)]);
+
+                return mergeWith(
+                    templateSource,
+                    o?.force ? MergeStrategy.AllowCreationConflict : undefined
+                );
+
+                /**
+                 * End of the create function
+                 * Below are the in-scope functions
+                 */
+
+                // functions defined in the scope of the else to use params and such
+                // for getting called in the template - todo - just call the functions and get the result
+                function toConstructorParams() {
+                    return params.map((p) => p.name).join(',');
+                }
+                function toDeclaration() {
+                    return params
+                        .map((p) =>
+                            p.type === 'string' || p.type === 'number'
+                                ? `let ${p.name}:${p.type};`
+                                : `${propertyMocks(p, depsCallsAndTypes, {
+                                      joiner: `${EOL}    `,
+                                  })}const ${p.name} = autoSpy(${p.type}${includePropertyMocks(
+                                      p,
+                                      depsCallsAndTypes
+                                  )});${addDefaultObservableAndPromiseToSpyJoined(
+                                      p,
+                                      depsCallsAndTypes,
+                                      { joiner: `${EOL}    `, spyReturnType: 'jasmine' }
+                                  )}`
+                        )
+                        .join(EOL);
+                }
+                function toBuilderExports() {
+                    return params.length > 0
+                        ? params
+                              .map((p) => p.name)
+                              .join(',' + EOL)
+                              .concat(',')
+                        : '';
+                }
+            } catch (e) {
+                if (e != null && e.message === 'No classes found to be spec-ed!') {
+                    const funktion = getFirstFunction(fileNameRaw, content);
+                    if (funktion == null) {
+                        throw new Error('No exported class or function to be spec-ed!');
+                    }
+
+                    const src = maybeUseCustomTemplate(
+                        tree,
+                        url('./files/function'),
+                        o?.functionTemplate
+                    );
+
+                    const templateSource = apply(src, [
+                        applyTemplates({
+                            ...strings,
+                            // the name of the new spec file
+                            specFileName,
+                            fileName,
+                            normalizedName: fileName,
+                            name: funktion.name,
+                        }),
+                        move(path),
+                    ]);
+
+                    return mergeWith(templateSource);
+                } else {
+                    throw e;
+                }
             }
         }
-    }
+    };
 }
 
 function maybeUseCustomTemplate(tree: Tree, src: Source, templateFileName?: string): Source {
@@ -345,7 +397,7 @@ function getFirstClass(fileName: string, fileContents: Buffer) {
         name,
         publicMethods,
         type,
-        depsCallsAndTypes
+        depsCallsAndTypes,
     } = classWithConstructorParamsOrFirst;
 
     return { params, name, publicMethods, type, depsCallsAndTypes };
