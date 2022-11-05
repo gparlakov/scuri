@@ -103,12 +103,12 @@ describe('spec', () => {
 
                     private privateProperty: string;
 
-                    aMethod(dep: string, service: Object) {}
+                    aMethod(dep: string, service: Service) {}
 
                     //a constructor comment
                     constructor(
                       /** shows in full text and is hidden in text */ dep: string,
-                      service: Object
+                      service: Service
                     ) {}
 
                     // an async public method

@@ -22,7 +22,6 @@ export function add(a: number, b: number) {
         // assert
         const contents = result.readContent(spec);
         expect(contents).toMatch(`import { add } from './add';`);
-        expect(contents).toMatch(`import { autoSpy } from 'autoSpy';`);
         expect(contents).toMatch(`describe('add', () => {`);
         expect(contents).toMatch(`  it('it should', () => {`);
         expect(contents).toMatch(`    // arrange`);

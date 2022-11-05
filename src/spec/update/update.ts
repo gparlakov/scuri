@@ -481,7 +481,7 @@ function addMissingImports(dependencies: ConstructorParam[], path: string, sourc
         }
     );
 
-    return [...dependencies, { name: 'EMPTY', type: 'Observable<void>', importPath: 'rxjs' }]
+    return dependencies
         .filter((d) => d.importPath != null)
         .filter((d) => duplicateMap.get(d) === 'first')
         .filter((d) => !isImported(source, d.type, d.importPath!))

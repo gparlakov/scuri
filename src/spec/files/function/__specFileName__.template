@@ -1,5 +1,4 @@
 import { <%= name %> } from './<%= normalizedName %>';
-import { autoSpy } from 'autoSpy';
 
 describe('<%= name %>', () => {
   it('it should', () => {

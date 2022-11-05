@@ -31,28 +31,31 @@ describe('C', () => {
         );
     });
 
-    it('should pass successfully', async  () => {
+    it('should pass successfully', async () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
         const errors = [];
-        runner.logger.pipe(filter(v => v.level === 'error')).subscribe(v => errors.push(v));
+        runner.logger.pipe(filter((v) => v.level === 'error')).subscribe((v) => errors.push(v));
         await runner.runSchematicAsync('spec', { name: './c.ts', update: true }, tree).toPromise();
         // assert
         expect(errors.length).toBe(0);
     });
 
-    it('should indent setup function variable declarations', async  () => {
+    it('should indent setup function variable declarations', async () => {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        const result = await runner.runSchematicAsync('spec', { name: './c.ts', update: true }, tree).toPromise();
+        const result = await runner
+            .runSchematicAsync('spec', { name: './c.ts', update: true }, tree)
+            .toPromise();
         // assert
         // @ts-ignore
         const contents = result.readContent('./c.spec.ts');
         // update should add LogService to imports, to construct params and create a spy for it
         expect(contents).toMatchInlineSnapshot(`
             "import { bDep, BDep, LogService } from '@angular/core';
+            import { autoSpy } from 'autoSpy';
 
             describe('C', () => {
             });
