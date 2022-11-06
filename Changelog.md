@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - adds methods for returning a value for each spy that's called
 - updates and adds only the needed things (methods, spies and spy-manipulation methods)
 - adds missing imports from rxjs or autoSpy
+- auto-detects jasmine or jest and allows for cli or options flag for the same
 
 ### Fixed
 
