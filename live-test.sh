@@ -28,7 +28,7 @@ if test -z "${DEBUG_LIVE_TEST}";  then
   ENTRYPOINT=$APP_DIR/$EXAMPLE_FOLDER/run-plus.sh
 else
   FLAGS='-it'
-  ENTRYPOINT=/bin/sh
+  ENTRYPOINT=/bin/bash
 fi
 
 docker run $FLAGS -v $(pwd)/example:$APP_DIR/example --entrypoint $ENTRYPOINT --net=host -e npm_config_registry=http://localhost:4873/ gparlakov/scuri:angular-14-app-v2
