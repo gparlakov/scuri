@@ -34,8 +34,7 @@
     "framework": {
       "type": "string",
       "alias": "f",
-      "description": "Only needed for Update. Can be set in Config too. Testing framework (jasmine or jest), default is jasmine",
-      "default": "jasmine"
+      "description": "Testing framework jasmine or jest. Only needed for Update. Can be set in Config too."
     }
   },
   "required": []

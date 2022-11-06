@@ -29,7 +29,6 @@ import { getLogger, setLogger } from '../common/logger';
 import { paths } from '../common/paths';
 import { describeSource } from '../common/read/read';
 import { scuriTemplateMark, updateCustomTemplateCut } from '../common/scuri-custom-update-template';
-import { getSpecFileName } from '../common/spec-file-name';
 import {
     ClassDescription,
     ClassTemplateData,
@@ -38,13 +37,15 @@ import {
 } from '../types';
 import { addMissingImports } from './add-missing-imports/add-missing-imports.rule';
 import { addMissing, update as doUpdate, UpdateOptions } from './update/update';
+import {detectTestingFramework, Supported, Supported as SupportedFrameworks } from '../common/detect-testing-framework'
+
 class SpecOptions {
     name: string;
     update?: boolean;
     classTemplate?: string;
     functionTemplate?: string;
     config?: string;
-    framework?: 'jest' | 'jasmine';
+    framework?: SupportedFrameworks;
 }
 
 type Config = Omit<SpecOptions, 'name' | 'update' | 'config'>;
@@ -58,13 +59,16 @@ export function spec({
     framework,
 }: SpecOptions): Rule {
     const isForce = process.argv.find((e) => e === 'force' || e === '--force') != null;
-    const frm = framework ?? 'jasmine';
+
     return (tree: Tree, context: SchematicContext) => {
+        // nothing before this line as it will have no access to logger
         const logger = context.logger.createChild('scuri.index');
         setLogger(logger);
+
         logger.debug(
             `Params: name: ${name} update: ${update} classTemplate: ${classTemplate} config: ${config}`
         );
+
         let c: Config = {};
         try {
             const res = config
@@ -95,6 +99,8 @@ export function spec({
             );
         }
 
+        const frm = detectTestingFramework(framework, c?.framework, tree, 'jasmine');
+
         try {
             if (update) {
                 if (
@@ -108,7 +114,7 @@ export function spec({
                 logger.debug(`Updating name ${name}`);
                 return chain([
                     updateExistingSpec(name, { framework: frm }),
-                    addMissingImports(getSpecFileName(name)),
+                    addMissingImports(getSpecFilePathName(name)),
                 ]);
             } else {
                 return chain([
@@ -116,8 +122,9 @@ export function spec({
                         classTemplate,
                         functionTemplate,
                         force: isForce,
+                        framework: frm
                     }),
-                    addMissingImports(getSpecFileName(name)),
+                    addMissingImports(getSpecFilePathName(name)),
                 ]);
             }
         } catch (e) {
@@ -241,7 +248,7 @@ function applyChanges(tree: Tree, specFilePath: string, changes: Change[], act: 
 
 function createNewSpec(
     fileNameRaw: string,
-    o?: { classTemplate?: string; functionTemplate?: string; force?: boolean }
+    o?: { classTemplate?: string; functionTemplate?: string; force?: boolean, framework?: Supported }
 ): Rule {
     const logger = getLogger('createNewSpec');
     return (tree, _context) => {
@@ -286,7 +293,7 @@ function createNewSpec(
                     builderExports: toBuilderExports(),
                     constructorParams: toConstructorParams(),
                     shorthand: typeShorthand(name),
-                    setupMethods: createSetupMethodsFn(params, depsCallsAndTypes),
+                    setupMethods: createSetupMethodsFn(params, depsCallsAndTypes, { spyReturnType: o?.framework}),
                 };
                 const src = maybeUseCustomTemplate(tree, url('./files/class'), o?.classTemplate);
 
@@ -320,7 +327,7 @@ function createNewSpec(
                                   )});${addDefaultObservableAndPromiseToSpyJoined(
                                       p,
                                       depsCallsAndTypes,
-                                      { joiner: `${EOL}    `, spyReturnType: 'jasmine' }
+                                      { joiner: `${EOL}    `, spyReturnType: o?.framework }
                                   )}`
                         )
                         .join(EOL);
