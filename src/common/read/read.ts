@@ -7,7 +7,7 @@ import {
     DependencyPropertyName,
     DependencyTypeName,
     Description,
-    isClassDescription
+    isClassDescription,
 } from '../../types';
 import { getLogger } from '../logger';
 import { getKindAndText, printKindAndText } from '../print-node';
@@ -152,7 +152,7 @@ function readDependencyCalls(
         DependencyTypeName,
         Map<DependencyPropertyName, DependencyCall>
     >(
-        constructorParams.map(p => ([p.type, new Map()])) // init the Map (hash) for each constructor param type
+        constructorParams.map((p) => [p.type, new Map()]) // init the Map (hash) for each constructor param type
     );
     const srcFile = prog.getSourceFile(sourceFileName);
     if (srcFile == null) {
@@ -173,7 +173,7 @@ function readDependencyCalls(
             constructorParams.some(
                 (param) =>
                     param.name === accessExpr.name.text &&
-                    checker.typeToString(checker.getTypeAtLocation(accessExpr)) === param.type
+                    checker.typeToString(checker.getTypeAtLocation(accessExpr)).includes(param.type)
             )
         )
         .filter(
@@ -185,11 +185,13 @@ function readDependencyCalls(
             const p = constructorParams.find(
                 (param) =>
                     param.name === accessExpr.name.text &&
-                    checker.typeToString(checker.getTypeAtLocation(accessExpr)) === param.type
+                    checker.typeToString(checker.getTypeAtLocation(accessExpr)).includes(param.type)
             )!;
 
             const callType = checker.getTypeAtLocation(accessExpr.parent);
-            l.debug(`processing,${getKindAndText(accessExpr.parent)}: ${checker.typeToString(callType)}`);
+            l.debug(
+                `processing,${getKindAndText(accessExpr.parent)}: ${checker.typeToString(callType)}`
+            );
             const callSignatures = callType.getCallSignatures();
 
             if (callSignatures?.length > 0) {
@@ -201,7 +203,9 @@ function readDependencyCalls(
                         const declName = declaration.name.getText();
 
                         l.debug(
-                            `method: ${accessExpr.name.text}.${declName} of type: ${checker.typeToString(
+                            `method: ${
+                                accessExpr.name.text
+                            }.${declName} of type: ${checker.typeToString(
                                 checker.getTypeAtLocation(accessExpr.parent)
                             )}`
                         );
@@ -245,7 +249,9 @@ function readDependencyCalls(
                 });
             } else {
                 l.debug(
-                    `not a prop and not a method: ${accessExpr.name.text}.${printKindAndText(accessExpr)} of type: ${checker.typeToString(
+                    `not a prop and not a method: ${accessExpr.name.text}.${printKindAndText(
+                        accessExpr
+                    )} of type: ${checker.typeToString(
                         checker.getTypeAtLocation(accessExpr.parent)
                     )}`
                 );
