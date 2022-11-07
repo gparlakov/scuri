@@ -11,8 +11,8 @@ describe('ExampleComponent', () => {
 
 function setup() {
 
-  const serviceObservable$ = new BehaviorSubject(null);
-  const service = autoSpy(ServiceWithMethods, {observable$: serviceObservable$});
+  const someOther$ = new BehaviorSubject(null);
+  const service = autoSpy(ServiceWithMethods, {observable$: someOther$});
   service.promiseReturning.and.returnValue(Promise.resolve('some other thing'));
 
   const builder = {

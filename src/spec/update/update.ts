@@ -1,4 +1,3 @@
-import { classify } from '@angular-devkit/core/src/utils/strings';
 import { EOL } from 'os';
 import * as ts from 'typescript';
 import { findNodes, insertImport, isImported } from '../../../lib/utility/ast-utils';
@@ -312,7 +311,7 @@ function addDepPropsMocks({
                         deps,
                         /*skipWhen*/ depOrObj => depOrObj === 'checkShouldSkipObjectWrapper'
                             ? somePropsAdded
-                            : text.includes(`${p.name}${classify(depOrObj.name)}`)
+                            : text.includes(depOrObj.name)
                     )
                 )
             ];
