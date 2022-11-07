@@ -1,5 +1,18 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import { Article, Profile, Comment } from '@realworld/core/api-types';
+export interface Article {
+  slug: string;
+}
+
+export interface Comment {
+  id: string;
+  message: string;
+}
+
+export interface Profile {
+  id: string;
+  name: string;
+}
+
 
 export const articleActions = createActionGroup({
   source: 'Article',
