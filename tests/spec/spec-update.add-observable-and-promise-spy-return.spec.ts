@@ -504,7 +504,7 @@ describe('spec for a class with a method calling a dependency method', () => {
         const specFile = result!.readContent(fileName.replace('.ts', '.spec.ts'));
         expect(specFile).toBeDefined();
         expect(specFile).toMatch(
-            'const service = autoSpy(ServiceWithMethods, {observable$: serviceObservable$, property$: serviceProperty$, promiseProp: servicePromiseProp, subject$: serviceSubject$});'
+            'const service = autoSpy(ServiceWithMethods, {observable$: someOther$, property$: serviceProperty$, promiseProp: servicePromiseProp, subject$: serviceSubject$});'
         );
     });
 
@@ -525,7 +525,7 @@ describe('spec for a class with a method calling a dependency method', () => {
         // assert
         const specFile = result!.readContent(fileName.replace('.ts', '.spec.ts'));
         expect(specFile).toBeDefined();
-        expect(specFile).toMatch('const serviceObservable$ = new BehaviorSubject(null);');
+        expect(specFile).toMatch('const someOther$ = new BehaviorSubject(null);');
         // don't add the same property mock 👇 as it already exists 👆
         expect(specFile).not.toMatch(
             'const serviceObservable$ = new ReplaySubject<ClassDescription[]>(1);'
