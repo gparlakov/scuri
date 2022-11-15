@@ -1,3 +1,4 @@
+import { Tree } from '@angular-devkit/schematics';
 import * as ts from 'typescript';
 import { findNodes } from '../../../lib/utility/ast-utils';
 import {
@@ -9,6 +10,7 @@ import {
     Description,
     isClassDescription,
 } from '../../types';
+import { createTsProgram } from '../create-ts-program';
 import { getLogger } from '../logger';
 import { getKindAndText, printKindAndText } from '../print-node';
 
@@ -58,19 +60,26 @@ const promiseProps = ['then', 'catch', 'finally'];
  * @param fileName the name of the file (required by ts API)
  * @param fileContents contents of the file
  */
-export function describeSource(fileName: string, fileContents: string): Description[] {
-    return read(ts.createSourceFile(fileName, fileContents, ts.ScriptTarget.ES2015, true)).map(
-        (r) =>
-            isClassDescription(r)
-                ? {
-                      ...r,
-                      constructorParams: addImportPaths(r.constructorParams, fileContents),
-                  }
-                : r
+export function describeSource(fileName: string, fileContents: string, tree: Tree): Description[] {
+    const program = createTsProgram(fileName, tree);
+    const fileSrc = program.getSourceFile(fileName);
+
+    if (fileSrc == null) {
+        getLogger(describeSource.name).debug('fileSrc is missing. Nothing to do here');
+        return [];
+    }
+
+    return read(fileSrc, program).map((r) =>
+        isClassDescription(r)
+            ? {
+                  ...r,
+                  constructorParams: addImportPaths(r.constructorParams, fileContents),
+              }
+            : r
     );
 }
 
-function read(node: ts.Node) {
+function read(node: ts.Node, program: ts.Program) {
     let result: Description[] = [];
     if (isExportedClass(node)) {
         const classDeclaration = node;
@@ -81,7 +90,7 @@ function read(node: ts.Node) {
                 name: classDeclaration.name != null ? classDeclaration.name.getText() : 'default',
                 constructorParams: constructorParams,
                 publicMethods: readPublicMethods(classDeclaration),
-                depsCallsAndTypes: readDependencyCalls(classDeclaration, constructorParams),
+                depsCallsAndTypes: readDependencyCalls(classDeclaration, constructorParams, program),
             },
         ];
     }
@@ -96,7 +105,7 @@ function read(node: ts.Node) {
         ];
     }
     ts.forEachChild(node, (n) => {
-        const r = read(n);
+        const r = read(n, program);
         if (r && r.length > 0) {
             result = result.concat(r);
         }
@@ -107,15 +116,18 @@ function read(node: ts.Node) {
 
 function readConstructorParams(node: ts.ClassDeclaration): ConstructorParam[] {
     let params: ConstructorParam[] = [];
+    // const logger = getLogger(readConstructorParams.name);
 
     ts.forEachChild(node, (node) => {
         if (node.kind === ts.SyntaxKind.Constructor) {
             const constructor = node as ts.ConstructorDeclaration;
 
-            params = constructor.parameters.map((p) => ({
-                name: p.name.getText(),
-                type: (p.type && p.type.getText()) || 'any', // the type of constructor param or any if not passe
-            }));
+            params = constructor.parameters.map((p) => {
+                return {
+                    name: p.name.getText(),
+                    type: (p.type && p.type.getText()) || 'any', // the type of constructor param or any if not passe
+                };
+            });
         }
     });
     return params;
@@ -138,15 +150,13 @@ function readPublicMethods(node: ts.ClassDeclaration): string[] {
 
 function readDependencyCalls(
     n: ts.Node,
-    constructorParams: ConstructorParam[]
+    constructorParams: ConstructorParam[],
+    prog: ts.Program
 ): DependencyMethodReturnAndPropertyTypes | undefined {
     const l = getLogger(readDependencyCalls.name);
     const sourceFileName = n.getSourceFile().fileName;
     const nodeFullText = n.getFullText();
-    const prog = ts.createProgram([sourceFileName], {
-        target: ts.ScriptTarget.ES2015,
-        module: ts.ModuleKind.CommonJS,
-    });
+
     const checker = prog.getTypeChecker();
     let dependencyUseTypes = new Map<
         DependencyTypeName,
@@ -189,6 +199,7 @@ function readDependencyCalls(
             )!;
 
             const callType = checker.getTypeAtLocation(accessExpr.parent);
+            l.debug(`accessExpr ${getKindAndText(accessExpr)}, type: ${checker.typeToString(checker.getTypeAtLocation(accessExpr))}`)
             l.debug(
                 `processing,${getKindAndText(accessExpr.parent)}: ${checker.typeToString(callType)}`
             );

@@ -168,7 +168,8 @@ function updateExistingSpec(fullName: string, o: UpdateOptions): Rule {
                 // if a spec exists we'll try to update it
                 const { params, name, publicMethods, depsCallsAndTypes } = getFirstClass(
                     specFileName,
-                    content
+                    content,
+                    tree
                 );
                 const shorthand = typeShorthand(name);
                 logger.debug(`Class name ${name} ${EOL}Constructor(${params}) {${publicMethods}}`);
@@ -274,7 +275,8 @@ function createNewSpec(
             try {
                 const { params, name, publicMethods, depsCallsAndTypes } = getFirstClass(
                     fileNameRaw,
-                    content
+                    content,
+                    tree
                 );
 
                 // if there are no methods in the class - let's add one test case anyway
@@ -345,7 +347,7 @@ function createNewSpec(
                 }
             } catch (e) {
                 if (e != null && e.message === 'No classes found to be spec-ed!') {
-                    const funktion = getFirstFunction(fileNameRaw, content);
+                    const funktion = getFirstFunction(fileNameRaw, content, tree);
                     if (funktion == null) {
                         throw new Error('No exported class or function to be spec-ed!');
                     }
@@ -391,8 +393,8 @@ function maybeUseCustomTemplate(tree: Tree, src: Source, templateFileName?: stri
     return src;
 }
 
-function getFirstClass(fileName: string, fileContents: Buffer) {
-    const descriptions = describeSource(fileName, fileContents.toString('utf8'));
+function getFirstClass(fileName: string, fileContents: Buffer, tree: Tree) {
+    const descriptions = describeSource(fileName, fileContents.toString('utf8'), tree);
 
     const classes = descriptions.filter((c) => isClassDescription(c)) as ClassDescription[];
     // we'll take the first class with any number of constructor params or just the first if there are none
@@ -413,8 +415,8 @@ function getFirstClass(fileName: string, fileContents: Buffer) {
     return { params, name, publicMethods, type, depsCallsAndTypes };
 }
 
-function getFirstFunction(fileName: string, fileContents: Buffer) {
-    const descriptions = describeSource(fileName, fileContents.toString('utf8'));
+function getFirstFunction(fileName: string, fileContents: Buffer, tree: Tree) {
+    const descriptions = describeSource(fileName, fileContents.toString('utf8'), tree);
     return (descriptions.filter((f) => f.type === 'function') as FunctionDescription[])[0];
 }
 
