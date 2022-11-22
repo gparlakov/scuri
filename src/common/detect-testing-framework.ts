@@ -80,6 +80,7 @@ export function detectTestingFramework(
         logger.debug(`Detected jest by way of ${found.jest.join()}`);
         return 'jest';
     } else {
+        logger.debug(`Fallback to ${fallback}`);
         // jest == jasmine
         return fallback;
         // todo - read through the files again and get the .mockReturnValue  and '.and.' numbers and .returnValue counts to make sure which type of runner is being used

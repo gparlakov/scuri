@@ -62,6 +62,7 @@ const promiseProps = ['then', 'catch', 'finally'];
  */
 export function describeSource(fileName: string, fileContents: string, tree: Tree): Description[] {
     const program = createTsProgram(fileName, tree);
+
     const fileSrc = program.getSourceFile(fileName);
 
     if (fileSrc == null) {

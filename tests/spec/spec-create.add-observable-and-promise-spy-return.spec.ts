@@ -178,7 +178,7 @@ describe('spec for a class with a method calling a dependency method', () => {
                 // assert
                 // expect(e).toEqual
               });
-              
+
             });
 
             function setup() {

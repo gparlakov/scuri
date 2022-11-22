@@ -26,7 +26,7 @@ export function updateCustom(o: Options): Rule {
         const fileUnderTestContent = tree.read(o.name)?.toString('utf8');
 
         if (typeof fileUnderTestContent === 'string' && typeof template === 'string') {
-            const r = describeSource(o.name, fileUnderTestContent);
+            const r = describeSource(o.name, fileUnderTestContent, tree);
             const topClass = Array.isArray(r) ? r[0] : <Description>{};
             if (isClassDescription(topClass)) {
                 const { constructorParams, publicMethods } = topClass;
