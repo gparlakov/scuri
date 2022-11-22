@@ -9,12 +9,12 @@ import { getSpecFilePathName } from '../../src/common/get-spec-file-name';
 
 export const collectionPath = join(__dirname, '../../collection.json');
 
-export const getTestFile = (fileName: string) => join(__dirname, './test-data', fileName);
-export const getTestFileContents = (fullFilePath: string) =>
-    readFileSync(fullFilePath).toString('utf8');
+export const getTestFile = (fileName: string, fromRoot: string = join(__dirname, './test-data')) => join(fromRoot, fileName);
+export const getTestFileContents = (fullFilePath: string, tree?: Tree) =>
+    (tree?.get(fullFilePath)?.content ?? readFileSync(fullFilePath)).toString('utf8');
 
 export const depsCallsReturnTypesFile = getTestFile('deps-calls-with-return-types.ts');
-export const depsCallsReturnTypesFileContents = () => getTestFileContents(depsCallsReturnTypesFile);
+export const depsCallsReturnTypesFileContents = (t?: Tree) => getTestFileContents(depsCallsReturnTypesFile, t);
 
 export function splitLines(s: string): string[] {
     return typeof s === 'string' ? s.split(/\n\r|\n|\r\n/) : [];
@@ -69,3 +69,4 @@ export function setupBase(testFilesFolder: string, fileName: string) {
 
     return builder;
 }
+
