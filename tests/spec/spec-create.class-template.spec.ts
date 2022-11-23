@@ -1,20 +1,23 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import { EOL } from 'os';
-import { collectionPath } from './common';
+import { collectionPath, getTestDataAbsoluteTree, getTestFile } from './common';
 
-const templateFileName = '__specFileName__.template';
 describe('Option: classTemplate', () => {
     let treeWithCustomClassTemplate: Tree;
+    let exampleComponentName = getTestFile('example.component.ts');
+    let exampleComponentSpecName = getTestFile('example.component.spec.ts');
+    let customTemplateName = getTestFile('__specFileName__.template');
+
     beforeEach(() => {
-        treeWithCustomClassTemplate = Tree.empty();
+        treeWithCustomClassTemplate = getTestDataAbsoluteTree();
         treeWithCustomClassTemplate.create(
-            'example.component.ts',
+            exampleComponentName,
             classContent()
         );
 
         treeWithCustomClassTemplate.create(
-            templateFileName,
+            customTemplateName,
             `<% params.forEach(p => { if(p.importPath) {%>import { <%= p.type %> } from '<%= p.importPath %>';
 <% }}) %>import { <%= className %> } from './<%= normalizedName %>';
 import { autoSpy } from 'autoSpy';
@@ -67,7 +70,7 @@ function setup() {
         return await runner
             .runSchematicAsync(
                 'spec',
-                { name: 'example.component.ts', classTemplate: 'missing-file-path' },
+                { name: exampleComponentName, classTemplate: 'missing-file-path' },
                 treeWithCustomClassTemplate
             )
             .toPromise()
@@ -87,15 +90,15 @@ function setup() {
         const result = await runner
             .runSchematicAsync(
                 'spec',
-                { name: 'example.component.ts', classTemplate: '__specFileName__.template' },
+                { name: exampleComponentName, classTemplate: customTemplateName },
                 treeWithCustomClassTemplate
             )
             .toPromise();
         // assert
-        expect(result.exists('example.component.spec.ts')).toBe(true);
+        expect(result.exists(exampleComponentSpecName)).toBe(true);
 
         const content = result
-            .readContent('example.component.spec.ts')
+            .readContent(exampleComponentSpecName)
             .replace(EOL, '\n')
             .split('\n');
         let i = 0;
@@ -143,15 +146,15 @@ function setup() {
         const result = await runner
             .runSchematicAsync(
                 'spec',
-                { name: 'example.component.ts', config: 'tests/spec/test-data/valid-config-valid-class-template.json' },
+                { name: exampleComponentName, config: 'tests/spec/test-data/valid-config-valid-class-template.json' },
                 treeWithCustomClassTemplate
             )
             .toPromise();
         // assert
-        expect(result.exists('example.component.spec.ts')).toBe(true);
+        expect(result.exists(exampleComponentSpecName)).toBe(true);
 
         const content = result
-            .readContent('example.component.spec.ts')
+            .readContent(exampleComponentSpecName)
             .replace(EOL, '\n')
             .split('\n');
         let i = 0;
@@ -196,20 +199,20 @@ function setup() {
         // arrange
         const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        treeWithCustomClassTemplate.overwrite(templateFileName, templateWithCustomUpdateTemplates());
+        treeWithCustomClassTemplate.overwrite(customTemplateName, templateWithCustomUpdateTemplates());
 
         const result = await runner
             .runSchematicAsync(
                 'spec',
-                { name: 'example.component.ts', config: 'tests/spec/test-data/valid-config-valid-class-template.json' },
+                { name: exampleComponentName, config: 'tests/spec/test-data/valid-config-valid-class-template.json' },
                 treeWithCustomClassTemplate
             )
             .toPromise();
         // assert
-        expect(result.exists('example.component.spec.ts')).toBe(true);
+        expect(result.exists(exampleComponentSpecName)).toBe(true);
 
         const content = result
-            .readContent('example.component.spec.ts')
+            .readContent(exampleComponentSpecName)
             .replace(EOL, '\n')
             .split('\n');
         let i = 0;
@@ -260,7 +263,7 @@ function setup() {
         const result = await runner
             .runSchematicAsync(
                 'spec',
-                { name: 'example.component.ts', classTemplate: templateFile },
+                { name: exampleComponentName, classTemplate: templateFile },
                 treeWithCustomClassTemplate
             )
             .toPromise();
@@ -279,7 +282,7 @@ function setup() {
         const result = await runner
             .runSchematicAsync(
                 'spec',
-                { name: 'example.component.ts', classTemplate: templateFile },
+                { name: exampleComponentName, classTemplate: templateFile },
                 treeWithCustomClassTemplate
             )
             .toPromise();
@@ -319,7 +322,7 @@ function setup() {
             .runSchematicAsync(
                 'spec',
                 {
-                    name: 'example.component.ts',
+                    name: exampleComponentName,
                     config: 'tests/spec/test-data/valid-config-valid-class-template.json',
                     classTemplate: 'just.template'
                 },

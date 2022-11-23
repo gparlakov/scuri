@@ -1,9 +1,4 @@
-import { LogEntry } from '@angular-devkit/core/src/logger';
-import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import { filter } from 'rxjs/operators';
-import { collectionPath, getTestFile, getTestFileContents, setupBase } from './common';
-import { getSpecFilePathName } from '../../src/common/get-spec-file-name';
+import { setupBase } from './common';
 
 describe('Framework test runner config', () => {
     it('should detect jasmine when karma.conf.js present', async () => {
