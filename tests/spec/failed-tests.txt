@@ -1,0 +1,45 @@
+FAIL  tests/spec/spec-create.class-template.spec.ts (14.556 s)
+
+FAIL  tests/spec/spec-create.spec.ts (17.576 s)
+
+FAIL  tests/spec/spec-update.spec.ts (13.375 s)
+
+FAIL  tests/spec/spec-create.function-template.spec.ts (11.055 s)
+
+FAIL  tests/update-custom/update-custom-green-path-called-from-the-spec-schematic.spec.ts (11.95 s)
+
+FAIL  tests/spec/spec-create.shorthand-is-first-letter.spec.ts (9.511 s)
+
+FAIL  tests/spec/spec-update.testbed-tests.spec.ts (6.633 s)
+
+FAIL  tests/spec/spec-update.group-imports.spec.ts
+
+FAIL  tests/spec/all.import-multiple.spec.ts
+
+FAIL  tests/update-custom/update-custom-green-path.debug-logs.spec.ts
+
+FAIL  tests/spec/spec-update.indentation-format.spec.ts
+
+FAIL  tests/spec/spec-update.spec-without-setup-function.spec.ts
+
+FAIL  tests/spec/spec-create.when-no-public-methods-add-single-test-case.spec.ts
+
+FAIL  tests/spec/spec-create.starter-demo-class-template.spec.ts
+
+FAIL  tests/spec/spec-create.add-spec-for-a-function.spec.ts
+
+FAIL  tests/spec/spec-update.only-add-missing-method-test-cases.spec.ts
+
+FAIL  tests/spec/spec-update.by-giving-spec-name.spec.ts
+
+FAIL  tests/spec/spec-update.spec-created-with-custom-template-without-custom-functions.spec.ts
+
+FAIL  tests/spec/spec-update.dont-add-comma.spec.ts
+
+FAIL  tests/update-custom/update-custom-mark-case-insensitive-and-methods-inside-describe.spec.ts
+
+FAIL  tests/update-custom/update-custom-green-path.spec.ts
+
+FAIL  tests/spec/all.nested-setup-function.spec.ts
+
+FAIL  tests/spec/spec-create.add-observable-and-promise-spy-return.spec.ts (14.194 s)

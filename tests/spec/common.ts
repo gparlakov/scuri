@@ -1,5 +1,8 @@
+import { normalize } from '@angular-devkit/core';
+import { NodeJsSyncHost } from '@angular-devkit/core/node';
 import { LogEntry } from '@angular-devkit/core/src/logger';
-import { Tree } from '@angular-devkit/schematics';
+import { ScopedHost } from '@angular-devkit/core/src/virtual-fs/host';
+import { HostCreateTree, Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import { readFileSync } from 'fs';
 import { EOL } from 'os';
@@ -20,8 +23,8 @@ export function splitLines(s: string): string[] {
     return typeof s === 'string' ? s.split(/\n\r|\n|\r\n/) : [];
 }
 
-export function setupBase(testFilesFolder: string, fileName: string) {
-    const tree = Tree.empty();
+export function setupBase(testFilesFolder: string, fileName: string, t: Tree | 'absolute' = Tree.empty()) {
+    const tree = t === 'absolute' ? getTestDataAbsoluteTree() : t;
     const runner = new SchematicTestRunner('schematics', collectionPath);
     const fileUnderTestFullPath = getTestFile(`${testFilesFolder}/${fileName}`);
 
@@ -70,3 +73,6 @@ export function setupBase(testFilesFolder: string, fileName: string) {
     return builder;
 }
 
+export function getTestDataAbsoluteTree(){
+    return  new HostCreateTree(new ScopedHost(new NodeJsSyncHost(), normalize(getTestFile(''))));
+}

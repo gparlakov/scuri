@@ -1,32 +1,25 @@
-import { normalize } from '@angular-devkit/core';
-import { NodeJsSyncHost } from '@angular-devkit/core/node';
-import { Logger } from '@angular-devkit/core/src/logger';
-import { ScopedHost } from '@angular-devkit/core/src/virtual-fs/host';
-import { HostCreateTree, Tree } from '@angular-devkit/schematics';
-import { log } from 'console';
-import { setLogger } from '../../src/common/logger';
+import { Tree } from '@angular-devkit/schematics';
 import { describeSource } from '../../src/common/read/read';
 import { ClassDescription, DependencyCallDescription } from '../../src/types';
-import { getTestFile } from './common';
+import {
+    depsCallsReturnTypesFile,
+    depsCallsReturnTypesFileContents,
+    getTestDataAbsoluteTree,
+} from './common';
 
 describe('Dependency method calls ', () => {
-
     let tree: Tree;
     beforeEach(() => {
-        tree = new HostCreateTree(new ScopedHost(new NodeJsSyncHost(), normalize(getTestFile(''))));
+        tree = getTestDataAbsoluteTree();
     });
 
     it('should read the names and return types of dependency methods', async () => {
         // arrange
-        const depsCallsReturnTypesFile = getTestFile('deps-calls-with-return-types.ts', '/');
-        const depsCallsReturnTypesFileContents = tree.read(depsCallsReturnTypesFile)?.toString()!;
-        const baseLogger = new Logger('base');
-        setLogger(baseLogger);
-        baseLogger.subscribe(log);
-        const x = describeSource(depsCallsReturnTypesFile, depsCallsReturnTypesFileContents, tree);
-        // const files: string[] = [];
-        // tree.visit(f => files.push(f));
-        log(depsCallsReturnTypesFile, depsCallsReturnTypesFileContents)//, files.filter(f => !f.includes('node_modules')))
+        const x = describeSource(
+            depsCallsReturnTypesFile,
+            depsCallsReturnTypesFileContents(),
+            tree
+        );
         // act
         const classDescription: ClassDescription = x[0] as ClassDescription;
 
