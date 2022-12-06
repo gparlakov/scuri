@@ -1,16 +1,14 @@
-FAIL  tests/spec/spec-create.class-template.spec.ts (14.556 s)
+FAIL  tests/spec/spec-create.spec.ts
 
-FAIL  tests/spec/spec-create.spec.ts (17.576 s)
+FAIL  tests/spec/spec-update.spec.ts
 
-FAIL  tests/spec/spec-update.spec.ts (13.375 s)
+FAIL  tests/spec/spec-create.function-template.spec.ts
 
-FAIL  tests/spec/spec-create.function-template.spec.ts (11.055 s)
+FAIL  tests/update-custom/update-custom-green-path-called-from-the-spec-schematic.spec.ts
 
-FAIL  tests/update-custom/update-custom-green-path-called-from-the-spec-schematic.spec.ts (11.95 s)
+FAIL  tests/spec/spec-create.shorthand-is-first-letter.spec.ts
 
-FAIL  tests/spec/spec-create.shorthand-is-first-letter.spec.ts (9.511 s)
-
-FAIL  tests/spec/spec-update.testbed-tests.spec.ts (6.633 s)
+FAIL  tests/spec/spec-update.testbed-tests.spec.ts
 
 FAIL  tests/spec/spec-update.group-imports.spec.ts
 
@@ -42,4 +40,4 @@ FAIL  tests/update-custom/update-custom-green-path.spec.ts
 
 FAIL  tests/spec/all.nested-setup-function.spec.ts
 
-FAIL  tests/spec/spec-create.add-observable-and-promise-spy-return.spec.ts (14.194 s)
+FAIL  tests/spec/spec-create.add-observable-and-promise-spy-return.spec.ts

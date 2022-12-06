@@ -1,67 +1,17 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import { EOL } from 'os';
-import { collectionPath, getTestDataAbsoluteTree, getTestFile } from './common';
+import { basename, dirname } from 'path';
+import { collectionPath, getTestFile, getTestFileContents, setupBase } from './common';
+
+const folder = 'spec-create.class-template';
+const component = 'example.component.ts';
 
 describe('Option: classTemplate', () => {
-    let treeWithCustomClassTemplate: Tree;
-    let exampleComponentName = getTestFile('example.component.ts');
-    let exampleComponentSpecName = getTestFile('example.component.spec.ts');
-    let customTemplateName = getTestFile('__specFileName__.template');
+    let customTemplateName = getTestFile(`${folder}/__specFileName__.template`);
 
-    beforeEach(() => {
-        treeWithCustomClassTemplate = getTestDataAbsoluteTree();
-        treeWithCustomClassTemplate.create(
-            exampleComponentName,
-            classContent()
-        );
-
-        treeWithCustomClassTemplate.create(
-            customTemplateName,
-            `<% params.forEach(p => { if(p.importPath) {%>import { <%= p.type %> } from '<%= p.importPath %>';
-<% }}) %>import { <%= className %> } from './<%= normalizedName %>';
-import { autoSpy } from 'autoSpy';
-
-describe('<%= className %>', () => {
-    <% publicMethods.forEach(meth=> {if(meth != '') { %>it('when <%= meth %> is called it should', () => {
-    // arrange
-    const { build } = setup().default();
-    const <%= shorthand %> = build();
-    // act
-    <%= shorthand %>.<%= meth %>();
-    // assert
-    // expect(<%= shorthand %>).toEqual
-    });
-    <% } else { %>
-    it('it should construct', () => {
-    // arrange
-    const { build } = setup().default();
-    // act
-    const <%= shorthand %> = build();
-    // assert
-    // expect(<%= shorthand %>).toEqual
-    });
-    <% }}) %>
-});
-
-// add a comment here
-function setup() {
-    <%= declaration %>
-    const builder = {
-    <%= builderExports %>
-    default() {
-        return builder;
-    },
-    build() {
-        return new <%= className %>(<%= constructorParams %>);
+    function templateWithCustomUpdateTemplates() {
+        return getTestFile(`${folder}/template-with-custom-updates.ts.template`);
     }
-    };
-
-    return builder;
-}
-`
-        );
-    });
 
     it('when class template missing it should stop', async () => {
         // arrange
@@ -70,8 +20,8 @@ function setup() {
         return await runner
             .runSchematicAsync(
                 'spec',
-                { name: exampleComponentName, classTemplate: 'missing-file-path' },
-                treeWithCustomClassTemplate
+                { name: '', classTemplate: 'missing-file-path' },
+                Tree.empty()
             )
             .toPromise()
             // assert
@@ -85,22 +35,16 @@ function setup() {
 
     it('when class template passed in it should use it', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        // act
-        const result = await runner
-            .runSchematicAsync(
-                'spec',
-                { name: exampleComponentName, classTemplate: customTemplateName },
-                treeWithCustomClassTemplate
-            )
-            .toPromise();
-        // assert
-        expect(result.exists(exampleComponentSpecName)).toBe(true);
+        const { run, add, testFileName, fullFileName, splitLines } = setupBase(folder, component);
+        add(fullFileName);
+        add(customTemplateName);
 
-        const content = result
-            .readContent(exampleComponentSpecName)
-            .replace(EOL, '\n')
-            .split('\n');
+        // act
+        const result = await run({ classTemplate: customTemplateName });
+        // assert
+        expect(result.exists(testFileName)).toBe(true);
+
+        const content = splitLines(result.readContent(testFileName));
         let i = 0;
         expect(content[i++]).toEqual(`import { ADep } from '../my/relative/path';`);
         expect(content[i++]).toEqual(`import { DDep } from '@angular/router';`);
@@ -123,7 +67,8 @@ function setup() {
         expect(content[i++]).toEqual(`// add a comment here`);
         expect(content[i++]).toEqual(`function setup() {`);
         expect(content[i++]).toEqual(`    const aDep = autoSpy(ADep);`);
-        expect(content[i++]).toEqual(`const d = autoSpy(DDep);`);
+        expect(content[i++]).toEqual(`    const d = autoSpy(DDep);`);
+        expect(content[i++]).toEqual(`    `);
         expect(content[i++]).toEqual(`    const builder = {`);
         expect(content[i++]).toMatch(`    aDep,`);
         expect(content[i++]).toEqual(`d,`);
@@ -141,22 +86,19 @@ function setup() {
 
     it('when class template in config use it', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        // act
-        const result = await runner
-            .runSchematicAsync(
-                'spec',
-                { name: exampleComponentName, config: 'tests/spec/test-data/valid-config-valid-class-template.json' },
-                treeWithCustomClassTemplate
-            )
-            .toPromise();
-        // assert
-        expect(result.exists(exampleComponentSpecName)).toBe(true);
+        const { run, add, testFileName, fullFileName, splitLines } = setupBase(folder, component);
+        add(fullFileName);
 
-        const content = result
-            .readContent(exampleComponentSpecName)
-            .replace(EOL, '\n')
-            .split('\n');
+        add(`/${basename(customTemplateName).trim()}`, getTestFileContents(customTemplateName));
+
+        // act
+        const result = await run({
+            config: getTestFile(configFileName()),
+        });
+        // assert
+        expect(result.exists(testFileName)).toBe(true);
+
+        const content = splitLines(result.readContent(testFileName));
         let i = 0;
         expect(content[i++]).toEqual(`import { ADep } from '../my/relative/path';`);
         expect(content[i++]).toEqual(`import { DDep } from '@angular/router';`);
@@ -179,7 +121,8 @@ function setup() {
         expect(content[i++]).toEqual(`// add a comment here`);
         expect(content[i++]).toEqual(`function setup() {`);
         expect(content[i++]).toEqual(`    const aDep = autoSpy(ADep);`);
-        expect(content[i++]).toEqual(`const d = autoSpy(DDep);`);
+        expect(content[i++]).toEqual(`    const d = autoSpy(DDep);`);
+        expect(content[i++]).toEqual(`    `);
         expect(content[i++]).toEqual(`    const builder = {`);
         expect(content[i++]).toMatch(`    aDep,`);
         expect(content[i++]).toEqual(`d,`);
@@ -197,24 +140,22 @@ function setup() {
 
     it('when class template has update templates - skip them from create result', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
+        const { run, add, testFileName, fullFileName, splitLines } = setupBase(folder, component);
+        add(fullFileName);
+
+        add(
+            `/${basename(customTemplateName).trim()}`,
+            getTestFileContents(templateWithCustomUpdateTemplates())
+        );
+
         // act
-        treeWithCustomClassTemplate.overwrite(customTemplateName, templateWithCustomUpdateTemplates());
-
-        const result = await runner
-            .runSchematicAsync(
-                'spec',
-                { name: exampleComponentName, config: 'tests/spec/test-data/valid-config-valid-class-template.json' },
-                treeWithCustomClassTemplate
-            )
-            .toPromise();
+        const result = await run({
+            config: getTestFile(configFileName()),
+        });
         // assert
-        expect(result.exists(exampleComponentSpecName)).toBe(true);
+        expect(result.exists(testFileName)).toBe(true);
 
-        const content = result
-            .readContent(exampleComponentSpecName)
-            .replace(EOL, '\n')
-            .split('\n');
+        const content = splitLines(result.readContent(testFileName));
         let i = 0;
         expect(content[i++]).toEqual(`import { ADep } from '../my/relative/path';`);
         expect(content[i++]).toEqual(`import { DDep } from '@angular/router';`);
@@ -237,7 +178,8 @@ function setup() {
         expect(content[i++]).toEqual(`// add a comment here`);
         expect(content[i++]).toEqual(`function setup() {`);
         expect(content[i++]).toEqual(`    const aDep = autoSpy(ADep);`);
-        expect(content[i++]).toEqual(`const d = autoSpy(DDep);`);
+        expect(content[i++]).toEqual(`    const d = autoSpy(DDep);`);
+        expect(content[i++]).toEqual(`    `);
         expect(content[i++]).toEqual(`    const builder = {`);
         expect(content[i++]).toMatch(`    aDep,`);
         expect(content[i++]).toEqual(`d,`);
@@ -255,156 +197,52 @@ function setup() {
 
     it('should be able to use functions in the spec file name', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        const templateFile = 'templates/spec/__name@dasherize__.spec.ts.template';
+        const { run, add, testFileName, fullFileName } = setupBase(folder, component);
+        add(fullFileName);
+
+        const templateWithFunction = '/__name@dasherize__.spec.ts.template';
+        add(templateWithFunction, getTestFileContents(templateWithCustomUpdateTemplates()));
+
         // act
-        treeWithCustomClassTemplate.create(templateFile, templateWithCustomUpdateTemplates());
-
-        const result = await runner
-            .runSchematicAsync(
-                'spec',
-                { name: exampleComponentName, classTemplate: templateFile },
-                treeWithCustomClassTemplate
-            )
-            .toPromise();
+        const result = await run({ classTemplate: templateWithFunction });
+        let files: string[] = [];
+        result.visit((f) => files.push(f));
         // assert
-        expect(result.exists('./example-component.spec.ts')).toBe(true);
-
+        expect(result.exists(`${dirname(testFileName)}/example-component.spec.ts`)).toBe(true);
     });
 
     it('should be able to use multiple functions in the spec file name', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        const templateFile = 'templates/spec/__name@dasherize@camelize__.spec.ts.template';
+        const { run, add, testFileName, fullFileName } = setupBase(folder, component);
+        add(fullFileName);
+
+        const templateWithFunction = '/__name@dasherize@camelize__.spec.ts.template';
+        add(templateWithFunction, getTestFileContents(templateWithCustomUpdateTemplates()));
+
         // act
-        treeWithCustomClassTemplate.create(templateFile, templateWithCustomUpdateTemplates());
-
-        const result = await runner
-            .runSchematicAsync(
-                'spec',
-                { name: exampleComponentName, classTemplate: templateFile },
-                treeWithCustomClassTemplate
-            )
-            .toPromise();
+        const result = await run({ classTemplate: templateWithFunction });
         // assert
-        expect(result.exists('./exampleComponent.spec.ts')).toBe(true);
-    });
-
-    it('should be able to use folderfy to match the file path', async () => {
-        // arrange
-        const className = '.\\my\\class\\location\\example-test.component.ts';
-        const specName = './my/class/location/example_component.custom.ts'
-        const templateName = 'templates/spec/__name@underscore__.custom.ts.template';
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        // act
-        treeWithCustomClassTemplate.create(className, classContent())
-        treeWithCustomClassTemplate.create(templateName, templateWithCustomUpdateTemplates());
-
-        const result = await runner
-            .runSchematicAsync(
-                'spec',
-                { name: className, classTemplate: templateName },
-                treeWithCustomClassTemplate
-            )
-            .toPromise();
-        // assert
-        expect(result.exists(specName)).toBe(true);
+        expect(result.exists(`${dirname(testFileName)}/exampleComponent.spec.ts`)).toBe(true);
     });
 
     it('when both config classTemplate and command line arg classTemplate passed in it should use CLI arg', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-
-        treeWithCustomClassTemplate.create('just.template', 'CLI Args take precedence');
+        const { run, add, fullFileName, testFilesFolder } = setupBase(folder, component);
+        add(fullFileName);
+        add('just.template', 'CLI Args take precedence');
+        add(`/${basename(customTemplateName).trim()}`, getTestFileContents(customTemplateName));
 
         // act
-        const result = await runner
-            .runSchematicAsync(
-                'spec',
-                {
-                    name: exampleComponentName,
-                    config: 'tests/spec/test-data/valid-config-valid-class-template.json',
-                    classTemplate: 'just.template'
-                },
-                treeWithCustomClassTemplate
-            )
-            .toPromise();
+        const result = await run({
+            config: getTestFile(configFileName()),
+            classTemplate: 'just.template',
+        });
+        const resFile = getTestFile(`${testFilesFolder}/just`);
         // assert
-        expect(result.exists('just')).toBe(true);
-
-        expect(result.readContent('just')).toEqual('CLI Args take precedence');
+        expect(result.exists(resFile)).toBe(true);
+        expect(result.readContent(resFile)).toEqual('CLI Args take precedence');
     });
 });
-
-
-function classContent(): string | Buffer {
-    return `import { ADep } from '../my/relative/path';
-import { DDep } from '@angular/router';
-
-export class ExampleComponent {
-    constructor(
-        private aDep: ADep,
-        private d: DDep,
-    ) {}
-
-    aMethod();
-}`;
-}
-
-function templateWithCustomUpdateTemplates() {
-    return `<% params.forEach(p => { if(p.importPath) {%>import { <%= p.type %> } from '<%= p.importPath %>';
-<% }}) %>import { <%= className %> } from './<%= normalizedName %>';
-import { autoSpy } from 'autoSpy';
-
-describe('<%= className %>', () => {
-    <% publicMethods.forEach(meth=> {if(meth != '') { %>it('when <%= meth %> is called it should', () => {
-    // arrange
-    const { build } = setup().default();
-    const <%= shorthand %> = build();
-    // act
-    <%= shorthand %>.<%= meth %>();
-    // assert
-    // expect(<%= shorthand %>).toEqual
-    });
-    <% } else { %>
-    it('it should construct', () => {
-    // arrange
-    const { build } = setup().default();
-    // act
-    const <%= shorthand %> = build();
-    // assert
-    // expect(<%= shorthand %>).toEqual
-    });
-    <% }}) %>
-});
-
-// add a comment here
-function setup() {
-    <%= declaration %>
-    const builder = {
-    <%= builderExports %>
-    default() {
-        return builder;
-    },
-    build() {
-        return new <%= className %>(<%= constructorParams %>);
-    }
-    };
-
-    return builder;
-}
-/** scuri:template:lets:<%params.forEach(p => {%>let <%= camelize(p.type) %>Spy: <%= p.type %>;
- <% }) %>*/
-/** scuri:template:injectables:<%params.forEach(p => {%>{ provide: <%= p.type %>, useClass: autoSpy(<%= p.type %>, '<%= p.type %>') },
- <% }) %>*/
-/** scuri:template:get-instances:<%params.forEach(p => {%><%= camelize(p.type) %>Spy = spyInject<<%= p.type %>>(TestBed.inject(<%= p.type %>));
- <% }) %>*/
-/** scuri:template:methods-skipDeDupe:<% publicMethods.forEach(meth=> {if(meth != '') { %>it('when <%= meth %> is called it should', () => {
-    // arrange
-    // act
-    <%= shorthand %>.<%= meth %>();
-    // assert
-    // expect(<%= shorthand %>).toEqual
-});
-<% }}) %>*/`
+function configFileName(): string {
+    return `${folder}/valid-config-valid-class-template.json`;
 }
