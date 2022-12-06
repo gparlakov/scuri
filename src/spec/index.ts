@@ -37,9 +37,13 @@ import {
 } from '../types';
 import { addMissingImports } from './add-missing-imports/add-missing-imports.rule';
 import { addMissing, update as doUpdate, UpdateOptions } from './update/update';
-import {detectTestingFramework, Supported, Supported as SupportedFrameworks } from '../common/detect-testing-framework'
+import {
+    detectTestingFramework,
+    Supported,
+    Supported as SupportedFrameworks,
+} from '../common/detect-testing-framework';
 
-class SpecOptions {
+export class SpecOptions {
     name: string;
     update?: boolean;
     classTemplate?: string;
@@ -125,7 +129,7 @@ export function spec({
                         classTemplate,
                         functionTemplate,
                         force: isForce,
-                        framework: frm
+                        framework: frm,
                     }),
                     addMissingImports(getSpecFilePathName(name), {autoSpyPath}),
                 ]);
@@ -252,7 +256,12 @@ function applyChanges(tree: Tree, specFilePath: string, changes: Change[], act: 
 
 function createNewSpec(
     fileNameRaw: string,
-    o?: { classTemplate?: string; functionTemplate?: string; force?: boolean, framework?: Supported }
+    o?: {
+        classTemplate?: string;
+        functionTemplate?: string;
+        force?: boolean;
+        framework?: Supported;
+    }
 ): Rule {
     const logger = getLogger('createNewSpec');
     return (tree, _context) => {
@@ -298,7 +307,9 @@ function createNewSpec(
                     builderExports: toBuilderExports(),
                     constructorParams: toConstructorParams(),
                     shorthand: typeShorthand(name),
-                    setupMethods: createSetupMethodsFn(params, depsCallsAndTypes, { spyReturnType: o?.framework}),
+                    setupMethods: createSetupMethodsFn(params, depsCallsAndTypes, {
+                        spyReturnType: o?.framework,
+                    }),
                 };
                 const src = maybeUseCustomTemplate(tree, url('./files/class'), o?.classTemplate);
 
@@ -335,7 +346,7 @@ function createNewSpec(
                                       { joiner: `${EOL}    `, spyReturnType: o?.framework }
                                   )}`
                         )
-                        .join(EOL);
+                        .join('');
                 }
                 function toBuilderExports() {
                     return params.length > 0
@@ -380,16 +391,22 @@ function createNewSpec(
 }
 
 function maybeUseCustomTemplate(tree: Tree, src: Source, templateFileName?: string): Source {
+    const logger = getLogger(maybeUseCustomTemplate.name);
+    const originalSrc = src;
+
     if (typeof templateFileName === 'string' && tree.exists(templateFileName)) {
         const template = tree.read(templateFileName);
         if (template != null) {
             const [rest] = updateCustomTemplateCut(template.toString('utf8'));
 
             const t = Tree.empty();
+
+            logger.debug(`${templateFileName} found and cut to [${rest}]`);
             t.create(basename(normalize(templateFileName)), rest);
             src = source(t);
         }
     }
+    logger.debug(`${templateFileName} ${src === originalSrc ? 'not' : ''} found `);
     return src;
 }
 

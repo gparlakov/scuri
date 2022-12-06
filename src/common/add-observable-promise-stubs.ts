@@ -108,8 +108,7 @@ export function propertyMocks(
             }
         })
         .filter((v) => v !== undefined)
-        .join(joiner)
-        .concat(joiner);
+        .join(joiner);
 }
 
 export function includePropertyMocks(
