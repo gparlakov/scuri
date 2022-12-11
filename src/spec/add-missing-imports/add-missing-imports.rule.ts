@@ -1,8 +1,7 @@
 import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
-import { EOL } from 'os';
-import * as ts from 'typescript';
 import { insertImport } from '../../../lib/utility/ast-utils';
 import { applyToUpdateRecorder } from '../../../lib/utility/change';
+import { createTsProgram } from '../../common/create-ts-program';
 import { getLogger } from '../../common/logger';
 
 const observableImports = ['Subject', 'Observable', 'EMPTY', 'of'];
@@ -14,20 +13,21 @@ export function addMissingImports(specFile: string, config: {autoSpyPath: string
             // adding the imports to a missing file is a noop
             return tree;
         }
+        const prog = createTsProgram(specFile, tree);
 
-        const defaultHost = ts.createCompilerHost({});
-        defaultHost.readFile = (s: string) => {
-            return tree.read(s)?.toString();
-        };
+        // const defaultHost = ts.createCompilerHost({});
+        // defaultHost.readFile = (s: string) => {
+        //     return tree.read(s)?.toString();
+        // };
 
-        defaultHost.writeFile = (name: string, text: string) => {
-            logger.debug(`default host writing ${name}:${text}`);
-        };
+        // defaultHost.writeFile = (name: string, text: string) => {
+        //     logger.debug(`default host writing ${name}:${text}`);
+        // };
 
-        defaultHost.fileExists = (name: string) => tree.exists(name);
-        defaultHost.getNewLine = () => EOL;
+        // defaultHost.fileExists = (name: string) => tree.exists(name);
+        // defaultHost.getNewLine = () => EOL;
 
-        const prog = ts.createProgram([specFile], {}, defaultHost);
+        // const prog = ts.createProgram([specFile], {}, defaultHost);
 
         // alternative
         // create a language service and getCodeFixes 2304(string index?)
