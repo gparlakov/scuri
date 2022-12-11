@@ -1,48 +1,78 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import { collectionPath } from './common';
+import { collectionPath, setupBase } from './common';
+
+const folder = 'spec-create';
+const emptyClass = 'empty-class.ts';
 
 describe('spec', () => {
-    let tree: Tree;
-    beforeEach(() => {
-        tree = Tree.empty();
-        tree.create('empty-class.ts', 'export class EmptyClass {}');
-    });
-
+    // let tree: Tree;
+    // beforeEach(() => {
+    //     tree = Tree.empty();
+    //     tree.create('empty-class.ts', 'export class EmptyClass {}');
+    // });
     it('throws when name is not passed in', async  () => {
         const runner = new SchematicTestRunner('schematics', collectionPath);
-        return runner.runSchematicAsync('spec', {}, tree).toPromise()
+        return runner.runSchematicAsync('spec', {}, Tree.empty()).toPromise()
             .then(() => fail('should throw'))
-            .catch(e => expect(e).toBeDefined());;
+            .catch(e => expect(e).toBeDefined());
     });
 
-    it('creates a file when name is passed in', async  () => {
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        const result = await runner.runSchematicAsync('spec', { name: 'empty-class.ts'}, tree).toPromise();
+    it('creates a file with non-empty content when name is passed in', async  () => {
+        const { run, fullFileName, testFileName, add } = setupBase(folder, emptyClass);
+        add(fullFileName);
+        const result = await run({ name: fullFileName });
+
         expect(result.files.length).toBe(2); // the empty class + the new spec file
-        expect(result.files[1]).toMatch('empty-class.spec.ts');
-    });
+        expect(result.readContent(testFileName).length).toBeGreaterThan(0);
 
-    it('creates a file with a non-empty content ', async  () => {
-        // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        // act
-        const result = await runner.runSchematicAsync('spec', { name: 'empty-class.ts' }, tree).toPromise();
-        // assert
-        expect(result.readContent('empty-class.spec.ts').length).toBeGreaterThan(0);
     });
 
     describe('targeting the EmptyClass', () => {
         it('creates a file with the boilerplate setup method ', async  () => {
-            // arrange
-            const runner = new SchematicTestRunner('schematics', collectionPath);
-            // act
-            const result = await runner.runSchematicAsync('spec', { name: 'empty-class.ts' }, tree).toPromise();
+            const { run, fullFileName, testFileName, add, splitLines } = setupBase(folder, emptyClass);
+            add(fullFileName);
+            const result = await run({ name: fullFileName });
             // assert
-            const contents = result.readContent('empty-class.spec.ts');
+            const contents = result.readContent(testFileName);
             expect(contents).toMatch(/function setup\(\) {/);
             expect(contents).toMatch(/const builder = {/);
             expect(contents).toMatch(/return new EmptyClass\(\);/);
+
+            const lines = splitLines(contents);
+            let i = 0;
+            expect(lines[i++]).toEqual("import { EmptyClass } from './empty-class';");
+            expect(lines[i++]).toEqual('');
+            expect(lines[i++]).toEqual("describe('EmptyClass', () => {");
+            expect(lines[i++]).toEqual('  ');
+            expect(lines[i++]).toEqual("  it('it should construct', () => {");
+            expect(lines[i++]).toEqual('    // arrange');
+            expect(lines[i++]).toEqual('    const { build } = setup().default();');
+            expect(lines[i++]).toEqual('    // act');
+            expect(lines[i++]).toEqual('    const e = build();');
+            expect(lines[i++]).toEqual('    // assert');
+            expect(lines[i++]).toEqual('    // expect(e).toEqual');
+            expect(lines[i++]).toEqual('  });');
+            expect(lines[i++]).toEqual('  ');
+            expect(lines[i++]).toEqual('});');
+            expect(lines[i++]).toEqual('');
+            expect(lines[i++]).toEqual('function setup() {');
+            expect(lines[i++]).toEqual('  ');
+            expect(lines[i++]).toEqual('  const builder = {');
+            expect(lines[i++]).toEqual('    ');
+            expect(lines[i++]).toEqual('    ');
+            expect(lines[i++]).toEqual('    default() {');
+            expect(lines[i++]).toEqual('      return builder;');
+            expect(lines[i++]).toEqual('    },');
+            expect(lines[i++]).toEqual('    build() {');
+            expect(lines[i++]).toEqual('      return new EmptyClass();');
+            expect(lines[i++]).toEqual('    }');
+            expect(lines[i++]).toEqual('  };');
+            expect(lines[i++]).toEqual('');
+            expect(lines[i++]).toEqual('  return builder;');
+            expect(lines[i++]).toEqual('}');
+            expect(lines[i++]).toEqual('');
+
         });
     });
 
@@ -50,88 +80,38 @@ describe('spec', () => {
         let tree: Tree;
         beforeEach(() => {
             tree = Tree.empty();
-            tree.create('./a-folder/with/an/empty-class.ts', 'export class EmptyClass {}');
         });
 
         it('creates a file in the same path depth as the name passed in', async  () => {
-            const runner = new SchematicTestRunner('schematics', collectionPath);
-            const result = await runner.runSchematicAsync(
-                'spec',
-                { name: './a-folder/with/an/empty-class.ts' },
-                tree
-            ).toPromise();
+            const { run, fullFileName, add } = setupBase(folder, './a-folder/with/an/empty-class.ts');
+            add(fullFileName);
+
+            const result = await run({ name: fullFileName });
             expect(result.files.length).toBe(2); // the empty class + the new spec file
             expect(result.files[1]).toMatch('/a-folder/with/an/empty-class.spec.ts');
         });
     });
 
-    describe('targeting the has-one-constructor-param class', () => {
-        beforeEach(() => {
-            tree = Tree.empty();
+    describe('', () => {
 
-            tree.create(
-                'has-one-constructor-parameter.ts',
-                `export class HasOneConstructorParameter {
-                    constructor(service: Object) {}
-                }`
-            );
-        });
-        it('it creates boilerplate with a new instance with one matching constructor parameter ', async  () => {
-            // arrange
-            const runner = new SchematicTestRunner('schematics', collectionPath);
-            // act
-            const result = await runner.runSchematicAsync(
-                'spec',
-                { name: 'has-one-constructor-parameter.ts' },
-                tree
-            ).toPromise();
+        it('targeting the has-one-constructor-param class it creates boilerplate with a new instance with one matching constructor parameter ', async  () => {
+            const { run, fullFileName, testFileName, add } = setupBase(folder, 'has-one-constructor-parameter.ts');
+            add(fullFileName);
+            const result = await run({ name: fullFileName });
             // assert
-            const contents = result.readContent('has-one-constructor-parameter.spec.ts');
+            const contents = result.readContent(testFileName);
             expect(contents).toMatch(/return new HasOneConstructorParameter\(service\);/);
         });
     });
 
     describe('targeting the example component class', () => {
-        let exampleComponentTree: Tree;
-        beforeEach(() => {
-            exampleComponentTree = Tree.empty();
-
-            exampleComponentTree.create(
-                'example.component.ts',
-                `export class ExampleComponent {
-                    publicProperty: boolean;
-
-                    private privateProperty: string;
-
-                    aMethod(dep: string, service: Service) {}
-
-                    //a constructor comment
-                    constructor(
-                      /** shows in full text and is hidden in text */ dep: string,
-                      service: Service
-                    ) {}
-
-                    // an async public method
-                    async anotherMethod() {}
-                    private third() {}
-                    public fourth() {}
-                    protected protectedMethod() {}
-                  }
-                  `
-            );
-        });
-
+        const component = 'example.component.ts';
         it('creates a file with matching number of `it` calls for each public method ', async  () => {
-            // arrange
-            const runner = new SchematicTestRunner('schematics', collectionPath);
-            // act
-            const result = await runner.runSchematicAsync(
-                'spec',
-                { name: 'example.component.ts' },
-                exampleComponentTree
-            ).toPromise();
+            const { run, fullFileName, testFileName, add } = setupBase(folder, component);
+            add(fullFileName);
+            const result = await run({ name: fullFileName });
             // assert
-            const contents = result.readContent('example.component.spec.ts');
+            const contents = result.readContent(testFileName);
             expect(contents).toMatch(/it\('when aMethod is called/);
             expect(contents).toMatch(/it\('when anotherMethod is called/);
             expect(contents).toMatch(/it\('when fourth is called/);
@@ -146,57 +126,26 @@ describe('spec', () => {
         });
 
         it('creates a file with `it` tests actually calling the public methods of the component/class ', async  () => {
-            // arrange
-            const runner = new SchematicTestRunner('schematics', collectionPath);
-            // act
-            const result = await runner.runSchematicAsync(
-                'spec',
-                { name: 'example.component.ts' },
-                exampleComponentTree
-            ).toPromise();
+            const { run, fullFileName, testFileName, add } = setupBase(folder, component);
+            add(fullFileName);
+            const result = await run({ name: fullFileName });
             // assert
-            const contents = result.readContent('example.component.spec.ts');
+            const contents = result.readContent(testFileName);
             expect(contents).toMatch(/it\('when aMethod is called/); // the `it` test method
             expect(contents).toMatch(/\.aMethod\(\)/g); // the call to the component's `aMethod` method
         });
     });
 
     describe('targeting a class with imports', () => {
-        let treeImports: Tree;
-        beforeEach(() => {
-            treeImports = Tree.empty();
 
-            treeImports.create(
-                'with-imports.component.ts',
-                `import { Router } from '@angular/core';
-                import { ADep} from '../../deps/a-dep.ts';
-                import {local} from './local.ts'
-                import * as AnotherDep from './local-deps/a-depth.service.ts';
-
-                export class WithImportsComponent {
-
-                    constructor(
-                      private router: Router,
-                      private aDep: ADep,
-                      private anoter: AnotherDep,
-                      local: local,
-                      simple: Object
-                    ) {}
-                }`
-            );
-        });
+        const component = 'with-imports.component.ts';
 
         it('adds the imports for the dependencies', async  () => {
-            // arrange
-            const runner = new SchematicTestRunner('schematics', collectionPath);
-            // act
-            const result = await runner.runSchematicAsync(
-                'spec',
-                { name: 'with-imports.component.ts' },
-                treeImports
-            ).toPromise();
+            const { run, fullFileName, testFileName, add } = setupBase(folder, component);
+            add(fullFileName);
+            const result = await run({ name: fullFileName });
             // assert
-            const contents = result.readContent('with-imports.component.spec.ts');
+            const contents = result.readContent(testFileName);
             expect(contents).toMatch(`import { Router } from '@angular/core';`);
             expect(contents).toMatch(`import { ADep } from '../../deps/a-dep.ts';`);
             expect(contents).toMatch(
@@ -208,10 +157,11 @@ describe('spec', () => {
 
         it('adds the imports for the dependencies when updating', async  () => {
             // arrange
-            const runner = new SchematicTestRunner('schematics', collectionPath);
-            // act
-            treeImports.create(
-                'with-imports.component.spec.ts',
+            const { run, fullFileName, testFileName, add } = setupBase(folder, component);
+            add(fullFileName);
+
+            add(
+               testFileName,
                 `describe("WithImports", () => {});
                 function setup() {
                     const builder = {
@@ -226,13 +176,11 @@ describe('spec', () => {
                 }
             `
             );
-            const result = await runner.runSchematicAsync(
-                'spec',
-                { name: 'with-imports.component.ts', update: true },
-                treeImports
-            ).toPromise();
+            // act
+            const result = await run({ name: fullFileName, update: true });
             // assert
-            const contents = result.readContent('with-imports.component.spec.ts');
+            const contents = result.readContent(testFileName);
+
             expect(contents).toMatch(`import { Router } from '@angular/core';`);
             expect(contents).toMatch(`import { ADep } from '../../deps/a-dep.ts';`);
             expect(contents).toMatch(

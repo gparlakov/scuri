@@ -118,12 +118,13 @@ export function spec({
                     logger.debug(`Switching to update custom ${classTemplate}`);
                     return schematic('update-custom', { name, classTemplate });
                 }
-                logger.debug(`Updating name ${name}`);
+                logger.debug(`Updating spec for [${name}]`);
                 return chain([
                     updateExistingSpec(name, { framework: frm }),
                     addMissingImports(getSpecFilePathName(name), {autoSpyPath}),
                 ]);
             } else {
+                logger.debug(`creating a new spec for file: [${name}]`);
                 return chain([
                     createNewSpec(name, {
                         classTemplate,
@@ -263,10 +264,11 @@ function createNewSpec(
         framework?: Supported;
     }
 ): Rule {
-    const logger = getLogger('createNewSpec');
+    const logger = getLogger(createNewSpec.name);
+    logger.debug('called and returning a function Rule')
+
     return (tree, _context) => {
         const content = tree.read(fileNameRaw);
-
         if (content == null) {
             logger.error(`The file ${fileNameRaw} is missing or empty.`);
             return tree;
@@ -274,6 +276,7 @@ function createNewSpec(
             // we aim at creating a spec from the class/function under test (name)
             // for the spec name we'll need to parse the base file name and its extension and calculate the path
 
+            logger.debug(`entering`)
             const {
                 specFileName,
                 fileName,
@@ -281,6 +284,7 @@ function createNewSpec(
                 folderPathNormal: folder,
             } = paths(fileNameRaw);
 
+            logger.debug(`specFileName ${specFileName},fileName ${fileName}, folderPathRaw ${path}, folderPathNormal ${folder},`)
             try {
                 const { params, name, publicMethods, depsCallsAndTypes } = getFirstClass(
                     fileNameRaw,
@@ -357,9 +361,10 @@ function createNewSpec(
                         : '';
                 }
             } catch (e) {
+                logger.debug(`caught an error ${e?.message ? e.message : e?.stackTrace? e?.stackTrace : JSON.stringify(e, null, 2)}`)
                 if (e != null && e.message === 'No classes found to be spec-ed!') {
-                    const funktion = getFirstFunction(fileNameRaw, content, tree);
-                    if (funktion == null) {
+                    const fun = getFirstFunction(fileNameRaw, content, tree);
+                    if (fun == null) {
                         throw new Error('No exported class or function to be spec-ed!');
                     }
 
@@ -376,7 +381,7 @@ function createNewSpec(
                             specFileName,
                             fileName,
                             normalizedName: fileName,
-                            name: funktion.name,
+                            name: fun.name,
                         }),
                         move(path),
                     ]);

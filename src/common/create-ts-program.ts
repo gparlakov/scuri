@@ -2,8 +2,14 @@ import { Tree } from '@angular-devkit/schematics';
 import * as ts from 'typescript';
 import { getLogger } from './logger';
 
+let programMap = new Map<string, ts.Program>();
 export function createTsProgram(fileName: string, tree: Tree): ts.Program {
     const logger = getLogger(createTsProgram.name);
+
+    if(programMap.has(fileName)) {
+        logger.debug(`Reusing program for ${fileName}`)
+        return programMap.get(fileName)!;
+    }
 
     let config: ts.ParsedCommandLine = {
         options: {
@@ -60,71 +66,17 @@ export function createTsProgram(fileName: string, tree: Tree): ts.Program {
     }
 
     const defaultHost = ts.createCompilerHost({}, true);
-    // const treeHost = <ts.CompilerHost>{
-    //     ...defaultHost,
-    //     readFile: (s: string) => {
-    //         const res = tree.read(s)?.toString();
-    //         logger.debug(`treeHost: readFile ${s}: ${res}`);
-    //         return res;
-    //     },
-    //     writeFile: (name: string, text: string) => {
-    //         logger.debug(`treeHost: writing ${name}:${text}`);
-    //         tree.overwrite(name, text);
-    //     },
-    //     fileExists: (name: string) => {
-    //         logger.debug(`treeHost: exists ${name}:${tree.exists(name) && tree.get(name) != null}`);
-    //         return tree.exists(name) && tree.get(name) != null;
-    //     },
-    //     getNewLine: () => EOL,
-    //     getCurrentDirectory: () => {
-    //         logger.debug(`treeHost: getCurrentDirectory ${tree.root.path}}`);
-    //         return tree.root.path
-    //     },
-    //     getDirectories: (path: string) => {
-    //         logger.debug(`treeHost: getDirectories for ${path}: ${tree.getDir(path)?.subdirs}`);
-    //         return tree.getDir(path)?.subdirs
-    //     },
-    //     directoryExists: (directoryName: string) => {
-    //         logger.debug(`treeHost: directoryExists for ${directoryName}: ${tree.getDir(directoryName) != null}`);
-    //         return tree.getDir(directoryName) != null
-    //     },
-    //     readDirectory(rootDir, extensions, excludes, includes, depth?) {
-    //         const files: string[] = []
-    //         tree.getDir(rootDir).visit(f => {
-    //             const supportedExtension = extensions != null && extensions?.length > 0 ? extensions.includes(extname(f)) : true;
-    //             const isExcluded = excludes != null && excludes?.length > 0 ? excludes.some(e => e === f || new RegExp(e).test(f)) : false ;
-    //             const isIncluded = includes != null && includes?.length > 0  ? includes.some(e => e === f || new RegExp(e).test(f)) : true ;
-
-    //             if(isExcluded || !isIncluded || !supportedExtension) {
-    //                 return;
-    //             }
-    //             files.push(f);
-    //         });
-
-    //         logger.debug(`treeHost: readDirectory for, ${rootDir}, ${extensions}, ${excludes}, ${includes}, ${depth}:${EOL}${files.join(',')}`);
-    //         return files;
-    //     },
-    //     getSourceFile(fileName, languageVersionOrOptions, _onError) {
-    //         logger.debug(`treeHost:getSourceFile for, ${fileName}, ${languageVersionOrOptions}`);
-    //         const contents = treeHost.readFile(fileName);
-    //         if(!contents) {
-    //             logger.debug(`Could not find ${fileName}`);
-    //             return undefined;
-    //         }
-
-    //         return ts.createSourceFile(fileName, contents, languageVersionOrOptions, true);
-    //     }
-    //     // ,
-    //     // watchFile() {
-    //     //     context.schematic.collection.description.name
-    //     // }
-    // };
     logger.debug(
-        `Creating program for ${fileName}, with options\n${JSON.stringify(config.options)}`
+        `Creating (and caching) program for ${fileName}, with options\n${JSON.stringify(config.options)}`
     );
-    return ts.createProgram([fileName], config.options, defaultHost);
+    const program = ts.createProgram([fileName], config.options, defaultHost);
+    programMap.set(fileName, program)
+    return program;
 }
 
+// failed experiment - faking the ts host by reading/writing from the tree host
+// failed b/c tree does not get node_modules and other  necessary .d.ts files that comprise a big chunk of the base types like string, Number, HTMLElement, etc.
+// keeping it around as it took way too much effort to just delete... :(
 
 // export function createTsProgram_1(fileName: string): ts.Program {
 //     const logger = getLogger(createTsProgram.name);
