@@ -46,6 +46,7 @@ class SpecOptions {
     functionTemplate?: string;
     config?: string;
     framework?: SupportedFrameworks;
+    autoSpyLocation?: string;
 }
 
 type Config = Omit<SpecOptions, 'name' | 'update' | 'config'>;
@@ -57,6 +58,7 @@ export function spec({
     functionTemplate,
     config,
     framework,
+    autoSpyLocation
 }: SpecOptions): Rule {
     const isForce = process.argv.find((e) => e === 'force' || e === '--force') != null;
 
@@ -100,6 +102,7 @@ export function spec({
         }
 
         const frm = detectTestingFramework(framework, c?.framework, tree, 'jasmine');
+        const autoSpyPath = (autoSpyLocation ?? c.autoSpyLocation) ?? 'autoSpy';
 
         try {
             if (update) {
@@ -114,7 +117,7 @@ export function spec({
                 logger.debug(`Updating name ${name}`);
                 return chain([
                     updateExistingSpec(name, { framework: frm }),
-                    addMissingImports(getSpecFilePathName(name)),
+                    addMissingImports(getSpecFilePathName(name), {autoSpyPath}),
                 ]);
             } else {
                 return chain([
@@ -124,7 +127,7 @@ export function spec({
                         force: isForce,
                         framework: frm
                     }),
-                    addMissingImports(getSpecFilePathName(name)),
+                    addMissingImports(getSpecFilePathName(name), {autoSpyPath}),
                 ]);
             }
         } catch (e) {

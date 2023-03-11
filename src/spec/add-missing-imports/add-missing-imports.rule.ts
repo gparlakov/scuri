@@ -7,7 +7,7 @@ import { getLogger } from '../../common/logger';
 
 const observableImports = ['Subject', 'Observable', 'EMPTY', 'of'];
 
-export function addMissingImports(specFile: string): Rule {
+export function addMissingImports(specFile: string, config: {autoSpyPath: string}): Rule {
     const logger = getLogger(addMissingImports.name);
     return (tree: Tree, _context: SchematicContext): Tree => {
         if(!tree.exists(specFile)) {
@@ -49,6 +49,7 @@ export function addMissingImports(specFile: string): Rule {
                 return undefined;
             });
 
+
         const uniqMissingImports = <SupportedImport[]>(
             [...new Set(missingImports)].map(isSupportedImport).filter((s) => s !== 'unsupported')
         );
@@ -72,7 +73,7 @@ export function addMissingImports(specFile: string): Rule {
             : [];
 
         const addAutoSpyMaybe = uniqMissingImports.some((i) => i.kind === 'autospy')
-            ? [insertImport(specFileSrc, specFile, 'autoSpy', 'autoSpy')]
+            ? [insertImport(specFileSrc, specFile, 'autoSpy', config.autoSpyPath)]
             : [];
 
         applyToUpdateRecorder(r, [
