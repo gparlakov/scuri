@@ -11,7 +11,7 @@ import {
     isClassDescription,
 } from '../../types';
 import { createTsProgram } from '../create-ts-program';
-import { getLogger } from '../logger';
+import { getLogger, getLoggerForFnAndInit } from '../logger';
 import { getKindAndText, printKindAndText } from '../print-node';
 
 const observableProps = ['source', 'operator', 'lift', 'subscribe', 'toPromise'];
@@ -61,14 +61,16 @@ const promiseProps = ['then', 'catch', 'finally'];
  * @param fileContents contents of the file
  */
 export function describeSource(fileName: string, fileContents: string, tree: Tree): Description[] {
+    const logger = getLoggerForFnAndInit(describeSource);
     const program = createTsProgram(fileName, tree);
 
     const fileSrc = program.getSourceFile(fileName);
 
     if (fileSrc == null) {
-        getLogger(describeSource.name).debug('fileSrc is missing. Nothing to do here');
+        logger.debug('fileSrc is missing. Nothing to do here');
         return [];
     }
+    logger.debug(`Found src file: (top 50) ${fileSrc.getFullText().slice(0, 50)}...`)
 
     return read(fileSrc, program).map((r) =>
         isClassDescription(r)

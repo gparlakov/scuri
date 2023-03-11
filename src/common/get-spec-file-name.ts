@@ -1,12 +1,13 @@
-import { basename, extname, join, normalize } from '@angular-devkit/core';
+import { basename, join, normalize } from '@angular-devkit/core';
 import { applyPathTemplate, FileEntry, TEMPLATE_FILENAME_RE } from '@angular-devkit/schematics';
 import { ClassTemplateData } from '../types';
 
 export function getSpecFilePathName(name: string) {
-    const normalizedName = normalize(name);
-    const ext = extname(basename(normalizedName));
+    return name.replace('.ts', '.spec.ts');
+    // const normalizedName = normalize(name);
+    // const ext = extname(basename(normalizedName));
 
-    return name.split(ext)[0] + '.spec' + ext;
+    // return name.split(ext)[0] + '.spec' + ext;
 }
 
 export function getSpecFileCustomName(

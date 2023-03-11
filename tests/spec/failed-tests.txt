@@ -1,5 +1,3 @@
-FAIL  tests/spec/spec-update.spec.ts
-
 FAIL  tests/spec/spec-create.function-template.spec.ts
 
 FAIL  tests/update-custom/update-custom-green-path-called-from-the-spec-schematic.spec.ts

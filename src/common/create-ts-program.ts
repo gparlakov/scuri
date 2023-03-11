@@ -2,13 +2,14 @@ import { Tree } from '@angular-devkit/schematics';
 import * as ts from 'typescript';
 import { getLogger } from './logger';
 
-let programMap = new Map<string, ts.Program>();
+let programCache = new Map<string, ts.Program>();
 export function createTsProgram(fileName: string, tree: Tree): ts.Program {
     const logger = getLogger(createTsProgram.name);
+    logger.debug(`entering for ${fileName}`)
 
-    if(programMap.has(fileName)) {
+    if(programCache.has(fileName)) {
         logger.debug(`Reusing program for ${fileName}`)
-        return programMap.get(fileName)!;
+        return programCache.get(fileName)!;
     }
 
     let config: ts.ParsedCommandLine = {
@@ -60,7 +61,7 @@ export function createTsProgram(fileName: string, tree: Tree): ts.Program {
         ts.findConfigFile(fileName, (f) => (checkedFiles.push(f), tree.exists(f)));
         logger.warn(
             `Did not find a tsconfig file close to ${fileName}. Some types might be missing. Searched in ${checkedFiles.join(
-                '\n'
+                '||'
             )}`
         );
     }
@@ -70,10 +71,29 @@ export function createTsProgram(fileName: string, tree: Tree): ts.Program {
         `Creating (and caching) program for ${fileName}, with options\n${JSON.stringify(config.options)}`
     );
     const program = ts.createProgram([fileName], config.options, defaultHost);
-    programMap.set(fileName, program)
+    programCache.set(fileName, program)
     return program;
 }
 
+export function getSourceFile(fullFileName: string, tree: Tree): ts.SourceFile | undefined {
+    const logger = getLogger(getSourceFile.name);
+    logger.debug(`entering for ${fullFileName}`)
+    // const program = createTsProgram(fullFileName, tree);
+
+    // if(program == null) {
+    //     logger.debug('Program/source file is still null, probably some error in log above. Creating a new source file from scratch.')
+    //     const contents = tree.read(fullFileName)?.toString();
+    //     if(contents == null) {
+    //         logger.error(`The contents of the ${fullFileName} are empty - the file is probably missing. Can't create a source file`)
+    //         return undefined;
+    //     }
+    //     logger.debug(`Creating just a source file for ${fullFileName}`)
+    return ts.createSourceFile(fullFileName, tree.read(fullFileName)?.toString() ?? '', ts.ScriptTarget.Latest, true);
+    // }
+
+    // logger.debug('Found program. Returning the source file from it')
+    // return program.getSourceFile(fullFileName);
+}
 // failed experiment - faking the ts host by reading/writing from the tree host
 // failed b/c tree does not get node_modules and other  necessary .d.ts files that comprise a big chunk of the base types like string, Number, HTMLElement, etc.
 // keeping it around as it took way too much effort to just delete... :(

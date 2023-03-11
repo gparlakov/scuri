@@ -42,8 +42,12 @@ export function setupBase(
         testFileName: getSpecFilePathName(fileUnderTestFullPath),
         tree,
         runner,
-        log(o?: { map?: (l: LogEntry) => unknown; filter?: string | ((l: LogEntry) => boolean) }) {
-            const mapFn = typeof o?.map === 'function' ? o.map : (m: LogEntry) => m;
+        log(o?: { map?: 'full' | ((l: LogEntry) => unknown); filter?: string | ((l: LogEntry) => boolean) }) {
+            const mapFn = typeof o?.map === 'function'
+                ? o.map // use the map fn if any
+                : o?.map === 'full'
+                    ? (m: LogEntry) => m  // the full object is dumped on console
+                    : (m: LogEntry) => `[${new Date(m.timestamp).toLocaleDateString()}${new Date(m.timestamp).toLocaleTimeString()}][${m.level}](${m.name})${m.message}`; // the standard line string
             const filterFn =
                 typeof o?.filter === 'function'
                     ? o.filter

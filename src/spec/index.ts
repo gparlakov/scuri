@@ -42,6 +42,7 @@ import {
     Supported,
     Supported as SupportedFrameworks,
 } from '../common/detect-testing-framework';
+import { getSourceFile } from '../common/create-ts-program';
 
 export class SpecOptions {
     name: string;
@@ -169,6 +170,7 @@ function updateExistingSpec(fullName: string, o: UpdateOptions): Rule {
                     `Can not update spec (for ${specFileName}) since it does not exist. Try running without the --update flag.`
                 );
             } else {
+                logger.debug(`found [${existingSpecFile.path}]`)
                 const specFilePath = existingSpecFile.path;
                 // if a spec exists we'll try to update it
                 const { params, name, publicMethods, depsCallsAndTypes } = getFirstClass(
@@ -177,21 +179,27 @@ function updateExistingSpec(fullName: string, o: UpdateOptions): Rule {
                     tree
                 );
                 const shorthand = typeShorthand(name);
-                logger.debug(`Class name ${name} ${EOL}Constructor(${params}) {${publicMethods}}`);
-
+                logger.debug(`Class name ${name} | constructor(${params.map(p => `${p.name}: ${p.type}`).join()}) methods: ${publicMethods}`);
+                const sourceFile = getSourceFile(specFilePath, tree);
+                if(sourceFile == null) {
+                    logger.error(`Can't find the source for ${specFilePath}. File is probably missing.`);
+                    throw new Error(`Can't find the source for ${specFilePath}. File is probably missing.`);
+                }
+                // logger.debug(`Source file ${sourceFile.getFullText()}`)
                 // start by adding missing things (like the setup function)
                 const addMissingChanges = addMissing(
                     specFilePath,
-                    tree.read(specFilePath)!.toString('utf8'),
+                    sourceFile,
                     params,
                     name
                 );
+                logger.debug(`addMissing(${addMissingChanges?.length}): ${addMissingChanges?.map(c => c.path).join('||')}`)
                 applyChanges(tree, specFilePath, addMissingChanges, 'add');
 
                 // then on the resulting tree - remove unneeded deps
                 const removeChanges = doUpdate(
                     specFilePath,
-                    tree.read(specFilePath)!.toString('utf8'),
+                    getSourceFile(specFilePath, tree)!,
                     params,
                     name,
                     'remove',
@@ -200,12 +208,13 @@ function updateExistingSpec(fullName: string, o: UpdateOptions): Rule {
                     depsCallsAndTypes,
                     o
                 );
+                logger.debug(`remove changes(${removeChanges.length}): ${removeChanges.map(r => r.description).join()}}`)
                 applyChanges(tree, specFilePath, removeChanges, 'remove');
 
                 // then add what needs to be added (new deps in the instantiation, 'it' for new methods, etc.)
                 const changesToAdd = doUpdate(
                     specFilePath,
-                    tree.read(specFilePath)!.toString('utf8'),
+                    getSourceFile(specFilePath, tree)!,
                     params,
                     name,
                     'add',
@@ -214,11 +223,12 @@ function updateExistingSpec(fullName: string, o: UpdateOptions): Rule {
                     depsCallsAndTypes,
                     o
                 );
+                logger.debug(`add changes(${changesToAdd.length}): ${changesToAdd.map(c => c.description).join()}`)
                 applyChanges(tree, specFilePath, changesToAdd, 'add');
 
                 const changesToAddAdditional = doUpdate(
                     specFilePath,
-                    tree.read(specFilePath)!.toString('utf8'),
+                    getSourceFile(specFilePath, tree)!,
                     params,
                     name,
                     'add-spy-methods-and-props',
@@ -227,6 +237,7 @@ function updateExistingSpec(fullName: string, o: UpdateOptions): Rule {
                     depsCallsAndTypes,
                     o
                 );
+                logger.debug(`add additional changes(${changesToAddAdditional.length}): ${changesToAddAdditional.map(c => c.description).join(',')}`)
                 applyChanges(tree, specFilePath, changesToAddAdditional, 'add');
 
                 return tree;
@@ -416,6 +427,8 @@ function maybeUseCustomTemplate(tree: Tree, src: Source, templateFileName?: stri
 }
 
 function getFirstClass(fileName: string, fileContents: Buffer, tree: Tree) {
+    const logger = getLogger(getFirstClass.name);
+    logger.debug('entering')
     const descriptions = describeSource(fileName, fileContents.toString('utf8'), tree);
 
     const classes = descriptions.filter((c) => isClassDescription(c)) as ClassDescription[];

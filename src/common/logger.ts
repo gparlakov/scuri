@@ -15,3 +15,9 @@ export function getLogger(name: string): Logger {
     }
     return mainLogger.createChild(name);
 }
+
+export function getLoggerForFnAndInit(f: Function) {
+    const l = getLogger(f.name);
+    l.debug(`entering`)
+    return l;
+}
