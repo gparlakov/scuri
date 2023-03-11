@@ -27,6 +27,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fixed error when trying to overwrite existing specs and using `--force` flag
 - fixed behavior when custom template has no custom functions - just use standard update when `scuri:spec --update` or throw if user specified `scuri:update-custom`
 
+## 1.3.1 - 2023-03-11
+
+### Added
+
+- configuration for autoSpy location
+
+
 ## 1.3.0 - 2022-08-30
 
 ### Added
