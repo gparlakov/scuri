@@ -40,6 +40,8 @@ export function setupBase(
         testFilesFolder,
         fullFileName: fileUnderTestFullPath,
         testFileName: getSpecFilePathName(fileUnderTestFullPath),
+        folderPath: getTestFile(testFilesFolder),
+        getFilePath: (p: string) => getTestFile(`${testFilesFolder}/${p}`),
         tree,
         runner,
         log(o?: { map?: 'full' | ((l: LogEntry) => unknown); filter?: string | ((l: LogEntry) => boolean) }) {
