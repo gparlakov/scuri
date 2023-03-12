@@ -1,41 +1,20 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import { EOL } from 'os';
-import { collectionPath } from './common';
+import { collectionPath, setupBase, splitLines } from './common';
 
 describe('Option: functionTemplate', () => {
-    let treeWithCustomFunctionTemplate: Tree;
-    beforeEach(() => {
-        treeWithCustomFunctionTemplate = Tree.empty();
-        treeWithCustomFunctionTemplate.create('example.ts', `export function exampleFunction() {}`);
+    const treeWithCustomFunctionTemplate= Tree.empty();
 
-        treeWithCustomFunctionTemplate.create(
-            '__specFileName__.template',
-            `import { <%= name %> } from './<%= normalizedName %>';
-
-describe('my function is <%= name %>', () => {
-    it('it should', () => {
-    // arrange
-    // act
-    const x = <%= name %>();
-    // assert
-    // expect(x).toEqual
-    });
-});`
-        );
-    });
-
+    const folder = 'spec-create.function-template';
+    const fn = 'function-for-template.ts';
+    const functionTemplate = '__specFileName__.template';
     it('when function template missing it should stop', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        // act
-        return await runner
-            .runSchematicAsync(
-                'spec',
-                { name: 'example.ts', functionTemplate: 'missing-file-path' },
-                treeWithCustomFunctionTemplate
-            )
-            .toPromise()
+        const { run, fullFileName, add } = setupBase(folder, fn);
+        add(fullFileName);
+        // add(testFileName);
+        return await run({ name: fullFileName, functionTemplate:'missing-file-path' })
             // assert
             .then(() => fail('should throw since the template file is missing'))
             .catch((e) => {
@@ -45,24 +24,20 @@ describe('my function is <%= name %>', () => {
             });
     });
 
-    it('when function template passed in it should use it', async () => {
+    fit('when function template passed in it should use it', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        // act
-        const result = await runner
-            .runSchematicAsync(
-                'spec',
-                { name: 'example.ts', functionTemplate: '__specFileName__.template' },
-                treeWithCustomFunctionTemplate
-            )
-            .toPromise();
+        const { run, fullFileName, testFileName, add, getFilePath } = setupBase(folder, fn);
+        const templatePath = getFilePath(functionTemplate);
+        add(fullFileName);
+        add(templatePath)
+        const result =  await run({ name: fullFileName, functionTemplate: templatePath })
         // assert
-        expect(result.exists('example.spec.ts')).toBe(true);
+        expect(result.exists(testFileName)).toBe(true);
 
-        const content = result.readContent('example.spec.ts').replace(EOL, '\n').split('\n');
+        const content = splitLines(result.readContent(testFileName));
         let i = 0;
 
-        expect(content[i++]).toEqual(`import { exampleFunction } from './example';`);
+        expect(content[i++]).toEqual(`import { exampleFunction } from './function-for-template';`);
         expect(content[i++]).toEqual(``);
         expect(content[i++]).toEqual(`describe('my function is exampleFunction', () => {`);
         expect(content[i++]).toEqual(`    it('it should', () => {`);
