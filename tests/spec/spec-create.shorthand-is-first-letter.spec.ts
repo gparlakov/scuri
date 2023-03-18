@@ -1,61 +1,34 @@
-import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import { collectionPath } from './common';
+import { setupBase } from './common';
 
-const source = 'c.ts';
-const spec = 'c.spec.ts';
+const fileName = 'shorthand-test.ts';
+const fileName1 = 'shorthand-test-1.ts';
+const folderName = 'spec-create.shorthand-is-first-letter';
 describe('spec', () => {
-    let tree: Tree;
-    beforeEach(() => {
-        tree = Tree.empty();
-    });
     it('scaffolds a test case with shorthand `c` for empty (c)ustomerComponent', async  () => {
-        tree.create(source, 'export class CustomerComponent {}');
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        // act
-        const result = await runner.runSchematicAsync('spec', { name: source }, tree).toPromise();
-        // assert
-        const contents = result.readContent(spec);
+        const { run, fullFileName, add, testFileName } = setupBase(folderName, fileName);
+        add(fullFileName);
 
-        expect(contents).toMatch('const c = build();');
-    });
-
-    it('scaffolds a test case with shorthand `c` for (c)ustomerComponent', async  () => {
-        tree.create(source, 'export class CustomerComponent { method(){} }');
-        // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
         // act
-        const result = await runner.runSchematicAsync('spec', { name: source }, tree).toPromise();
+        const result = await run({ name: fullFileName});
         // assert
-        const contents = result.readContent(spec);
+        const contents = result.readContent(testFileName);
 
         expect(contents).toMatch('const c = build();');
         expect(contents).toMatch('c.method();');
     });
 
-    it('scaffolds a test case with shorthand `a` for (a)uthService', async  () => {
-        tree.create(source, 'export class AuthService { login(){} }');
-        // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        // act
-        const result = await runner.runSchematicAsync('spec', { name: source }, tree).toPromise();
-        // assert
-        const contents = result.readContent(spec);
-
-        expect(contents).toMatch('const a = build();');
-        expect(contents).toMatch('a.login();');
-    });
-
     it('scaffolds a test case with shorthand `a` for empty (a)uthService', async  () => {
-        tree.create(source, 'export class AuthService { }');
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
+        const { run, fullFileName, add, testFileName } = setupBase(folderName, fileName1);
+        add(fullFileName);
+
         // act
-        const result = await runner.runSchematicAsync('spec', { name: source }, tree).toPromise();
+        const result = await run({ name: fullFileName});
         // assert
-        const contents = result.readContent(spec);
+        const contents = result.readContent(testFileName);
 
         expect(contents).toMatch('const a = build();');
+        expect(contents).toMatch('a.login()');
     });
 });
