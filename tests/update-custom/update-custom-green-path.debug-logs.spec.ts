@@ -1,23 +1,14 @@
-import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import { Subject } from 'rxjs';
-import { Options } from '../../src/update-custom/index';
 import { listenLogger, subscribe } from '../get-logger-errors';
-import { collectionPath } from '../spec/common';
+import { setupBase } from '../spec/common';
 describe('update-custom', () => {
-    let tree: Tree;
-    const name = 'example.ts';
-    const specFileName = 'example.spec.ts';
+
+    const file = 'for-debug-logs.ts';
     const classTemplate = '__specFileName__.template';
+    const folder = 'debug-logs';
     let stop$: Subject<void>;
 
     beforeEach(() => {
-        tree = Tree.empty();
-
-        tree.create(name, fileContent());
-        tree.create(specFileName, specFileContent());
-        tree.create(classTemplate, template());
-
         stop$ = new Subject<void>();
     });
 
@@ -26,151 +17,52 @@ describe('update-custom', () => {
     });
 
     it('should debug-output the skipped methods and the template results prior to dedupe', async () => {
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        const logs = subscribe(listenLogger(runner.logger, { level: 'debug' }), 10);
-
-        await runner
-            .runSchematicAsync(
-                'update-custom',
-                <Options>{ name, classTemplate },
-                tree
-            )
-            .toPromise();
+        // arrange
+        const { run, fullFileName, add, testFileName, letLogger } = setupBase(folder, file);
+        add(fullFileName);
+        add(testFileName);
+        add(classTemplate, template());
+        // act
+        let logs: string[] = [];
+        letLogger(l => logs = subscribe(listenLogger(l, { level: 'debug' }), stop$));
+        await run({ name: fullFileName, update: true, classTemplate }, 'update-custom');
 
         // skipping methods
-        expect(logs).toMatchInlineSnapshot(`
-            Array [
-              "missing src file",
-              "Cut the template to parts [{\\"mark\\":\\"lets\\",\\"template\\":\\"<%params.forEach(p => {%>let <%= camelize(p.type) %>Spy: <%= p.type %>;\\\\n<% }) %>\\"},{\\"mark\\":\\"injectables\\",\\"template\\":\\"<%params.forEach(p => {%>{ provide: <%= p.type %>, useClass: autoSpy(<%= p.type %>, '<%= p.type %>') },\\\\n<% }) %>\\"},{\\"mark\\":\\"get-instances\\",\\"template\\":\\"<%params.forEach(p => {%><%= camelize(p.type) %>Spy = spyInject<<%= p.type %>>(TestBed.inject(<%= p.type %>));\\\\n<% }) %>\\"},{\\"mark\\":\\"methods-skipDeDupe\\",\\"template\\":\\"<% publicMethods.forEach(meth=> {if(meth != '') { %>it('when <%= meth %> is called it should', () => {\\\\n    // arrange\\\\n    // act\\\\n    <%= shorthand %>.<%= meth %>();\\\\n    // assert\\\\n    // expect(<%= shorthand %>).toEqual\\\\n});\\\\n<% }}) %>\\"}]",
-              "Skipping methods: [myMethod] as they seem to be already in the spec.",
-              "Template result before de-duplication: [let serviceSpy: Service;
-            let routerSpy: Router;
-            let justSpy: Just;
-            ]",
-              "Mark // scuri:lets (original lets) found at position(142)",
-              "Template result before de-duplication: [{ provide: Service, useClass: autoSpy(Service, 'Service') },
-            { provide: Router, useClass: autoSpy(Router, 'Router') },
-            { provide: Just, useClass: autoSpy(Just, 'Just') },
-            ]",
-              "Mark // scuri:injectables (original injectables) found at position(410)",
-              "Template result before de-duplication: [serviceSpy = spyInject<Service>(TestBed.inject(Service));
-            routerSpy = spyInject<Router>(TestBed.inject(Router));
-            justSpy = spyInject<Just>(TestBed.inject(Just));
-            ]",
-              "Mark // scuri:get-instances (original get-instances) found at position(531)",
-              "Template result before de-duplication: [it('when yourMethod is called it should', () => {
-                // arrange
-                // act
-                e.yourMethod();
-                // assert
-                // expect(e).toEqual
-            });
-            it('when theirMethod is called it should', () => {
-                // arrange
-                // act
-                e.theirMethod();
-                // assert
-                // expect(e).toEqual
-            });
-            ]",
-            ]
-        `);
+        expect(logs).toMatchSnapshot();
     });
 
     it('should debug-output the empty template results', async () => {
-        const r = tree.beginUpdate(classTemplate);
-        r.insertRight(1813, '/**scuri:template:empty-template:*/');
-        tree.commitUpdate(r);
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        const logs = subscribe(listenLogger(runner.logger, { level: 'debug' }), stop$);
 
-        await runner
-            .runSchematicAsync(
-                'update-custom',
-                <Options>{ name, classTemplate },
-                tree
-            )
-            .toPromise();
+        // arrange
+        const { run, fullFileName, add, testFileName, letLogger } = setupBase(folder, file);
+        add(fullFileName);
+        add(testFileName);
+        add(classTemplate, template('/**scuri:template:empty-template:*/'));
+
+        let logs: string[] = [];
+        letLogger(l => logs = subscribe(listenLogger(l, { level: 'debug' }), stop$));
+
+        await run({ name: fullFileName, classTemplate },'update-custom');
 
         expect(logs).toContain('No result from applying template for empty-template.');
     });
 
     it('should error on failed template', async () => {
-        const r = tree.beginUpdate(classTemplate);
-        r.insertRight(
-            1813,
-            '/**scuri:template:empty-template:<%= test.forEach %> <% sharans.forEach(s => {%> tt<%=s <% }%>*/'
-        );
-        tree.commitUpdate(r);
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        const logs = subscribe(listenLogger(runner.logger, { level: 'error' }), stop$);
+     // arrange
+     const { run, fullFileName, add, testFileName, letLogger } = setupBase(folder, file);
+     add(fullFileName);
+     add(testFileName);
+     add(classTemplate, template('/**scuri:template:empty-template:<%= test.forEach %> <% sharans.forEach(s => {%> tt<%=s <% }%>*/'));
 
-        await runner
-            .runSchematicAsync(
-                'update-custom',
-                <Options>{ name, classTemplate },
-                tree
-            )
-            .toPromise()
-            .catch((e) => {
-                expect(logs).toEqual([]);
+     await run({ name: fullFileName, classTemplate },'update-custom')
+           .catch((e) => {
                 expect(e).toEqual(new SyntaxError("Unexpected token '%'"));
             });
     });
 });
 
-function fileContent(): string {
-    return `import { Router } from "@the/router";
-import { Just } from "maybe";
-import { Service } from "./service";
-export class ExampleComponent {
-    constructor(service: Service, router: Router, just: Just) {}
 
-    myMethod() {}
-
-    yourMethod() {}
-
-    theirMethod() {}
-}
-`;
-}
-
-function specFileContent(): string {
-    return `import { MyDirective } from './directive';
-import { autoSpy, spyInject } from 'jasmine-auto-spies';
-
-describe('ExampleComponent', () => {
-    // scuri:lets
-
-    beforeEach(
-        waitForAsync(() => {
-            TestBed.configureTestingModule({
-                providers: [
-                    MyDirective,
-                    { provide: Service, useClass: autoSpy(Service, 'Service') },
-                    // scuri:injectables
-                ]
-            });
-
-            directive = TestBed.inject(MyDirective);
-            // scuri:get-instances
-        })
-    );
-
-    it('when myMethod is called it should', () => {
-        // arrange
-        // act
-        e.myMethod();
-        // assert
-        // expect(e).toEqual
-    });
-
-    // scuri:methods
-});
-`;
-}
-
-function template() {
+function template(addition: string = '') {
     return `<% params.forEach(p => { if(p.importPath) {%>import { <%= p.type %> } from '<%= p.importPath %>';
 <% }}) %>import { <%= className %> } from './<%= normalizedName %>';
 import { autoSpy, spyInject } from 'jasmine-auto-spies';
@@ -225,5 +117,6 @@ describe('<%= className %>', () => {
     // expect(<%= shorthand %>).toEqual
 });
 <% }}) %>*/
+${addition}
 `;
 }

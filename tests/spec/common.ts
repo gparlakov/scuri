@@ -76,9 +76,9 @@ export function setupBase(
         build() {
             return tree;
         },
-        async run(o?: Partial<SpecOptions>) {
+        async run(o?: Partial<SpecOptions>, schematic: 'spec' | 'update-custom' = 'spec') {
             return runner
-                .runSchematicAsync('spec', { name: fileUnderTestFullPath, ...o }, tree)
+                .runSchematicAsync(schematic, { name: fileUnderTestFullPath, ...o }, tree)
                 .toPromise();
         },
         splitLines(s: string): string[] {
