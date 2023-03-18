@@ -21,9 +21,11 @@ export type Options = {
 
 export function updateCustom(o: Options): Rule {
     return (tree: Tree, context: SchematicContext) => {
-        setLogger(context.logger.createChild('scuri:update-custom'));
+        const logger = context.logger.createChild('scuri:update-custom')
+        setLogger(logger);
         const template = tree.read(o.classTemplate)?.toString('utf8');
         const fileUnderTestContent = tree.read(o.name)?.toString('utf8');
+        logger.debug(`Entering for opts:${JSON.stringify(o)}`);
 
         if (typeof fileUnderTestContent === 'string' && typeof template === 'string') {
             const r = describeSource(o.name, fileUnderTestContent, tree);
@@ -55,6 +57,7 @@ export function updateCustom(o: Options): Rule {
                 }
 
                 const customSpecFileName = getSpecFileCustomName(classData, o.classTemplate);
+                tree.visit(f => logger.debug(f))
                 const customSpecFileContents = customSpecFileName != null ? tree.read(customSpecFileName) : null;
                 if (customSpecFileContents != null) {
                     const inserts = updateWithCustomTemplate(
