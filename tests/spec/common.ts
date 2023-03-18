@@ -1,6 +1,6 @@
 import { normalize } from '@angular-devkit/core';
 import { NodeJsSyncHost } from '@angular-devkit/core/node';
-import { LogEntry } from '@angular-devkit/core/src/logger';
+import { LogEntry, Logger } from '@angular-devkit/core/src/logger';
 import { ScopedHost } from '@angular-devkit/core/src/virtual-fs/host';
 import { HostCreateTree, Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
@@ -62,6 +62,9 @@ export function setupBase(
             runner.logger.pipe(filter((f) => filterFn(f))).subscribe((l) => log(mapFn(l)));
 
             return builder;
+        },
+        letLogger(l: (l: Logger) => void): void {
+            l(runner.logger);
         },
         add(name: string, contents?: string) {
             tree.create(name, contents ?? getTestFileContents(name));
