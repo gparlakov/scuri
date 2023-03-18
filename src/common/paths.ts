@@ -1,4 +1,5 @@
-import { basename, extname, normalize } from '@angular-devkit/core';
+import { normalize, basename, extname } from 'path';
+import { getLogger } from './logger';
 
 /**
  * Holds the folder, fileName and specFileName:
@@ -36,7 +37,7 @@ export type Paths = {
      */
     fileName: string;
 
-   /**
+    /**
      * The folder containing the target under test, verbatim as the user specified.
      *
      * @example
@@ -45,18 +46,20 @@ export type Paths = {
      * @example
      * --name = .\example\example.component.ts -> .\example\example.component
      */
-    folderPathRaw: string
-   /**
+    folderPathRaw: string;
+    /**
      * The folder containing the target under test, normalized to forward slash path.
      *
      * @example
      * --name = .\example\example.component.ts -> ./example/example.component
      *
      */
-    folderPathNormal: string
-}
+    folderPathNormal: string;
+};
 
 export function paths(name: string): Paths {
+    const logger = getLogger(paths.name);
+    logger.debug(`entering for ${name}`);
     // --name=./example/example.component.ts -> example.component.ts
     const fileName = basename(normalize(name));
 
@@ -72,11 +75,13 @@ export function paths(name: string): Paths {
     const folderPathRaw = name.split(fileName)[0]; // split on the filename - so we get only an array of one item
 
     const folderPathNormal = normalize(folderPathRaw);
-    return {
+    const r = {
         specFileName,
         fileName: fileNameSansExtension,
         folderPathRaw,
-        folderPathNormal
+        folderPathNormal,
     };
-}
 
+    logger.debug(`returning ${JSON.stringify(r)}`)
+    return r;
+}
