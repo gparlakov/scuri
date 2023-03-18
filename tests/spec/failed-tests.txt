@@ -1,5 +1,3 @@
-FAIL  tests/update-custom/update-custom-green-path.debug-logs.spec.ts
-
 FAIL  tests/spec/spec-update.indentation-format.spec.ts
 
 FAIL  tests/spec/spec-update.spec-without-setup-function.spec.ts
