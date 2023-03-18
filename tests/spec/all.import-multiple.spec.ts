@@ -1,80 +1,30 @@
-import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import { collectionPath } from './common';
+import { setupBase } from './common';
+const folder = 'all.import-multiple';
+const file = 'with-imports.component.ts';
 
 describe('When importing multiple declarations from the same module', () => {
-    let treeWithMultipleImports = Tree.empty();
-    treeWithMultipleImports.create(
-        'with-imports.component.ts',
-        `import { ADep, BDep } from '../my/relative/path';
-import { Router, DDep } from '@angular/router';
-
-export class WithImportsComponent {
-    constructor(
-        private aDep: ADep,
-        private d: DDep,
-        private b: BDep,
-        private router: Router,
-    ) {}
-}`
-    );
-
-    treeWithMultipleImports.create(
-        'with-imports.component.spec.ts',
-        `import { ADep } from '../my/relative/path';
-import { DDep } from '@angular/router';
-import { WithImportsComponent } from './with-imports.component';
-import { autoSpy } from 'autoSpy';
-
-describe('WithImportsComponent', () => {
-
-});
-
-function setup() {
-    const aDep = autoSpy(aDep);
-    const dDep = autoSpy(DDep);
-    const builder = {
-        dDep,
-        aDep,
-        default() {
-            return builder;
-        },
-        build() {
-            return new WithImportsComponent(aDep,dDep);
-        }
-    };
-
-    return builder;
-}`
-    );
-
     it('update should import all required', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
+        const { run, fullFileName, add, testFileName } = setupBase(folder, file);
+        add(fullFileName);
+        add(testFileName);
         // act
-        const result = await runner.runSchematicAsync(
-            'spec',
-            { name: 'with-imports.component.ts', update: true },
-            treeWithMultipleImports
-        ).toPromise();
+        const result = await run({ name: fullFileName, update: true });
         // assert
-        const contents = result.readContent('with-imports.component.spec.ts');
+        const contents = result.readContent(testFileName);
         expect(contents).toMatch(`import { ADep, BDep } from '../my/relative/path';`);
         expect(contents).toContain(`import { DDep, Router } from '@angular/router';`);
     });
 
     it('create should import all required', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        treeWithMultipleImports.delete('with-imports.component.spec.ts');
+        // arrange
+        const { run, fullFileName, add, testFileName } = setupBase(folder, 'with-imports-for-create.component.ts');
+        add(fullFileName);
         // act
-        const result = await runner.runSchematicAsync(
-            'spec',
-            { name: 'with-imports.component.ts', update: false },
-            treeWithMultipleImports
-        ).toPromise();
+        const result = await run({ name: fullFileName, update: false });
         // assert
-        const contents = result.readContent('with-imports.component.spec.ts');
+        const contents = result.readContent(testFileName);
         expect(contents).toMatch(`import { ADep } from '../my/relative/path';`);
         expect(contents).toMatch(`import { BDep } from '../my/relative/path';`);
         expect(contents).toContain(`import { Router } from '@angular/router';`);
