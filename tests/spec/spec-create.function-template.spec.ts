@@ -1,7 +1,7 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import { EOL } from 'os';
-import { collectionPath, setupBase, splitLines } from './common';
+import { collectionPath, getTestFileContents, setupBase, splitLines } from './common';
 
 describe('Option: functionTemplate', () => {
     const treeWithCustomFunctionTemplate= Tree.empty();
@@ -9,6 +9,7 @@ describe('Option: functionTemplate', () => {
     const folder = 'spec-create.function-template';
     const fn = 'function-for-template.ts';
     const functionTemplate = '__specFileName__.template';
+    const functionTemplateConfig = 'valid-config-valid-function-template.json';
     it('when function template missing it should stop', async () => {
         // arrange
         const { run, fullFileName, add } = setupBase(folder, fn);
@@ -24,7 +25,7 @@ describe('Option: functionTemplate', () => {
             });
     });
 
-    fit('when function template passed in it should use it', async () => {
+    it('when function template passed in it should use it', async () => {
         // arrange
         const { run, fullFileName, testFileName, add, getFilePath } = setupBase(folder, fn);
         const templatePath = getFilePath(functionTemplate);
@@ -51,26 +52,21 @@ describe('Option: functionTemplate', () => {
     });
 
     it('when function template in config use it', async () => {
-        // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        // act
-        const result = await runner
-            .runSchematicAsync(
-                'spec',
-                {
-                    name: 'example.ts',
-                    config: 'tests/spec/test-data/valid-config-valid-function-template.json',
-                },
-                treeWithCustomFunctionTemplate
-            )
-            .toPromise();
-        // assert
-        expect(result.exists('example.spec.ts')).toBe(true);
 
-        const content = result.readContent('example.spec.ts').replace(EOL, '\n').split('\n');
+        // arrange
+        const { run, fullFileName, testFileName, add, getFilePath, tree } = setupBase(folder, fn);
+        const templatePath = getFilePath(functionTemplate);
+        const configPath = getFilePath(functionTemplateConfig);
+        add(fullFileName);
+        add(templatePath.split(/scuri\\|scuri\//)[1], getTestFileContents(templatePath))
+        const result =  await run({ name: fullFileName, config: configPath });
+        // assert
+        expect(result.exists(testFileName)).toBe(true);
+
+        const content = splitLines(result.readContent(testFileName));
 
         let i = 0;
-        expect(content[i++]).toEqual(`import { exampleFunction } from './example';`);
+        expect(content[i++]).toEqual(`import { exampleFunction } from './function-for-template';`);
         expect(content[i++]).toEqual(``);
         expect(content[i++]).toEqual(`describe('my function is exampleFunction', () => {`);
         expect(content[i++]).toEqual(`    it('it should', () => {`);
@@ -85,67 +81,59 @@ describe('Option: functionTemplate', () => {
 
     it('when both config classTemplate and command line arg classTemplate passed in it should use CLI arg', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        // create the just.template
-        treeWithCustomFunctionTemplate.create('just.template', 'CLI Args take precedence');
-
-        // act
-        const result = await runner
-            .runSchematicAsync(
-                'spec',
-                {
-                    name: 'example.ts',
-                    config: 'tests/spec/test-data/valid-config-valid-function-template.json',
-                    functionTemplate: 'just.template',
-                },
-                treeWithCustomFunctionTemplate
-            )
-            .toPromise();
+        const { run, fullFileName, add, getFilePath } = setupBase(folder, fn);
+        const templatePath = getFilePath(functionTemplate);
+        add(fullFileName);
+        add(templatePath);
+        add('just.template', 'CLI Args take precedence');
+        const configPath = getFilePath(functionTemplateConfig);
+        const result =  await run({ name: fullFileName, functionTemplate: 'just.template', config: configPath })
         // assert
-        expect(result.exists('just')).toBe(true);
+        expect(result.exists(getFilePath('just'))).toBe(true);
 
-        expect(result.readContent('just')).toEqual('CLI Args take precedence');
+        expect(result.readContent(getFilePath('just'))).toEqual('CLI Args take precedence');
     });
 
     it('function template can use these props demo and functions ', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        treeWithCustomFunctionTemplate.create(
+        const { run, fullFileName, add, getFilePath } = setupBase(folder, fn);
+        const templatePath = getFilePath(functionTemplate);
+        add(fullFileName);
+        add(templatePath);
+        add(
             '__name@dasherize__.function-spec.ts.template',
             `CUSTOM FUNCTION TEMPLATE
 AVAILABLE PROPERTIES:
 specFileName: <%= specFileName %>
 normalizedName: <%= normalizedName %> (fileName.ext) ->normalize-> fileName
 name: <%= name %>,
-`
-        );
-        // act
-        const result = await runner
-            .runSchematicAsync(
-                'spec',
-                { name: 'example.ts', functionTemplate: '__name@dasherize__.function-spec.ts.template' },
-                treeWithCustomFunctionTemplate
-            )
-            .toPromise();
-        // assert
-        expect(result.exists('example-function.function-spec.ts')).toBe(true);
+`);
+        const result =  await run({ name: fullFileName, functionTemplate: '__name@dasherize__.function-spec.ts.template' })
+        const specFile = getFilePath('example-function.function-spec.ts');
 
-        const content = result.readContent('example-function.function-spec.ts').replace(EOL, '\n').split('\n');
+        // act
+        // assert
+        expect(result.exists(specFile)).toBe(true);
+
+        const content = result.readContent(specFile).replace(EOL, '\n').split('\n');
         let i = 0;
         expect(content[i++]).toEqual(`CUSTOM FUNCTION TEMPLATE`);
         expect(content[i++]).toEqual(`AVAILABLE PROPERTIES:`);
-        expect(content[i++]).toEqual(`specFileName: example.spec.ts`);
+        expect(content[i++]).toEqual(`specFileName: function-for-template.spec.ts`);
         expect(content[i++]).toEqual(
-            `normalizedName: example (fileName.ext) ->normalize-> fileName`
+            `normalizedName: function-for-template (fileName.ext) ->normalize-> fileName`
         );
         expect(content[i++]).toEqual(`name: exampleFunction,`);
     });
 
     it('function template demo', async () => {
-        // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        treeWithCustomFunctionTemplate.create(
-            'demo.template',
+        const { run, fullFileName, add, getFilePath } = setupBase(folder, fn);
+        const templatePath = getFilePath(functionTemplate);
+        add(fullFileName);
+        add(templatePath);
+        const demoTemplate = 'demo.template'
+        add(
+            demoTemplate,
             `
 import { <%= name %> } from './<%= normalizedName %>';
 
@@ -159,20 +147,15 @@ describe('<%= name %> (is a function!)', () => {
 `
         );
         // act
-        const result = await runner
-            .runSchematicAsync(
-                'spec',
-                { name: 'example.ts', functionTemplate: 'demo.template' },
-                treeWithCustomFunctionTemplate
-            )
-            .toPromise();
+        const result =  await run({ name: fullFileName, functionTemplate: demoTemplate })
+        const specFile = getFilePath('demo');
         // assert
-        expect(result.exists('demo')).toBe(true);
+        expect(result.exists(specFile)).toBe(true);
 
-        const content = result.readContent('demo').replace(EOL, '\n').split('\n');
+        const content = result.readContent(specFile).replace(EOL, '\n').split('\n');
         let i = 0;
         expect(content[i++]).toEqual(``);
-        expect(content[i++]).toEqual(`import { exampleFunction } from './example';`);
+        expect(content[i++]).toEqual(`import { exampleFunction } from './function-for-template';`);
         expect(content[i++]).toEqual(``);
         expect(content[i++]).toEqual(`describe('exampleFunction (is a function!)', () => {`);
         expect(content[i++]).toEqual(`    it('should mostly work', () => {`);

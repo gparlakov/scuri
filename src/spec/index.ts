@@ -16,7 +16,6 @@ import {
 } from '@angular-devkit/schematics';
 import { cosmiconfigSync } from 'cosmiconfig';
 import { EOL } from 'os';
-import { resolve } from 'path';
 import { Change, InsertChange, RemoveChange } from '../../lib/utility/change';
 import {
     addDefaultObservableAndPromiseToSpyJoined,
@@ -91,7 +90,7 @@ export function spec({
         classTemplate = classTemplate ?? c.classTemplate;
         if (typeof classTemplate === 'string' && !tree.exists(classTemplate)) {
             throw new Error(
-                `Class template configuration was [${resolve(
+                `Class template configuration was [${normalize(
                     classTemplate
                 )}] but that file seems to be missing.`
             );
@@ -100,7 +99,7 @@ export function spec({
         functionTemplate = functionTemplate ?? c.functionTemplate;
         if (typeof functionTemplate === 'string' && !tree.exists(functionTemplate)) {
             throw new Error(
-                `Function template configuration was [${resolve(
+                `Function template configuration was [${normalize(
                     functionTemplate
                 )}] but that file seems to be missing.`
             );
