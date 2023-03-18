@@ -1,5 +1,3 @@
-FAIL  tests/spec/spec-update.testbed-tests.spec.ts
-
 FAIL  tests/spec/spec-update.group-imports.spec.ts
 
 FAIL  tests/spec/all.import-multiple.spec.ts
