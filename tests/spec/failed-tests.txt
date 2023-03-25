@@ -1,5 +1,3 @@
-FAIL  tests/spec/spec-update.only-add-missing-method-test-cases.spec.ts
-
 FAIL  tests/spec/spec-update.by-giving-spec-name.spec.ts
 
 FAIL  tests/spec/spec-update.spec-created-with-custom-template-without-custom-functions.spec.ts
