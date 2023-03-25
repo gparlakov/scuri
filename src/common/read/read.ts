@@ -4,6 +4,7 @@ import { findNodes } from '../../../lib/utility/ast-utils';
 import {
     ConstructorParam,
     DependencyCall,
+    DependencyCallDescription,
     DependencyMethodReturnAndPropertyTypes,
     DependencyPropertyName,
     DependencyTypeName,
@@ -202,9 +203,9 @@ function readDependencyCalls(
             )!;
 
             const callType = checker.getTypeAtLocation(accessExpr.parent);
-            l.debug(`accessExpr ${getKindAndText(accessExpr)}, type: ${checker.typeToString(checker.getTypeAtLocation(accessExpr))}`)
+            l.debug(`for ${p?.type} and ${p?.name} accessExpr ${getKindAndText(accessExpr)}, type: ${checker.typeToString(checker.getTypeAtLocation(accessExpr))}`)
             l.debug(
-                `processing,${getKindAndText(accessExpr.parent)}: ${checker.typeToString(callType)}`
+                `processing ${getKindAndText(accessExpr.parent)}: ${checker.typeToString(callType)}`
             );
             const callSignatures = callType.getCallSignatures();
 
@@ -223,8 +224,7 @@ function readDependencyCalls(
                                 checker.getTypeAtLocation(accessExpr.parent)
                             )}`
                         );
-
-                        dependencyUseTypes.get(p.type)!.set(declName, {
+                        const x: DependencyCallDescription = {
                             type: checker.typeToString(returnType),
                             typeParams:
                                 'typeArguments' in returnType
@@ -235,7 +235,9 @@ function readDependencyCalls(
                             signature: 'function',
                             name: declName,
                             kind: typeKind(returnType),
-                        });
+                        }
+                        l.debug(`will set in [${p.type}]: {${declName}: {type: ${x.type}, typeParams: ${x.typeParams.join()}, signature: ${x.signature}, name: ${x.name}, kind: ${x.kind}}}`);
+                        dependencyUseTypes.get(p.type)!.set(declName, x);
                     }
                 });
             } else if (
@@ -249,7 +251,7 @@ function readDependencyCalls(
                     )}`
                 );
 
-                dependencyUseTypes.get(p.type)?.set(propName, {
+                const x: DependencyCallDescription = {
                     type: checker.typeToString(callType),
                     typeParams:
                         'typeArguments' in callType
@@ -260,7 +262,10 @@ function readDependencyCalls(
                     signature: 'property',
                     name: propName,
                     kind: typeKind(callType),
-                });
+                }
+
+                l.debug(`will set in [${p.type}]: {${propName}: {type: ${x.type}, typeParams: ${x.typeParams.join()}, signature: ${x.signature}, name: ${x.name}, kind: ${x.kind}}}`)
+                dependencyUseTypes.get(p.type)?.set(propName, x);
             } else {
                 l.debug(
                     `not a prop and not a method: ${accessExpr.name.text}.${printKindAndText(
@@ -272,6 +277,7 @@ function readDependencyCalls(
             }
         });
 
+    l.debug(`returning ${[...dependencyUseTypes.keys()].join()}: ${[...dependencyUseTypes.values()].map(c => JSON.stringify([...c.entries()])).join()}`);
     return dependencyUseTypes;
 }
 

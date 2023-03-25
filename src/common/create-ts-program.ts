@@ -71,6 +71,7 @@ export function createTsProgram(fileName: string, tree: Tree): ts.Program {
         `Creating (and caching) program for ${fileName}, with options\n${JSON.stringify(config.options)}`
     );
     const program = ts.createProgram([fileName], config.options, defaultHost);
+    logger.debug(`FileContents: ${program.getSourceFile(fileName)?.getFullText()}`)
     programCache.set(fileName, program)
     return program;
 }
