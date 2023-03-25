@@ -1,55 +1,33 @@
 import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import { EOL } from 'os';
-import { collectionPath } from './common';
+import { log } from 'console';
+import { setupBase, splitLines } from './common';
 
+const file = 'starter-demo-class.ts';
+const folder = 'spec-create-starter-demo-class-template';
 const templateFileName = '__specFileName__-or-__normalizedName__.custom-spec.ts.template';
 describe('Option: classTemplate', () => {
     let tree: Tree;
     beforeEach(() => {
         tree = Tree.empty();
-        tree.create(
-            'example.component.ts',
-            `import { ADep } from '../my/relative/path';
-import { DDep } from '@angular/router';
-
-export class ExampleComponent {
-    constructor(
-        private aDep: ADep,
-        private d: DDep,
-    ) {}
-
-    aMethod();
-}`
-        );
-
     });
 
     it('should create the spec with the custom template from the https://gist.github.com/gparlakov/f299011829e229c9d37cf0cb38506d97#file-my-tmpl', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
+        const { run, fullFileName, add, getFilePath } = setupBase(folder, file);
+        add(fullFileName);
+        add(templateFileName, theDemoTemplate());
+const newSpecFile = getFilePath('starter-demo-class.spec.ts-or-starter-demo-class.custom-spec.ts');
         // act
-        tree.create(
-            templateFileName,
-            theDemoTemplate()
+
+        const result = await run({ name: fullFileName, classTemplate: templateFileName });
+        // assert
+        expect(result.exists(newSpecFile)).toBe(
+            true
         );
 
-        const result = await runner
-            .runSchematicAsync(
-                'spec',
-                { name: 'example.component.ts', classTemplate: templateFileName },
-                tree
-            )
-            .toPromise();
-        // assert
-        expect(result.exists('example.component.spec.ts-or-example.component.custom-spec.ts')).toBe(true);
-
-        const content = result
-            .readContent('example.component.spec.ts-or-example.component.custom-spec.ts')
-            .replace(/\r\n|\n\r|\n/g, '\n')
-            .split('\n');
+        const content = splitLines(result
+            .readContent(newSpecFile));
         let i = 0;
-
 
         expect(content[i++]).toEqual(`/**`);
         expect(content[i++]).toEqual(` *  CUSTOM TEMPLATE`);
@@ -65,17 +43,18 @@ export class ExampleComponent {
         expect(content[i++]).toEqual(` *  importPath: @angular/router`);
         expect(content[i++]).toEqual(` *  type: DDep`);
         expect(content[i++]).toEqual(` *  `);
-        expect(content[i++]).toEqual(` *  specFileName: example.component.spec.ts`);
-        expect(content[i++]).toEqual(` *  normalizedName: example.component`);
+        expect(content[i++]).toEqual(` *  specFileName: starter-demo-class.spec.ts`);
+        expect(content[i++]).toEqual(` *  normalizedName: starter-demo-class`);
         expect(content[i++]).toEqual(` *  className: ExampleComponent`);
         expect(content[i++]).toEqual(` *  publicMethods: aMethod`);
         expect(content[i++]).toEqual(` *  declaration: const aDep = autoSpy(ADep);`);
-        expect(content[i++]).toEqual(`const d = autoSpy(DDep);`);
+        expect(content[i++]).toEqual(`    const d = autoSpy(DDep);`);
+        expect(content[i++]).toEqual(`    `);
         expect(content[i++]).toEqual(` *  builderExports: aDep,`);
         expect(content[i++]).toEqual(`d,`);
         expect(content[i++]).toEqual(` *  constructorParams: aDep,d`);
         expect(content[i++]).toEqual(` *  shorthand: e`);
-        expect(content[i++]).toEqual(` *  `);
+        expect(content[i++]).toEqual(` *`);
         expect(content[i++]).toEqual(` *  AVAILABLE FUNCTIONS`);
         expect(content[i++]).toEqual(` *`);
         expect(content[i++]).toEqual(` *  classify: ExampleComponent`);
@@ -86,13 +65,13 @@ export class ExampleComponent {
         expect(content[i++]).toEqual(` *  classify: ExampleComponent`);
         expect(content[i++]).toEqual(` *  underscore: example_component`);
         expect(content[i++]).toEqual(` *  capitalize: ExampleComponent`);
-        expect(content[i++]).toEqual(` *  levenshtein(name, specFileName): 11`);
+        expect(content[i++]).toEqual(` *  levenshtein(name, specFileName): 21`);
         expect(content[i++]).toEqual(` *`);
         expect(content[i++]).toEqual(` *`);
         expect(content[i++]).toEqual(` */`);
         expect(content[i++]).toEqual(`import { ADep } from '../my/relative/path';`);
         expect(content[i++]).toEqual(`import { DDep } from '@angular/router';`);
-        expect(content[i++]).toEqual(`import { ExampleComponent } from './example.component';`);
+        expect(content[i++]).toEqual(`import { ExampleComponent } from './starter-demo-class';`);
         expect(content[i++]).toEqual(`import { autoSpy } from 'autoSpy';`);
         expect(content[i++]).toEqual('');
         expect(content[i++]).toEqual(`describe('ExampleComponent', () => {`);
@@ -111,7 +90,8 @@ export class ExampleComponent {
         expect(content[i++]).toEqual(`// tslint-disable-type`);
         expect(content[i++]).toEqual(`function setup() {`);
         expect(content[i++]).toEqual(`    const aDep = autoSpy(ADep);`);
-        expect(content[i++]).toEqual(`const d = autoSpy(DDep);const builder = {`);
+        expect(content[i++]).toEqual(`    const d = autoSpy(DDep);`);
+        expect(content[i++]).toEqual(`    const builder = {`);
         expect(content[i++]).toEqual(`    aDep,`);
         expect(content[i++]).toEqual(`d,default() {`);
         expect(content[i++]).toEqual(`        return builder;`);
@@ -125,7 +105,6 @@ export class ExampleComponent {
         expect(content[i++]).toEqual(`}`);
     });
 });
-
 
 function theDemoTemplate() {
     return `/**
@@ -146,7 +125,7 @@ function theDemoTemplate() {
  *  builderExports: <%= builderExports %>
  *  constructorParams: <%= constructorParams %>
  *  shorthand: <%= shorthand %>
- *  
+ *
  *  AVAILABLE FUNCTIONS
  *
  *  classify: <%=classify(name)%>
@@ -199,5 +178,5 @@ function setup() {
     };
 
     return builder;
-}`
+}`;
 }
