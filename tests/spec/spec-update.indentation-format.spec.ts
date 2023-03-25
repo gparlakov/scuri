@@ -1,83 +1,55 @@
+import { LogEntry } from '@angular-devkit/core/src/logger';
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import { filter } from 'rxjs/operators';
-import { collectionPath } from './common';
+import { Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { subscribe } from '../common/subscribe-in-tests';
+import { collectionPath, setupBase } from './common';
 
+const folder = 'spec-update.indentation-format';
+const file = 'indentation-component.ts';
 describe('Calling update on existing specs without setup function', () => {
-    let tree = Tree.empty();
-
-    beforeEach(() => {
-        tree = Tree.empty();
-        tree.create(
-            'c.ts',
-            `import { LogService, BDep } from '@angular/core';
-
-export class C  {
-    constructor(
-        private aDep: BDep,
-        private bDep: BDep,
-        private cDep: BDep,
-        private logger: LogService
-    ) {}
-}`
-        );
-
-        tree.create(
-            'c.spec.ts',
-            `import { bDep } from '@angular/core';
-
-describe('C', () => {
-});`
-        );
-    });
-
     it('should pass successfully', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
+        const { run, fullFileName, add, testFileName, letLogger } = setupBase(folder, file);
+        add(fullFileName);
+        add(testFileName);
+
+        const stop$ = new Subject();
+        const errors: LogEntry[] = [];
+
+        letLogger((logger) =>
+            subscribe(
+                logger.pipe(
+                    map((l) => {
+                        if (l.level === 'error') {
+                            errors.push(l);
+                        }
+                    })
+                ),
+                stop$
+            )
+        );
+
         // act
-        const errors = [];
-        runner.logger.pipe(filter((v) => v.level === 'error')).subscribe((v) => errors.push(v));
-        await runner.runSchematicAsync('spec', { name: './c.ts', update: true }, tree).toPromise();
+        await run({ name: fullFileName, update: true }).catch((e) => {
+            fail('Failing b/c this is expected to pass w/o errors');
+        });
+
         // assert
         expect(errors.length).toBe(0);
     });
 
     it('should indent setup function variable declarations', async () => {
-        // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        // act
-        const result = await runner
-            .runSchematicAsync('spec', { name: './c.ts', update: true }, tree)
-            .toPromise();
-        // assert
-        // @ts-ignore
-        const contents = result.readContent('./c.spec.ts');
-        // update should add LogService to imports, to construct params and create a spy for it
-        expect(contents).toMatchInlineSnapshot(`
-            "import { bDep, BDep, LogService } from '@angular/core';
-            import { autoSpy } from 'autoSpy';
+         // arrange
+         const { run, fullFileName, add, testFileName } = setupBase(folder, file);
+         add(fullFileName);
+         add(testFileName);
 
-            describe('C', () => {
-            });
-            function setup() {
-                const aDep = autoSpy(BDep);
-                const bDep = autoSpy(BDep);
-                const cDep = autoSpy(BDep);
-                const logger = autoSpy(LogService);
-                const builder = {
-                    aDep,
-                    bDep,
-                    cDep,
-                    logger,
-                    default() {
-                        return builder;
-                    },
-                    build() {
-                        return new C(aDep, bDep, cDep, logger);
-                    }
-                }
-                return builder;
-            }"
-        `);
+                 // act
+        const result = await run({ name: fullFileName, update: true });
+        // assert
+        const contents = result.readContent(testFileName);
+        expect(contents).toMatchSnapshot();
     });
 });

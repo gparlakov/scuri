@@ -1,8 +1,6 @@
 import { LogEntry } from '@angular-devkit/core/src/logger';
-import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import { filter } from 'rxjs/operators';
-import { collectionPath, setupBase } from './common';
+import { setupBase } from './common';
 
 describe('Calling update on existing specs without setup function', () => {
     const file = 'group-imports.ts';
