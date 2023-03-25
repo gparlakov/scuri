@@ -1,5 +1,3 @@
-FAIL  tests/spec/spec-update.spec-without-setup-function.spec.ts
-
 FAIL  tests/spec/spec-create.when-no-public-methods-add-single-test-case.spec.ts
 
 FAIL  tests/spec/spec-create.starter-demo-class-template.spec.ts

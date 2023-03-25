@@ -187,7 +187,7 @@ function setup() {
             const forComma = 'for-comma.ts'
             it('should add a comma at the start of the deps list', async () => {
                 // arrange
-                const { run, fullFileName, testFileName, add } = setupBase(folder, forComma).log();
+                const { run, fullFileName, testFileName, add } = setupBase(folder, forComma);
                 add(fullFileName);
                 add(testFileName);
                 // act
