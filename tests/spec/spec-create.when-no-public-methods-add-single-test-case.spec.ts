@@ -1,20 +1,19 @@
-import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import { collectionPath } from './common';
+import { setupBase } from './common';
+
+const file = 'empty-class.ts'
+const folder = 'spec-create-when-no-public-methods'
 
 describe('spec', () => {
-    let tree: Tree;
-    beforeEach(() => {
-        tree = Tree.empty();
-        tree.create('empty-class.ts', 'export class EmptyClass {}');
-    });
+
     it('creates a file with the boilerplate setup method ', async  () => {
-        // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
+         // arrange
+         const { run, fullFileName, add, testFileName, letLogger } = setupBase(folder, file);
+         add(fullFileName);
+
         // act
-        const result = await runner.runSchematicAsync('spec', { name: 'empty-class.ts' }, tree).toPromise();
+        const result = await run({ name: fullFileName });
         // assert
-        const contents = result.readContent('empty-class.spec.ts');
+        const contents = result.readContent(testFileName);
 
         const eol = '(\\r\\n|\\n)\\s*';
         expect(contents).toMatch(
