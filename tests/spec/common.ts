@@ -19,10 +19,6 @@ export const getTestFile = (fileName: string, fromRoot: string = join(__dirname,
 export const getTestFileContents = (fullFilePath: string, tree?: Tree) =>
     (tree?.get(fullFilePath)?.content ?? readFileSync(fullFilePath)).toString('utf8');
 
-export const depsCallsReturnTypesFile = getTestFile('deps-calls-with-return-types.ts');
-export const depsCallsReturnTypesFileContents = (t?: Tree) =>
-    getTestFileContents(depsCallsReturnTypesFile, t);
-
 export function splitLines(s: string): string[] {
     return typeof s === 'string' ? s.split(/\n\r|\n|\r\n/) : [];
 }
