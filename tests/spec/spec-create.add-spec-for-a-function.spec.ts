@@ -1,26 +1,19 @@
-import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import { collectionPath } from './common';
+import { setupBase } from './common';
 
-const source = 'add.ts';
-const spec = 'add.spec.ts';
+const folder = 'add-spec-for-a-function';
+const file = 'add.ts';
+
 describe('When source file has only function', () => {
-    let tree = Tree.empty();
-    tree.create(
-        source,
-        `
-export function add(a: number, b: number) {
-    return a + b;
-}`
-    );
 
     it('create should create a describe and one test case for the function', async  () => {
-        // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        // act
-        const result = await runner.runSchematicAsync('spec', { name: source, update: false }, tree).toPromise();
+         // arrange
+         const { run, fullFileName, add, testFileName } = setupBase(folder, file);
+         add(fullFileName);
+         // act
+         const result = await run({name: fullFileName, update: false});
+
         // assert
-        const contents = result.readContent(spec);
+        const contents = result.readContent(testFileName);
         expect(contents).toMatch(`import { add } from './add';`);
         expect(contents).toMatch(`describe('add', () => {`);
         expect(contents).toMatch(`  it('it should', () => {`);
