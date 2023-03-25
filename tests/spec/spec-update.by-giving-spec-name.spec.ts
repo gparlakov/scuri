@@ -1,5 +1,4 @@
 import { LogEntry } from '@angular-devkit/core/src/logger';
-import { Tree } from '@angular-devkit/schematics';
 import { filter } from 'rxjs/operators';
 import { setupBase } from './common';
 
@@ -8,11 +7,6 @@ const folder = 'update-by-giving-spec-name';
 const file = 'c.ts';
 
 describe('Calling update and passing the spec file in --name ', () => {
-    let tree = Tree.empty();
-
-    beforeEach(() => {
-        tree = Tree.empty();
-    });
 
     it('should work and not throw errors', async  () => {
         // arrange
