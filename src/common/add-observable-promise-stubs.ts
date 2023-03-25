@@ -88,8 +88,7 @@ export function propertyMocks(
             if (depMeta == null || depMeta.kind === 'other' || depMeta.signature === 'function') {
                 return undefined;
             } else {
-                const { name } = depMeta;
-                const Name = `${classify(p.name)}${classify(name)}`;
+                const { name } = depMeta
                 const name$ = observablePropName(p.name, depMeta.name);
                 const promiseName = promisePropName(p.name, depMeta.name);
                 const type = depMeta.typeParams[0];
@@ -100,7 +99,7 @@ export function propertyMocks(
                         return `const ${name$} = new ReplaySubject<${type}>(1);`;
                     case 'promise':
                         // prettier ignore
-                        return `const resolve${Name}: Function;${nl}const reject${Name}: Function;${nl}const ${promiseName} = new Promise((res, rej) => {${nl}${w}${resolveName(
+                        return `let ${resolveName(name)}: Function;${nl}let ${rejectName(name)}: Function;${nl}const ${promiseName} = new Promise((res, rej) => {${nl}${w}${resolveName(
                             name
                         )} = res;${nl}${w}${rejectName(name)} = rej;${nl}});`;
                     default:

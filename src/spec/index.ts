@@ -421,7 +421,7 @@ function maybeUseCustomTemplate(tree: Tree, src: Source, templateFileName?: stri
             src = source(t);
         }
     }
-    logger.debug(`${templateFileName} ${src === originalSrc ? 'not' : ''} found `);
+    logger.debug(`${templateFileName ?? 'no template option passed ----'} ${src === originalSrc ? 'not' : ''} found `);
     return src;
 }
 

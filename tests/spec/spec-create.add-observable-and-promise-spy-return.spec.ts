@@ -1,6 +1,4 @@
-import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import { collectionPath, getTestFile, getTestFileContents, setupBase, splitLines } from './common';
+import { setupBase, splitLines } from './common';
 
 const folder = 'add-observable-and-promise-spy-return';
 const depsCallsReturnTypesFile = 'deps-calls-with-return-types.ts';
@@ -42,8 +40,8 @@ describe('spec for a class with a method calling a dependency method', () => {
         // start at line below setup function
         let i = ls.findIndex((l) => l.includes('function setup')) + 1;
         expect(ls[i++]).toEqual('  const serviceProperty$ = new ReplaySubject<string>(1);');
-        expect(ls[i++]).toEqual('    const resolveServicePromiseProp: Function;');
-        expect(ls[i++]).toEqual('    const rejectServicePromiseProp: Function;');
+        expect(ls[i++]).toEqual('    let resolvePromiseProp: Function;');
+        expect(ls[i++]).toEqual('    let rejectPromiseProp: Function;');
         expect(ls[i++]).toEqual('    const servicePromiseProp = new Promise((res, rej) => {');
         expect(ls[i++]).toEqual('        resolvePromiseProp = res;');
         expect(ls[i++]).toEqual('        rejectPromiseProp = rej;');
@@ -146,158 +144,63 @@ describe('spec for a class with a method calling a dependency method', () => {
 
         // assert
         const specFile = result!.readContent(testFileName);
-        expect(specFile).toMatchInlineSnapshot(`
-            "import { ServiceWithMethods } from './deps-calls-with-return-types.dependency';
-            import { ExampleComponent } from './deps-calls-with-return-types';
-            import { EMPTY, Observable, ReplaySubject } from 'rxjs';
-            import { autoSpy } from 'autoSpy';
 
-            describe('ExampleComponent', () => {
-              it('when aMethod is called it should', () => {
-                // arrange
-                const { build } = setup().default();
-                const e = build();
-                // act
-                e.aMethod();
-                // assert
-                // expect(e).toEqual
-              });
-              it('when anotherMethod is called it should', () => {
-                // arrange
-                const { build } = setup().default();
-                const e = build();
-                // act
-                e.anotherMethod();
-                // assert
-                // expect(e).toEqual
-              });
+        expect(specFile).toContain(`import { autoSpy } from 'autoSpy'`);
 
-            });
-
-            function setup() {
-              const serviceProperty$ = new ReplaySubject<string>(1);
-                const resolveServicePromiseProp: Function;
-                const rejectServicePromiseProp: Function;
-                const servicePromiseProp = new Promise((res, rej) => {
-                    resolvePromiseProp = res;
-                    rejectPromiseProp = rej;
-                });
-                const serviceObservable$ = new ReplaySubject<ClassDescription[]>(1);
-                const serviceSubject$ = new ReplaySubject<string>(1);
-                const service = autoSpy(ServiceWithMethods, { property$: serviceProperty$, promiseProp: servicePromiseProp, observable$: serviceObservable$, subject$: serviceSubject$ });
-                service.observableReturning.and.returnValue(EMPTY);
-                service.promiseReturning.and.returnValue(new Promise(res => {}));
-              const builder = {
-                service,
-                withServiceJustAMethodReturn(j: ClassDescription) {
-                    service.justAMethod.and.returnValue(j);
-                    return builder;
-                },
-                withServiceObservableReturningReturn(o: Observable<string>) {
-                    service.observableReturning.and.returnValue(o);
-                    return builder;
-                },
-                withServicePromiseReturningReturn(p: Promise<string>) {
-                    service.promiseReturning.and.returnValue(p);
-                    return builder;
-                },
-                withServiceProperty$(p$: Observable<string>) {
-                    p$.subscribe({
-                        next: (v) => serviceProperty$.next(v),
-                        error: (e) => serviceProperty$.error(e),
-                        complete: () => serviceProperty$.complete()
-                    });
-                    return builder;
-                },
-                withServicePromiseProp(p: Promise<string>) {
-                    p
-                        .then((v) => resolveServicePromiseProp(v))
-                        .catch((e) => rejectServicePromiseProp(e));
-                    return builder;
-                },
-                withServiceObservable$(o$: Observable<ClassDescription[]>) {
-                    o$.subscribe({
-                        next: (v) => serviceObservable$.next(v),
-                        error: (e) => serviceObservable$.error(e),
-                        complete: () => serviceObservable$.complete()
-                    });
-                    return builder;
-                },
-                withServiceSubject$(s$: Observable<string>) {
-                    s$.subscribe({
-                        next: (v) => serviceSubject$.next(v),
-                        error: (e) => serviceSubject$.error(e),
-                        complete: () => serviceSubject$.complete()
-                    });
-                    return builder;
-                },
-                default() {
-                  return builder;
-                },
-                build() {
-                  return new ExampleComponent(service);
-                }
-              };
-
-              return builder;
-            }
-            "
-        `);
+        // prettier-ignore
+        expect(specFile).toMatchSnapshot();
     });
 
-    // it('when dependencies used without accessing props or methods it should not throw and add properties and methods for dependency params of type <Observable>  and <Promise> not having undefined as prop name and dep name', async () => {
-    //     // arrange
-    //     const tree = Tree.empty();
-    //     const fileName = getTestFile('create.when-used-in-if-expressions/component.ts');
-    //     const specName = fileName.replace('.ts', '.spec.ts');
+    it('when dependencies used without accessing props or methods it should not throw and add properties and methods for dependency params of type <Observable>  and <Promise> not having undefined as prop name and dep name', async () => {
+         // arrange
+         const { run, fullFileName, add, testFileName } = setupBase(
+            'create.when-used-in-if-expressions',
+            'component.ts'
+        );
+        add(fullFileName);
+        // act
+        const result = await run({ name: fullFileName, update: false });
 
-    //     tree.create(fileName, getTestFileContents(fileName));
-    //     const runner = new SchematicTestRunner('schematics', collectionPath);
-    //     // act
-    //     const result = await runner
-    //         .runSchematicAsync('spec', { name: fileName, update: false }, tree)
-    //         .toPromise();
+        // assert
+        const specFile = result.readContent(testFileName);
+        expect(specFile).toBeDefined();
 
-    //     // assert
-    //     const specFile = result.readContent(specName);
-    //     expect(specFile).toBeDefined();
+        const ls = splitLines(specFile);
 
-    //     const ls = splitLines(specFile);
+        let i = ls.findIndex((l) => l.includes('function setup()')) + 1;
 
-    //     let i = ls.findIndex((l) => l.includes('function setup()')) + 1;
-
-    //     expect(ls[i++]).toEqual(
-    //         '  const serviceObservable$ = new ReplaySubject<ClassDescription[]>(1);'
-    //     );
-    //     expect(ls[i++]).toEqual(
-    //         '    const service = autoSpy(ServiceWithMethods, { observable$: serviceObservable$ });'
-    //     );
-    //     expect(ls[i++]).toEqual('    service.observableReturning.and.returnValue(EMPTY);');
-    //     expect(ls[i++]).toEqual('  const builder = {');
-    //     expect(ls[i++]).toEqual('    service,');
-    //     expect(ls[i++]).toEqual(
-    //         '    withServiceObservableReturningReturn(o: Observable<string>) {'
-    //     );
-    //     expect(ls[i++]).toEqual('        service.observableReturning.and.returnValue(o);');
-    //     expect(ls[i++]).toEqual('        return builder;');
-    //     expect(ls[i++]).toEqual('    },');
-    //     expect(ls[i++]).toEqual('    withServiceObservable$(o$: Observable<ClassDescription[]>) {');
-    //     expect(ls[i++]).toEqual('        o$.subscribe({');
-    //     expect(ls[i++]).toEqual('            next: (v) => serviceObservable$.next(v),');
-    //     expect(ls[i++]).toEqual('            error: (e) => serviceObservable$.error(e),');
-    //     expect(ls[i++]).toEqual('            complete: () => serviceObservable$.complete()');
-    //     expect(ls[i++]).toEqual('        });');
-    //     expect(ls[i++]).toEqual('        return builder;');
-    //     expect(ls[i++]).toEqual('    },');
-    //     expect(ls[i++]).toEqual('    default() {');
-    //     expect(ls[i++]).toEqual('      return builder;');
-    //     expect(ls[i++]).toEqual('    },');
-    //     expect(ls[i++]).toEqual('    build() {');
-    //     expect(ls[i++]).toEqual('      return new ExampleComponentForIfExpressions(service);');
-    //     expect(ls[i++]).toEqual('    }');
-    //     expect(ls[i++]).toEqual('  };');
-    //     expect(ls[i++]).toEqual('');
-    //     expect(ls[i++]).toEqual('  return builder;');
-    //     expect(ls[i++]).toEqual('}');
-    // });
+        expect(ls[i++]).toEqual(
+            '  const serviceObservable$ = new ReplaySubject<ClassDescription[]>(1);'
+        );
+        expect(ls[i++]).toEqual(
+            '    const service = autoSpy(ServiceWithMethods, { observable$: serviceObservable$ });'
+        );
+        expect(ls[i++]).toEqual('    service.observableReturning.and.returnValue(EMPTY);');
+        expect(ls[i++]).toEqual('  const builder = {');
+        expect(ls[i++]).toEqual('    service,');
+        expect(ls[i++]).toEqual(
+            '    withServiceObservableReturningReturn(o: Observable<string>) {'
+        );
+        expect(ls[i++]).toEqual('        service.observableReturning.and.returnValue(o);');
+        expect(ls[i++]).toEqual('        return builder;');
+        expect(ls[i++]).toEqual('    },');
+        expect(ls[i++]).toEqual('    withServiceObservable$(o$: Observable<ClassDescription[]>) {');
+        expect(ls[i++]).toEqual('        o$.subscribe({');
+        expect(ls[i++]).toEqual('            next: (v) => serviceObservable$.next(v),');
+        expect(ls[i++]).toEqual('            error: (e) => serviceObservable$.error(e),');
+        expect(ls[i++]).toEqual('            complete: () => serviceObservable$.complete()');
+        expect(ls[i++]).toEqual('        });');
+        expect(ls[i++]).toEqual('        return builder;');
+        expect(ls[i++]).toEqual('    },');
+        expect(ls[i++]).toEqual('    default() {');
+        expect(ls[i++]).toEqual('      return builder;');
+        expect(ls[i++]).toEqual('    },');
+        expect(ls[i++]).toEqual('    build() {');
+        expect(ls[i++]).toEqual('      return new ExampleComponentForIfExpressions(service);');
+        expect(ls[i++]).toEqual('    }');
+        expect(ls[i++]).toEqual('  };');
+        expect(ls[i++]).toEqual('');
+        expect(ls[i++]).toEqual('  return builder;');
+        expect(ls[i++]).toEqual('}');
+    });
 });
