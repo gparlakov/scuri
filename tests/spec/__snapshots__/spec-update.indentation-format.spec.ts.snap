@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Calling update on existing specs without setup function should indent setup function variable declarations 1`] = `
+"import { bDep, BDep, LogService } from '@angular/core';
+
+describe('C', () => {
+});
+
+function setup() {
+    const aDep = autoSpy(BDep);
+    
+    const bDep = autoSpy(BDep);
+    
+    const cDep = autoSpy(BDep);
+    
+    const logger = autoSpy(LogService);
+    
+    const builder = {
+        aDep,
+        bDep,
+        cDep,
+        logger,
+        default() {
+            return builder;
+        },
+        build() {
+            return new C(aDep, bDep, cDep, logger);
+        },
+        
+    }
+    return builder;
+}"
+`;
