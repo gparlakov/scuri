@@ -7,6 +7,7 @@ import {
     TemplateFunction,
 } from '../types';
 import { buildErrorForMissingSwitchCase } from './build-time-error-for-missing-switch-case';
+import { getLogger } from './logger';
 
 interface DefaultMethodReturnsOptions {
     joiner?: string;
@@ -70,6 +71,9 @@ export function propertyMocks(
     depsCallsAndTypes: DependencyMethodReturnAndPropertyTypes | undefined,
     o?: DefaultMethodReturnsOptions
 ): string {
+    const logger = getLogger(propertyMocks.name);
+    logger.debug(`Entering for params ${JSON.stringify(p)} with deps ${JSON.stringify(depsCallsAndTypes)}`)
+
     if (depsCallsAndTypes?.get(p.type)?.entries() == null) {
         return '';
     }
@@ -77,7 +81,7 @@ export function propertyMocks(
     const w = joinerWhitespace(joiner, '    ');
 
     const dep = depsCallsAndTypes?.get(p.type);
-    return Array.from(dep!.keys())
+    const result = Array.from(dep!.keys())
         .map((propOrMethod) => {
             const depMeta = dep?.get(propOrMethod);
 
@@ -109,6 +113,9 @@ export function propertyMocks(
         })
         .filter((v) => v !== undefined)
         .join(joiner);
+
+    // add a joiner (space) after the last one
+    return result?.length > 0 ? `${result}${joiner}` : result;
 }
 
 export function includePropertyMocks(
