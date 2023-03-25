@@ -2,6 +2,4 @@ FAIL  tests/update-custom/update-custom-mark-case-insensitive-and-methods-inside
 
 FAIL  tests/update-custom/update-custom-green-path.spec.ts
 
-FAIL  tests/spec/all.nested-setup-function.spec.ts
-
 FAIL  tests/spec/spec-create.add-observable-and-promise-spy-return.spec.ts

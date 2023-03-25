@@ -1,52 +1,21 @@
-import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import { collectionPath } from './common';
+import { setupBase } from './common';
+
+const folder = 'nested-setup-function';
+const file = 'c.ts';
 
 describe('Nested setup functions should not break', () => {
-    let tree = Tree.empty();
-
-    tree.create(
-        'c.ts',
-        `import { LogService, BDep } from '@angular/core';
-
-        export class C  {
-            constructor(
-                private bDep: BDep,
-                private logger: LogService
-            ) {}
-        `
-    );
-
-    tree.create(
-        'c.spec.ts',
-        `import { BDep } from '@angular/core';
-
-        describe('C', () => {
-
-            function setup() {
-                let bDep: SpyOf<ActivatedRoute> = autoSpy(bDep);
-                const builder = {
-                    bDep,
-                    build: () => {
-                        return new C(bDep);
-                    },
-                };
-
-                return builder;
-            }
-        });`
-    );
-
-    it('update', async  () => {
+    it('update', async () => {
         // arrange
-        const runner = new SchematicTestRunner('schematics', collectionPath);
+        const { run, fullFileName, add, testFileName } = setupBase(folder, file);
+        add(fullFileName);
+        add(testFileName);
         // act
-        const result = await runner.runSchematicAsync('spec', { name: './c.ts', update: true }, tree).toPromise();
+        const result = await run({ name: fullFileName, update: true });
         // assert
         // @ts-ignore
-        const contents = result.readContent('./c.spec.ts');
+        const contents = result.readContent(testFileName);
         // update should add LogService to imports, to construct params and create a spy for it
-        expect(contents).toContain("import { BDep, LogService } from '@angular/core';");
+        expect(contents).toContain("import { BDep, LogService } from '@a");
         expect(contents).toContain('C(bDep, logger)');
         expect(contents).toContain(`const logger = autoSpy(LogService);`);
     });
