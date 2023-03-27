@@ -7,8 +7,22 @@ Array [
   "entering for C:\\\\Users\\\\gparl\\\\projects\\\\scuri\\\\tests\\\\spec\\\\test-data\\\\debug-logs\\\\for-debug-logs.ts",
   "Creating (and caching) program for C:\\\\Users\\\\gparl\\\\projects\\\\scuri\\\\tests\\\\spec\\\\test-data\\\\debug-logs\\\\for-debug-logs.ts, with options
 {\\"target\\":2,\\"module\\":1}",
+  "FileContents: import { Router } from \\"@the/router\\";
+import { Just } from \\"maybe\\";
+import { Service } from \\"./service\\";
+export class ExampleComponent {
+    constructor(service: Service, router: Router, just: Just) {}
+
+    myMethod() {}
+
+    yourMethod() {}
+
+    theirMethod() {}
+}
+",
   "Found src file: (top 50) import { Router } from \\"@the/router\\";
 import { Ju...",
+  "returning Service,Router,Just: [],[],[]",
   "entering for C:\\\\Users\\\\gparl\\\\projects\\\\scuri\\\\tests\\\\spec\\\\test-data\\\\debug-logs\\\\for-debug-logs.ts",
   "returning {\\"specFileName\\":\\"for-debug-logs.spec.ts\\",\\"fileName\\":\\"for-debug-logs\\",\\"folderPathRaw\\":\\"C:\\\\\\\\Users\\\\\\\\gparl\\\\\\\\projects\\\\\\\\scuri\\\\\\\\tests\\\\\\\\spec\\\\\\\\test-data\\\\\\\\debug-logs\\\\\\\\\\",\\"folderPathNormal\\":\\"C:\\\\\\\\Users\\\\\\\\gparl\\\\\\\\projects\\\\\\\\scuri\\\\\\\\tests\\\\\\\\spec\\\\\\\\test-data\\\\\\\\debug-logs\\\\\\\\\\"}",
   "entering for classData {\\"className\\":\\"ExampleComponent\\",\\"name\\":\\"ExampleComponent\\",\\"specFileName\\":\\"for-debug-logs.spec.ts\\",\\"normalizedName\\":\\"for-debug-logs\\",\\"folder\\":\\"C:\\\\\\\\Users\\\\\\\\gparl\\\\\\\\projects\\\\\\\\scuri\\\\\\\\tests\\\\\\\\spec\\\\\\\\test-data\\\\\\\\debug-logs\\\\\\\\\\",\\"constructorParams\\":\\"not available for update - please use \`params\`\\",\\"declaration\\":\\"not available for update - specific for scuri original style testing\\",\\"builderExports\\":\\"not available for update - builder is specific for scuri original style testing - the setup function with a builder\\",\\"params\\":[{\\"name\\":\\"service\\",\\"type\\":\\"Service\\",\\"importPath\\":\\"./service\\"},{\\"name\\":\\"router\\",\\"type\\":\\"Router\\",\\"importPath\\":\\"@the/router\\"},{\\"name\\":\\"just\\",\\"type\\":\\"Just\\",\\"importPath\\":\\"maybe\\"}],\\"publicMethods\\":[\\"myMethod\\",\\"yourMethod\\",\\"theirMethod\\"],\\"shorthand\\":\\"f\\",\\"setupMethods\\":[]} templateName __specFileName__.template",
