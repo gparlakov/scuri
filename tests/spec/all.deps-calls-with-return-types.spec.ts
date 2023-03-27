@@ -2,22 +2,24 @@ import { Tree } from '@angular-devkit/schematics';
 import { describeSource } from '../../src/common/read/read';
 import { ClassDescription, DependencyCallDescription } from '../../src/types';
 import {
-    depsCallsReturnTypesFile,
-    depsCallsReturnTypesFileContents,
-    getTestDataAbsoluteTree,
+    getTestDataAbsoluteTree, getTestFile, getTestFileContents,
 } from './common';
+
+const depsCallsReturnTypesFile = 'deps-calls-with-return-types.ts';
+const folder = 'all-deps-calls-with-return-types';
 
 describe('Dependency method calls ', () => {
     let tree: Tree;
     beforeEach(() => {
-        tree = getTestDataAbsoluteTree();
+        tree = getTestDataAbsoluteTree(`${folder}/`);
     });
 
     it('should read the names and return types of dependency methods', async () => {
+        const fullFileName = getTestFile(`${folder}/${depsCallsReturnTypesFile}`);
         // arrange
         const x = describeSource(
-            depsCallsReturnTypesFile,
-            depsCallsReturnTypesFileContents(),
+            fullFileName,
+            getTestFileContents(fullFileName),
             tree
         );
         // act

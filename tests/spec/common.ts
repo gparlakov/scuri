@@ -28,7 +28,7 @@ export function setupBase(
     fileName: string,
     t: Tree | 'absolute' = Tree.empty()
 ) {
-    const tree = t === 'absolute' ? getTestDataAbsoluteTree() : t;
+    const tree = t === 'absolute' ? getTestDataAbsoluteTree(`${testFilesFolder}/`) : t;
     const runner = new SchematicTestRunner('schematics', collectionPath);
     const fileUnderTestFullPath = getTestFile(`${testFilesFolder}/${fileName}`);
 
@@ -90,6 +90,9 @@ export function setupBase(
     return builder;
 }
 
-export function getTestDataAbsoluteTree() {
-    return new HostCreateTree(new ScopedHost(new NodeJsSyncHost(), normalize(getTestFile(''))));
+export function getTestDataAbsoluteTree(path: string) {
+    return new HostCreateTree(new ScopedHost(new NodeJsSyncHost(), normalize(getTestFile(path))));
+    // return new FilterHostTree(new HostTree(new ScopedHost(new NodeJsSyncHost())), (p) => {
+    //     return p.includes(path);
+    // });
 }
