@@ -1,6 +1,5 @@
 import { normalize, basename, extname } from 'path';
 import { getLogger } from './logger';
-import { normalize as ngNormalize } from '@angular-devkit/core';
 
 /**
  * Holds the folder, fileName and specFileName:
@@ -75,7 +74,7 @@ export function paths(name: string): Paths {
     // the folder verbatim as the user specified
     const folderPathRaw = name.split(fileName)[0]; // split on the filename - so we get only an array of one item
 
-    const folderPathNormal = ngNormalize(folderPathRaw);
+    const folderPathNormal = normalize(folderPathRaw);
     const r = {
         specFileName,
         fileName: fileNameSansExtension,

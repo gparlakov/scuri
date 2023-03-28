@@ -1,30 +1,26 @@
-import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import { Options } from '../../src/update-custom/index';
-import { collectionPath } from '../spec/common';
+import { setupBase } from '../spec/common';
 
 describe('update-custom', () => {
-    let tree: Tree;
     const name = 'to-update.component.ts';
+    const folder = 'update-custom-mark'
     const specFileName = 'to-update.component.custom.spec.ts';
     const classTemplate = '__normalizedName__.custom.spec.ts.template';
 
-    beforeEach(() => {
-        tree = Tree.empty();
-
-        tree.create(name, fileContent());
-        tree.create(specFileName, specFileContent());
-        tree.create(classTemplate, template());
-    });
 
     it('should add new and not repeat existing lines', async () => {
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        const treeAfter = await runner
-            .runSchematicAsync('update-custom', <Options>{ name, classTemplate }, tree)
-            .toPromise();
-        const result = treeAfter?.read(specFileName)?.toString('utf8');
-        expect(treeAfter.files.length).toEqual(3);
-        expect(result).toMatchInlineSnapshot(`
+
+        // arrange
+        const { run, fullFileName, add, getFilePath } = setupBase(folder, name);
+        add(fullFileName);
+        const testFileName = getFilePath(specFileName);
+        add(testFileName);
+        add(classTemplate, template());
+        // act
+        const result = await run({ name: fullFileName, classTemplate }, 'update-custom');
+
+        // assert
+        const specFile = result!.readContent(testFileName).toString();
+        expect(specFile).toMatchInlineSnapshot(`
             "import { ToUpdateComponent } from './to-update.component';
             import { autoSpy, spyInject } from 'jasmine-auto-spies';
 
@@ -83,62 +79,6 @@ describe('update-custom', () => {
         `);
     });
 });
-
-function fileContent(): string {
-    return `import { Router } from '@the/router';
-import { Just } from 'maybe';
-import { Service } from './service';
-export class ToUpdateComponent {
-  constructor(service: Service, router: Router, just: Just) {}
-
-  myMethod() {}
-
-  mySecondMethod() {}
-}
-
-`;
-}
-
-function specFileContent(): string {
-    return `import { ToUpdateComponent } from './to-update.component';
-import { autoSpy, spyInject } from 'jasmine-auto-spies';
-
-describe('ToUpdateComponent', () => {
-
-    // scuri:lets
-
-    beforeEach(
-        waitForAsync(() => {
-            TestBed.configureTestingModule({
-                providers: [
-                    MyDirective,
-
-                    // scuri:injectables
-                ]
-            });
-
-            directive = TestBed.inject(MyDirective);
-
-            // scuri:get-instances
-
-        })
-    );
-
-    it('when myMethod is called it should', () => {
-        // arrange
-        // act
-        t.myMethod();
-        // assert
-        // expect(t).toEqual
-    });
-
-
-    // scuri:Methods
-
-});
-
-`;
-}
 
 function template() {
     return `<% params.forEach(p => { if(p.importPath) {%>import { <%= p.type %> } from '<%= p.importPath %>';
