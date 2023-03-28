@@ -1,3 +1,1 @@
-FAIL  tests/update-custom/update-custom-mark-case-insensitive-and-methods-inside-describe.spec.ts
-
 FAIL  tests/update-custom/update-custom-green-path.spec.ts
