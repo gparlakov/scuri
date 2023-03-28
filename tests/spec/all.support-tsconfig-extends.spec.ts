@@ -1,22 +1,14 @@
 import { getTestFile, setupBase } from './common';
 
 describe('spec', () => {
-    it('...', async () => {
+    it('support tsconfig extends', async () => {
         // arrange
 
         const { add, run, testFileName, testFilesFolder, splitLines } = setupBase(
             'all.support-tsconfig-extends',
             'app/component.ts'
         )
-        .default()
-        .log({
-            filter(l) {
-                // return l.message.includes('treeHost: readFile')
-                // return false && l.message.includes('all.') ||
-                // return  l.name === 'readDependencyCalls';
-                return false;
-            },
-        });
+        .default();
 
         add(getTestFile(`${testFilesFolder}/app/tsconfig.json`));
         add(getTestFile(`${testFilesFolder}/tsconfig.base.json`));

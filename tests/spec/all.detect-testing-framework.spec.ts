@@ -58,8 +58,7 @@ describe('Framework test runner config', () => {
         // arrange
         const { run, testFileName } = setup()
             .default()
-            .add('jest.config.mjs', '')
-            .log({ filter: 'determine----' });
+            .add('jest.config.mjs', '');
         // act
         const result = await run();
         // assert
