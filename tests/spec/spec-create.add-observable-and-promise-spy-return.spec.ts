@@ -176,6 +176,7 @@ describe('spec for a class with a method calling a dependency method', () => {
             '    const service = autoSpy(ServiceWithMethods, { observable$: serviceObservable$ });'
         );
         expect(ls[i++]).toEqual('    service.observableReturning.and.returnValue(EMPTY);');
+        expect(ls[i++]).toEqual('    ');
         expect(ls[i++]).toEqual('  const builder = {');
         expect(ls[i++]).toEqual('    service,');
         expect(ls[i++]).toEqual(

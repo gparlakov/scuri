@@ -41,6 +41,7 @@ function setup() {
     const service = autoSpy(ServiceWithMethods, { property$: serviceProperty$, promiseProp: servicePromiseProp, observable$: serviceObservable$, subject$: serviceSubject$ });
     service.observableReturning.and.returnValue(EMPTY);
     service.promiseReturning.and.returnValue(new Promise(res => {}));
+    
   const builder = {
     service,
     withServiceJustAMethodReturn(j: ClassDescription) {

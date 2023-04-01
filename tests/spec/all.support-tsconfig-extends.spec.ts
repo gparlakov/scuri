@@ -23,7 +23,7 @@ describe('spec', () => {
         let i = lines.findIndex(l => l.includes('function setup'));
         expect(lines[i++]).toMatch('function setup() {');
         expect(lines[i++]).toMatch('  const dep = autoSpy(Dep);');
-        // expect(lines[i++]).toMatch('    ');
+        expect(lines[i++]).toMatch('    ');
         expect(lines[i++]).toMatch('  const builder = {');
         expect(lines[i++]).toMatch('    dep,');
         expect(lines[i++]).toMatch('    withDepProperty(p: string) {');

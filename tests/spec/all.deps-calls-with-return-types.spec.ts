@@ -14,9 +14,8 @@ describe('Dependency method calls ', () => {
         tree = getTestDataAbsoluteTree(`${folder}/`);
     });
 
-    fit('should read the names and return types of dependency methods', async () => {
+    it('should read the names and return types of dependency methods', async () => {
         const fullFileName = getTestFile(`${folder}/${depsCallsReturnTypesFile}`);
-        console.log(fullFileName)
         // arrange
         const x = describeSource(
             fullFileName,
