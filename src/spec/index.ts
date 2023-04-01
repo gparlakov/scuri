@@ -344,8 +344,8 @@ function createNewSpec(
                 function toConstructorParams() {
                     return params.map((p) => p.name).join(',');
                 }
-                function toDeclaration(joiner?: string) {
-                    joiner = joiner ?? `${EOL}    `
+                function toDeclaration(j?: string) {
+                    const joiner = typeof j === 'string' ? j : `${EOL}    `;
                     return params
                         .map((p) =>
                             p.type === 'string' || p.type === 'number'
