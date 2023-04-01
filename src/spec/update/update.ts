@@ -12,7 +12,7 @@ import {
 import { buildErrorForMissingSwitchCase } from '../../common/build-time-error-for-missing-switch-case';
 
 import { dependenciesWrap } from '../../common/deps-filtered';
-import { getLogger, getLoggerForFnAndInit } from '../../common/logger';
+import { getLogger } from '../../common/logger';
 import { ConstructorParam, DependencyMethodReturnAndPropertyTypes } from '../../types';
 
 export interface UpdateOptions {
