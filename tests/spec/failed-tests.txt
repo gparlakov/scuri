@@ -1,4 +1,3 @@
-all.support-tsconfig-extends.spec.ts
 spec-update.only-add-missing-method-test-cases.spec.ts
 all.autospy-options.spec.ts
 all.deps-calls-with-return-types.spec.ts
