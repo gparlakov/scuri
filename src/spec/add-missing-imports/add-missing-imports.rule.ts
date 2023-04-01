@@ -1,6 +1,6 @@
 import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { insertImport } from '../../../lib/utility/ast-utils';
-import { applyToUpdateRecorder } from '../../../lib/utility/change';
+import { applyToUpdateRecorder, InsertChange } from '../../../lib/utility/change';
 import { createTsProgram } from '../../common/create-ts-program';
 import { getLogger } from '../../common/logger';
 
@@ -76,6 +76,8 @@ export function addMissingImports(specFile: string, config: {autoSpyPath: string
                   ),
               ]
             : [];
+
+        logger.debug(`Will ${addFromRxjs.length > 0 ? `add ${addFromRxjs.map(c => (c as InsertChange).description).join(',')}` : ' not add RxJs imports'}`)
 
         const addAutoSpyMaybe = uniqMissingImports.some((i) => i.kind === 'autospy')
             ? [insertImport(specFileSrc, specFile, 'autoSpy', config.autoSpyPath)]
