@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Calling update should update the spec file 1`] = `
+"import { bDep } from '@angular/core';
+
+describe('C', () => {
+    it('existing method one test', () => {
+        c.methodOne();
+    })
+    it('existing test case with name of methodTwo in the spec title', () => {
+        c.methodTwo();
+    })
+    it('just any name', () => {
+        c.methodThree();
+    })
+});
+
+function setup() {
+    const builder = {
+        default() {
+            return builder;
+        },
+        build() {
+            return new C();
+        }
+    }
+    return builder;
+}"
+`;
