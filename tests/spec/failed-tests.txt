@@ -1,2 +1,1 @@
-all.autospy-options.spec.ts
 all.deps-calls-with-return-types.spec.ts
