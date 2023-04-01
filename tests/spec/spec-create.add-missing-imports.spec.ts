@@ -1,42 +1,35 @@
-import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import { collectionPath, getTestFile, getTestFileContents } from './common';
+import { setupBase } from './common';
 
 describe('spec', () => {
-    let tree: Tree;
-    beforeEach(() => {
-        tree = Tree.empty();
-    });
+    const folder = 'create.add-missing-imports';
+    const file = 'component.ts';
 
     it('adds the imports for the Observable dependencies when creating', async () => {
         // arrange
-        const fileUnderTest = 'component.ts';
-        const filePath = getTestFile(`create.add-missing-imports/${fileUnderTest}`);
-        const specFileName = filePath.replace('.ts', '.spec.ts');
-        tree.create(filePath, getTestFileContents(filePath));
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        // runner.logger.subscribe(m => console.log(m.message))
+        const { run, fullFileName, add, testFileName } = setupBase(folder, file);
+        add(fullFileName);
         // act
-        const result = await runner.runSchematicAsync('spec', { name: filePath }, tree).toPromise();
+        const result = await run({ name: fullFileName, update: false });
+
         // assert
-        const contents = result.readContent(specFileName);
+        const contents = result!.readContent(testFileName);
         expect(contents).toMatch("import { EMPTY, Observable, ReplaySubject } from 'rxjs';");
         expect(contents).toMatch("import { autoSpy } from 'autoSpy';");
     });
 
     it('adds the imports for the Observable dependencies when updating', async () => {
         // arrange
-        const fileUnderTest = 'component.ts';
-        const filePath = getTestFile(`update.add-missing-imports/${fileUnderTest}`);
-        tree.create(filePath, getTestFileContents(filePath));
-        const specFilePath = filePath.replace('.ts', '.spec.ts');
-        tree.create(specFilePath, getTestFileContents(specFilePath));
-        const runner = new SchematicTestRunner('schematics', collectionPath);
-        // runner.logger.subscribe(m => console.log(m.message))
+        const { run, fullFileName, add, testFileName } = setupBase(
+            'update.add-missing-imports',
+            file
+        );
+        add(fullFileName);
+        add(testFileName);
         // act
-        const result = await runner.runSchematicAsync('spec', { name: filePath, update: true }, tree).toPromise();
+        const result = await run({ name: fullFileName, update: true });
+        // act
         // assert
-        const contents = result.readContent(specFilePath);
+        const contents = result.readContent(testFileName);
         expect(contents).toMatch("import { EMPTY, Observable, ReplaySubject } from 'rxjs';");
         expect(contents).toMatch("import { autoSpy } from 'autoSpy';");
     });
