@@ -8,13 +8,9 @@ describe('C', () => {
 
 function setup() {
     const aDep = autoSpy(BDep);
-    
     const bDep = autoSpy(BDep);
-    
     const cDep = autoSpy(BDep);
-    
     const logger = autoSpy(LogService);
-    
     const builder = {
         aDep,
         bDep,

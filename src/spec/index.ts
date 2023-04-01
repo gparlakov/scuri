@@ -344,21 +344,22 @@ function createNewSpec(
                 function toConstructorParams() {
                     return params.map((p) => p.name).join(',');
                 }
-                function toDeclaration() {
+                function toDeclaration(joiner?: string) {
+                    joiner = joiner ?? `${EOL}    `
                     return params
                         .map((p) =>
                             p.type === 'string' || p.type === 'number'
                                 ? `let ${p.name}:${p.type};`
                                 : `${propertyMocks(p, depsCallsAndTypes, {
-                                      joiner: `${EOL}    `,
+                                      joiner,
                                   })}const ${p.name} = autoSpy(${p.type}${includePropertyMocks(
                                       p,
                                       depsCallsAndTypes
                                   )});${addDefaultObservableAndPromiseToSpyJoined(
                                       p,
                                       depsCallsAndTypes,
-                                      { joiner: `${EOL}    `, spyReturnType: o?.framework }
-                                  )}`
+                                      { joiner, spyReturnType: o?.framework }
+                                  )}${joiner}`
                         )
                         .join('');
                 }
