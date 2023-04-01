@@ -1,9 +1,7 @@
-import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import * as ts from 'typescript';
 import { RemoveChange } from '../../lib/utility/change';
 import { update } from '../../src/spec/update/update';
-import { collectionPath, setupBase } from './common';
+import { setupBase } from './common';
 
 const folder = 'spec-update';
 
@@ -182,7 +180,7 @@ function setup() {
             });
         });
 
-        fdescribe('when there are existing deps in the class-under-test constructor', () => {
+        describe('when there are existing deps in the class-under-test constructor', () => {
 
             const forComma = 'for-comma.ts'
             it('should add a comma at the start of the deps list', async () => {
