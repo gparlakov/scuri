@@ -1,6 +1,7 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import { EOL } from 'os';
+import { normalize } from 'path';
 import { collectionPath, getTestFileContents, setupBase, splitLines } from './common';
 
 describe('Option: functionTemplate', () => {
@@ -56,9 +57,10 @@ describe('Option: functionTemplate', () => {
         // arrange
         const { run, fullFileName, testFileName, add, getFilePath, tree } = setupBase(folder, fn);
         const templatePath = getFilePath(functionTemplate);
+        const treeTemplatePath = normalize(`tests/spec/test-data/${folder}/${functionTemplate}`)
         const configPath = getFilePath(functionTemplateConfig);
         add(fullFileName);
-        add(templatePath.split(/scuri\\|scuri\//)[1], getTestFileContents(templatePath))
+        add(treeTemplatePath, getTestFileContents(templatePath));
         const result =  await run({ name: fullFileName, config: configPath });
         // assert
         expect(result.exists(testFileName)).toBe(true);
