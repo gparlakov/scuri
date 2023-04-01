@@ -24,11 +24,13 @@ export function addDefaultObservableAndPromiseToSpyJoined(
     }
     const joiner = typeof options?.joiner === 'string' ? options?.joiner : EOL;
 
-    return `${typeof joiner === 'string' ? joiner : ''}${addDefaultObservableAndPromiseToSpy(
+    const result = addDefaultObservableAndPromiseToSpy(
         p,
         deps,
         options
-    ).join(joiner)}`;
+    ).join(joiner);
+
+    return result != '' ? `${typeof joiner === 'string' ? joiner : ''}${result}` : result;
 }
 
 export function addDefaultObservableAndPromiseToSpy(
