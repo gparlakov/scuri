@@ -51,11 +51,8 @@ describe('ExampleComponent', () => {
 
 function setup() {
     const service = autoSpy(Service);
-    
     const router = autoSpy(Router);
-    
     const just = autoSpy(Just);
-    
     const builder = {
         service,
         router,
