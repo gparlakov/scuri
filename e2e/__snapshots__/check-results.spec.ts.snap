@@ -6,22 +6,22 @@ exports[`spec should check results against snapshot: my-com-expected 1`] = `
  *
  *  AVAILABLE PROPERTIES:
  *
- *  params: {importPath: string, type: string} 
+ *  params: {importPath: string, type: string}
  *  name: router
  *  importPath: @angular/router
  *  type: Router
- *  
+ *
  *  specFileName: my-com.component.spec.ts
  *  normalizedName: my-com.component
  *  className: MyComComponent
  *  publicMethods: ngOnInit
- *  declaration: 
+ *  declaration:
     const router = autoSpy(Router);
-    
+
  *  builderExports: router,
  *  constructorParams: router
  *  shorthand: m
- *  
+ *
  *  AVAILABLE FUNCTIONS
  *
  *  classify: MyComComponent
@@ -50,12 +50,12 @@ describe('MyComComponent', () => {
     // assert
     // expect(m).toEqual
   });
-  
+
 });
 
 // tslint-disable-type
 function setup() {
-  
+
     const router = autoSpy(Router);
     const builder = {
     router,default() {
@@ -95,11 +95,11 @@ describe('OtherComponent', () => {
     // assert
     // expect(o).toEqual
   });
-  
+
 });
 
 function setup() {
-  
+
     const s = autoSpy(Service);
     s.promiseReturning.and.returnValue(new Promise(res => {}));
     s.observableReturning.and.returnValue(EMPTY);
@@ -151,13 +151,13 @@ describe('PromiseAndObservableComponent', () => {
     // assert
     // expect(p).toEqual
   });
-  
+
 });
 
 function setup() {
   const serviceUserName$ = new ReplaySubject<string>(1);
-    const resolveServiceComments: Function;
-    const rejectServiceComments: Function;
+    let resolveComments: Function;
+    let rejectComments: Function;
     const serviceComments = new Promise((res, rej) => {
         resolveComments = res;
         rejectComments = rej;
@@ -165,6 +165,7 @@ function setup() {
     const service = autoSpy(Service, { userName$: serviceUserName$, comments: serviceComments });
     service.getComment.and.returnValue(new Promise(res => {}));
     service.getUser.and.returnValue(EMPTY);
+
   const builder = {
     service,
     withServiceUserName$(u$: Observable<string>) {
@@ -251,7 +252,7 @@ describe('ToUpdateComponent', () => {
             // assert
             // expect(t).toEqual
         });
-        
+
     // scuri:methods
 
 });

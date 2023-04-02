@@ -372,7 +372,7 @@ function createNewSpec(
                         : '';
                 }
             } catch (e) {
-                logger.debug(`caught an error ${e?.message ? e.message : e?.stackTrace? e?.stackTrace : JSON.stringify(e, null, 2)}`)
+                logger.debug(`caught an error ${e?.message} name ${e.name } stack:${e?.stack}`)
                 if (e != null && e.message === 'No classes found to be spec-ed!') {
                     const fun = getFirstFunction(fileNameRaw, content, tree);
                     if (fun == null) {
