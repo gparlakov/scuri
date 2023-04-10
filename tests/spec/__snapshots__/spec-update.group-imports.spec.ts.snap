@@ -7,6 +7,7 @@ import { some } from '../util';
 import { MyDep } from '@angular/Common';
 import { LibraryClass } from '../shared/library';
 import { LibraryClass1 } from '../shared/library';
+import { autoSpy } from 'autoSpy';
 
 describe('C', () => {
 });
@@ -42,7 +43,8 @@ function setup() {
 `;
 
 exports[`Calling update on existing specs without setup function should not import deps with no path i.e. from dom or other tslibs, Object, Event 1`] = `
-"describe('C', () => {
+"import { autoSpy } from 'autoSpy';
+describe('C', () => {
 });
 
 function setup() {

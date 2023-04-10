@@ -2,9 +2,9 @@
 
 exports[`spec for a class with a method calling a dependency method should add EMPTY/a Promise for the dep method returning an observable/Promise when dependency is already part of the spec 1`] = `
 "import { ExampleComponent } from './deps-calls-with-return-types';
+import { ServiceWithMethods } from './deps-calls-with-return-types.dependency';
 import { EMPTY, Observable } from 'rxjs';
 import { autoSpy } from 'autoSpy';
-import { ServiceWithMethods } from './deps-calls-with-return-types.dependency';
 
 describe('ExampleComponent', () => {
     it('when aMethod is called it should', () => {
@@ -55,6 +55,7 @@ exports[`spec for a class with a method calling a dependency method should add m
 import { ExampleComponent } from './component';
 import { autoSpy } from 'autoSpy';
 import { ServiceWithMethods } from './dependency';
+import { EMPTY, Observable, ReplaySubject } from 'rxjs';
 
 describe('ExampleComponent', () => {
     it('when aMethod is called it should', () => {
@@ -161,6 +162,7 @@ exports[`spec for a class with a method calling a dependency method should add m
 import { ExampleComponent } from './component';
 import { autoSpy } from 'autoSpy';
 import { ServiceWithMethods } from './dependency';
+import { EMPTY, Observable, ReplaySubject } from 'rxjs';
 
 describe('ExampleComponent', () => {
     it('when aMethod is called it should', () => {

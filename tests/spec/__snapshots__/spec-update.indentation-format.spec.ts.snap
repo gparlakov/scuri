@@ -2,6 +2,7 @@
 
 exports[`Calling update on existing specs without setup function should indent setup function variable declarations 1`] = `
 "import { bDep, BDep, LogService } from '@angular/core';
+import { autoSpy } from 'autoSpy';
 
 describe('C', () => {
 });
