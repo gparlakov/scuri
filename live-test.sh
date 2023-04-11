@@ -11,8 +11,9 @@ set -e
 npm run build
 
 # start the local registry
-
-sudo chown -R 10001:65533 $PWD/.verdaccio
+## give the ./.verdaccio/verdaccio folder ownership to the 10001 user from the 65533 group as per verdaccio documentation
+## https://verdaccio.org/docs/docker#running-verdaccio-using-docker
+sudo chown -R 10001:65533 $PWD/.verdaccio/verdaccio
 docker-compose -f ./.verdaccio/docker-compose.yml up -d
 # publish to local registry
 npm_config_registry=http://localhost:4873/ npm publish
