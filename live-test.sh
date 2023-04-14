@@ -11,8 +11,9 @@ set -e
 npm run build
 
 # start the local registry
-
-sudo chown -R 10001:65533 $PWD/.verdaccio
+## give the ./.verdaccio/verdaccio folder ownership to the 10001 user from the 65533 group as per verdaccio documentation
+## https://verdaccio.org/docs/docker#running-verdaccio-using-docker
+sudo chown -R 10001:65533 $PWD/.verdaccio/verdaccio
 docker-compose -f ./.verdaccio/docker-compose.yml up -d
 # publish to local registry
 npm_config_registry=http://localhost:4873/ npm publish
@@ -28,7 +29,7 @@ if test -z "${DEBUG_LIVE_TEST}";  then
   ENTRYPOINT=$APP_DIR/$EXAMPLE_FOLDER/run-plus.sh
 else
   FLAGS='-it'
-  ENTRYPOINT=/bin/sh
+  ENTRYPOINT=/bin/bash
 fi
 
 docker run $FLAGS -v $(pwd)/example:$APP_DIR/example --entrypoint $ENTRYPOINT --net=host -e npm_config_registry=http://localhost:4873/ gparlakov/scuri:angular-14-app-v2

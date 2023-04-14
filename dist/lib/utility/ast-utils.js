@@ -121,7 +121,6 @@ function getSourceNodes(sourceFile) {
 exports.getSourceNodes = getSourceNodes;
 function findNode(node, kind, text) {
     if (node.kind === kind && node.getText() === text) {
-        // throw new Error(node.getText());
         return node;
     }
     let foundNode = null;
@@ -261,27 +260,26 @@ function getMetadataField(node, metadataField) {
 exports.getMetadataField = getMetadataField;
 function addSymbolToNgModuleMetadata(source, ngModulePath, metadataField, symbolName, importPath = null) {
     const nodes = getDecoratorMetadata(source, 'NgModule', '@angular/core');
-    let node = nodes[0]; // eslint-disable-line @typescript-eslint/no-explicit-any
+    const node = nodes[0];
     // Find the decorator declaration.
-    if (!node) {
+    if (!node || !ts.isObjectLiteralExpression(node)) {
         return [];
     }
     // Get all the children property assignment of object literals.
     const matchingProperties = getMetadataField(node, metadataField);
     if (matchingProperties.length == 0) {
         // We haven't found the field in the metadata declaration. Insert a new field.
-        const expr = node;
         let position;
         let toInsert;
-        if (expr.properties.length == 0) {
-            position = expr.getEnd() - 1;
+        if (node.properties.length == 0) {
+            position = node.getEnd() - 1;
             toInsert = `\n  ${metadataField}: [\n${core_1.tags.indentBy(4) `${symbolName}`}\n  ]\n`;
         }
         else {
-            node = expr.properties[expr.properties.length - 1];
-            position = node.getEnd();
+            const childNode = node.properties[node.properties.length - 1];
+            position = childNode.getEnd();
             // Get the indentation of the last element, if any.
-            const text = node.getFullText(source);
+            const text = childNode.getFullText(source);
             const matches = text.match(/^(\r?\n)(\s*)/);
             if (matches) {
                 toInsert =
@@ -304,35 +302,33 @@ function addSymbolToNgModuleMetadata(source, ngModulePath, metadataField, symbol
     }
     const assignment = matchingProperties[0];
     // If it's not an array, nothing we can do really.
-    if (assignment.initializer.kind !== ts.SyntaxKind.ArrayLiteralExpression) {
+    if (!ts.isPropertyAssignment(assignment) ||
+        !ts.isArrayLiteralExpression(assignment.initializer)) {
         return [];
     }
-    const arrLiteral = assignment.initializer;
-    if (arrLiteral.elements.length == 0) {
-        // Forward the property.
-        node = arrLiteral;
-    }
-    else {
-        node = arrLiteral.elements;
-    }
-    if (Array.isArray(node)) {
-        const nodeArray = node;
-        const symbolsArray = nodeArray.map((node) => core_1.tags.oneLine `${node.getText()}`);
+    let expresssion;
+    const assignmentInit = assignment.initializer;
+    const elements = assignmentInit.elements;
+    if (elements.length) {
+        const symbolsArray = elements.map((node) => core_1.tags.oneLine `${node.getText()}`);
         if (symbolsArray.includes(core_1.tags.oneLine `${symbolName}`)) {
             return [];
         }
-        node = node[node.length - 1];
+        expresssion = elements[elements.length - 1];
+    }
+    else {
+        expresssion = assignmentInit;
     }
     let toInsert;
-    let position = node.getEnd();
-    if (node.kind == ts.SyntaxKind.ArrayLiteralExpression) {
+    let position = expresssion.getEnd();
+    if (ts.isArrayLiteralExpression(expresssion)) {
         // We found the field but it's empty. Insert it just before the `]`.
         position--;
         toInsert = `\n${core_1.tags.indentBy(4) `${symbolName}`}\n  `;
     }
     else {
         // Get the indentation of the last element, if any.
-        const text = node.getFullText(source);
+        const text = expresssion.getFullText(source);
         const matches = text.match(/^(\r?\n)(\s*)/);
         if (matches) {
             toInsert = `,${matches[1]}${core_1.tags.indentBy(matches[2].length) `${symbolName}`}`;
@@ -447,6 +443,9 @@ exports.getEnvironmentExportName = getEnvironmentExportName;
 function getRouterModuleDeclaration(source) {
     const result = getDecoratorMetadata(source, 'NgModule', '@angular/core');
     const node = result[0];
+    if (!node || !ts.isObjectLiteralExpression(node)) {
+        return undefined;
+    }
     const matchingProperties = getMetadataField(node, 'imports');
     if (!matchingProperties) {
         return;
@@ -467,7 +466,8 @@ exports.getRouterModuleDeclaration = getRouterModuleDeclaration;
 function addRouteDeclarationToModule(source, fileToAdd, routeLiteral) {
     const routerModuleExpr = getRouterModuleDeclaration(source);
     if (!routerModuleExpr) {
-        throw new Error(`Couldn't find a route declaration in ${fileToAdd}.`);
+        throw new Error(`Couldn't find a route declaration in ${fileToAdd}.\n` +
+            `Use the '--module' option to specify a different routing module.`);
     }
     const scopeConfigMethodArgs = routerModuleExpr.arguments;
     if (!scopeConfigMethodArgs.length) {

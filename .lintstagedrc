@@ -1,3 +1,3 @@
 {
-  "{*.js,*.ts}": "tslint --fix"
+  "{*.js,*.ts}": "npx tslint -p ./tslint.json --fix"
 }

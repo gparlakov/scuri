@@ -8,6 +8,7 @@ import {
 } from '@angular-devkit/schematics';
 import { EOL } from 'os';
 import { getSpecFileCustomName } from '../common/get-spec-file-name';
+import { setLogger } from '../common/logger';
 import { paths } from '../common/paths';
 import { describeSource } from '../common/read/read';
 import { scuriTemplateMark, updateCustomTemplateCut } from '../common/scuri-custom-update-template';
@@ -20,11 +21,14 @@ export type Options = {
 
 export function updateCustom(o: Options): Rule {
     return (tree: Tree, context: SchematicContext) => {
+        const logger = context.logger.createChild('scuri:update-custom')
+        setLogger(logger);
         const template = tree.read(o.classTemplate)?.toString('utf8');
         const fileUnderTestContent = tree.read(o.name)?.toString('utf8');
+        logger.debug(`Entering for opts:${JSON.stringify(o)}`);
 
         if (typeof fileUnderTestContent === 'string' && typeof template === 'string') {
-            const r = describeSource(o.name, fileUnderTestContent);
+            const r = describeSource(o.name, fileUnderTestContent, tree);
             const topClass = Array.isArray(r) ? r[0] : <Description>{};
             if (isClassDescription(topClass)) {
                 const { constructorParams, publicMethods } = topClass;
@@ -53,6 +57,7 @@ export function updateCustom(o: Options): Rule {
                 }
 
                 const customSpecFileName = getSpecFileCustomName(classData, o.classTemplate);
+                tree.visit(f => logger.debug(f))
                 const customSpecFileContents = customSpecFileName != null ? tree.read(customSpecFileName) : null;
                 if (customSpecFileContents != null) {
                     const inserts = updateWithCustomTemplate(
@@ -101,7 +106,7 @@ export function updateWithCustomTemplate(
     if(parts == null || parts.length === 0) {
         throw new Error(`The custom template seems to be missing the ${scuriTemplateMark} mark. Perhaps you need the standard update?`)
     }
-    
+
     const originalMethods = templateData.publicMethods;
     // skip methods that already have tests
     templateData.publicMethods = originalMethods.filter(
@@ -133,7 +138,7 @@ export function updateWithCustomTemplate(
             } else {
                 context.logger.debug(`Template result before de-duplication: [${templateResult}]`);
             }
-            
+
             const spaces = getWhitespaceBefore(templateData.specFileContents, mark);
             // skip de-duplication for the whole section (mark)
             const skipDeDupe = p.mark.toLowerCase().includes(skip.toLowerCase());

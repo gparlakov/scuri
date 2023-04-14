@@ -19,11 +19,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - adds methods for emit/error/complete the promise and observable property stubs
 - adds methods for returning a value for each spy that's called
 - updates and adds only the needed things (methods, spies and spy-manipulation methods)
+- adds missing imports from rxjs or autoSpy
+- auto-detects jasmine or jest and allows for cli or options flag for the same
 
 ### Fixed
 
 - fixed error when trying to overwrite existing specs and using `--force` flag
 - fixed behavior when custom template has no custom functions - just use standard update when `scuri:spec --update` or throw if user specified `scuri:update-custom`
+
+## 1.3.1 - 2023-03-11
+
+### Added
+
+- configuration for autoSpy location
+
 
 ## 1.3.0 - 2022-08-30
 

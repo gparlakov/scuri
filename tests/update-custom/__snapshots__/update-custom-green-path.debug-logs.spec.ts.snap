@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`update-custom should debug-output the skipped methods and the template results prior to dedupe 1`] = `
+Array [
+  "Entering for opts:{\\"name\\":\\"C:\\\\\\\\Users\\\\\\\\gparl\\\\\\\\projects\\\\\\\\scuri\\\\\\\\tests\\\\\\\\spec\\\\\\\\test-data\\\\\\\\debug-logs\\\\\\\\for-debug-logs.ts\\",\\"update\\":true,\\"classTemplate\\":\\"__specFileName__.template\\"}",
+  "entering",
+  "entering for C:\\\\Users\\\\gparl\\\\projects\\\\scuri\\\\tests\\\\spec\\\\test-data\\\\debug-logs\\\\for-debug-logs.ts",
+  "Creating (and caching) program for C:\\\\Users\\\\gparl\\\\projects\\\\scuri\\\\tests\\\\spec\\\\test-data\\\\debug-logs\\\\for-debug-logs.ts, with options
+{\\"target\\":2,\\"module\\":1}",
+  "FileContents: import { Router } from \\"@the/router\\";
+import { Just } from \\"maybe\\";
+import { Service } from \\"./service\\";
+export class ExampleComponent {
+    constructor(service: Service, router: Router, just: Just) {}
+
+    myMethod() {}
+
+    yourMethod() {}
+
+    theirMethod() {}
+}
+",
+  "Found src file: (top 50) import { Router } from \\"@the/router\\";
+import { Ju...",
+  "returning Service,Router,Just: [],[],[]",
+  "entering for C:\\\\Users\\\\gparl\\\\projects\\\\scuri\\\\tests\\\\spec\\\\test-data\\\\debug-logs\\\\for-debug-logs.ts",
+  "returning {\\"specFileName\\":\\"for-debug-logs.spec.ts\\",\\"fileName\\":\\"for-debug-logs\\",\\"folderPathRaw\\":\\"C:\\\\\\\\Users\\\\\\\\gparl\\\\\\\\projects\\\\\\\\scuri\\\\\\\\tests\\\\\\\\spec\\\\\\\\test-data\\\\\\\\debug-logs\\\\\\\\\\",\\"folderPathNormal\\":\\"C:\\\\\\\\Users\\\\\\\\gparl\\\\\\\\projects\\\\\\\\scuri\\\\\\\\tests\\\\\\\\spec\\\\\\\\test-data\\\\\\\\debug-logs\\\\\\\\\\"}",
+  "entering for classData {\\"className\\":\\"ExampleComponent\\",\\"name\\":\\"ExampleComponent\\",\\"specFileName\\":\\"for-debug-logs.spec.ts\\",\\"normalizedName\\":\\"for-debug-logs\\",\\"folder\\":\\"C:\\\\\\\\Users\\\\\\\\gparl\\\\\\\\projects\\\\\\\\scuri\\\\\\\\tests\\\\\\\\spec\\\\\\\\test-data\\\\\\\\debug-logs\\\\\\\\\\",\\"constructorParams\\":\\"not available for update - please use \`params\`\\",\\"declaration\\":\\"not available for update - specific for scuri original style testing\\",\\"builderExports\\":\\"not available for update - builder is specific for scuri original style testing - the setup function with a builder\\",\\"params\\":[{\\"name\\":\\"service\\",\\"type\\":\\"Service\\",\\"importPath\\":\\"./service\\"},{\\"name\\":\\"router\\",\\"type\\":\\"Router\\",\\"importPath\\":\\"@the/router\\"},{\\"name\\":\\"just\\",\\"type\\":\\"Just\\",\\"importPath\\":\\"maybe\\"}],\\"publicMethods\\":[\\"myMethod\\",\\"yourMethod\\",\\"theirMethod\\"],\\"shorthand\\":\\"f\\",\\"setupMethods\\":[]} templateName __specFileName__.template",
+  "looking for templateFile __specFileName__.template result in [object Object]",
+  "returning C:\\\\Users\\\\gparl\\\\projects\\\\scuri\\\\tests\\\\spec\\\\test-data\\\\debug-logs\\\\for-debug-logs.spec.ts",
+  "/__specFileName__.template",
+  "/C:/Users/gparl/projects/scuri/tests/spec/test-data/debug-logs/for-debug-logs.ts",
+  "/C:/Users/gparl/projects/scuri/tests/spec/test-data/debug-logs/for-debug-logs.spec.ts",
+  "Cut the template to parts [{\\"mark\\":\\"lets\\",\\"template\\":\\"<%params.forEach(p => {%>let <%= camelize(p.type) %>Spy: <%= p.type %>;\\\\n<% }) %>\\"},{\\"mark\\":\\"injectables\\",\\"template\\":\\"<%params.forEach(p => {%>{ provide: <%= p.type %>, useClass: autoSpy(<%= p.type %>, '<%= p.type %>') },\\\\n<% }) %>\\"},{\\"mark\\":\\"get-instances\\",\\"template\\":\\"<%params.forEach(p => {%><%= camelize(p.type) %>Spy = spyInject<<%= p.type %>>(TestBed.inject(<%= p.type %>));\\\\n<% }) %>\\"},{\\"mark\\":\\"methods-skipDeDupe\\",\\"template\\":\\"<% publicMethods.forEach(meth=> {if(meth != '') { %>it('when <%= meth %> is called it should', () => {\\\\n    // arrange\\\\n    // act\\\\n    <%= shorthand %>.<%= meth %>();\\\\n    // assert\\\\n    // expect(<%= shorthand %>).toEqual\\\\n});\\\\n<% }}) %>\\"}]",
+  "Skipping methods: [myMethod] as they seem to be already in the spec.",
+  "Template result before de-duplication: [let serviceSpy: Service;
+let routerSpy: Router;
+let justSpy: Just;
+]",
+  "Mark // scuri:lets (original lets) found at position(146)",
+  "Template result before de-duplication: [{ provide: Service, useClass: autoSpy(Service, 'Service') },
+{ provide: Router, useClass: autoSpy(Router, 'Router') },
+{ provide: Just, useClass: autoSpy(Just, 'Just') },
+]",
+  "Mark // scuri:injectables (original injectables) found at position(422)",
+  "Template result before de-duplication: [serviceSpy = spyInject<Service>(TestBed.inject(Service));
+routerSpy = spyInject<Router>(TestBed.inject(Router));
+justSpy = spyInject<Just>(TestBed.inject(Just));
+]",
+  "Mark // scuri:get-instances (original get-instances) found at position(548)",
+  "Template result before de-duplication: [it('when yourMethod is called it should', () => {
+    // arrange
+    // act
+    f.yourMethod();
+    // assert
+    // expect(f).toEqual
+});
+it('when theirMethod is called it should', () => {
+    // arrange
+    // act
+    f.theirMethod();
+    // assert
+    // expect(f).toEqual
+});
+]",
+  "Mark // scuri:methods (original methods-skipDeDupe) found at position(770)",
+]
+`;

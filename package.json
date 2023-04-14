@@ -1,6 +1,6 @@
 {
   "name": "scuri",
-  "version": "1.4.0-rc.0",
+  "version": "1.4.0-rc.5",
   "description": "A spec generator schematic - Spec Create Update Read (class - component, service, directive and dependencies) Incorporate (them in the result)",
   "scripts": {
     "s": "schematics",
@@ -15,7 +15,7 @@
     "build.run.watch": "chokidar \"src/**/*.ts\" --initial --ignore \"src/**/*.d.ts\" -c 'rm -rf ./dist; npm run build.run' ",
     "build.run.watch.autospy": "chokidar \"src/**/*.ts\" --initial --ignore \"src/**/*.d.ts\" -c 'rm -rf ./dist&& npm run build && npm run s ./dist/collection.json:autospy --debug=false' ",
     "tslint": "tslint",
-    "lint": "npm run tslint -- -p tsconfig.test.json -c tslint.json",
+    "lint": "npx tslint -p ./tslint.json --fix",
     "pretty-quick": "pretty-quick",
     "deprecated_prepublish": "npm run build",
     "dependencies": "npx husky install"

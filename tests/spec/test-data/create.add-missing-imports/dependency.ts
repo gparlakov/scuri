@@ -1,6 +1,6 @@
 /** starts on next line*/
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
-interface ClassDescription {
+export interface ClassDescription {
     name: string;
     constructorParams: string[];
     publicMethods: string[];
@@ -16,8 +16,10 @@ export class ServiceWithMethods {
 
     constructor() {}
 
-    observableReturning() {
-        return of('emit-and-complete');
+    observableReturning(): Observable<number>
+    observableReturning(a: string): Observable<string>
+    observableReturning(a?: string | undefined): Observable<string | number> {
+        return of(a ? a : 1);
     }
     promiseReturning() {
         return Promise.resolve('resolved')

@@ -1,0 +1,4 @@
+{
+    "autoSpyLocation": "@some/path",
+    "autoSpyFunctionName": "fn"
+}

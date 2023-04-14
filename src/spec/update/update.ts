@@ -1,4 +1,3 @@
-import { classify } from '@angular-devkit/core/src/utils/strings';
 import { EOL } from 'os';
 import * as ts from 'typescript';
 import { findNodes, insertImport, isImported } from '../../../lib/utility/ast-utils';
@@ -11,7 +10,9 @@ import {
     propertyMocks,
 } from '../../common/add-observable-promise-stubs';
 import { buildErrorForMissingSwitchCase } from '../../common/build-time-error-for-missing-switch-case';
+
 import { dependenciesWrap } from '../../common/deps-filtered';
+import { getLogger } from '../../common/logger';
 import { ConstructorParam, DependencyMethodReturnAndPropertyTypes } from '../../types';
 
 export interface UpdateOptions {
@@ -19,7 +20,7 @@ export interface UpdateOptions {
 }
 
 export interface DepMethodsAdditionsOptions {
-    fileContent: string;
+    source: ts.SourceFile;
     allParams: ConstructorParam[];
     path: string;
     deps: DependencyMethodReturnAndPropertyTypes | undefined;
@@ -27,7 +28,7 @@ export interface DepMethodsAdditionsOptions {
 }
 
 export interface AddDepPropsMockOptions {
-    fileContent: string;
+    source: ts.SourceFile;
     allParams: ConstructorParam[];
     path: string;
     deps: DependencyMethodReturnAndPropertyTypes | undefined;
@@ -37,12 +38,10 @@ export interface AddDepPropsMockOptions {
 
 export function addMissing(
     path: string,
-    fileContent: string,
+    source: ts.SourceFile,
     _dependencies: ConstructorParam[],
     classUnderTestName: string
 ) {
-    const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
-
     const setupFunctionNode = readSetupFunction(source);
 
     let missingThings: Change[] = [];
@@ -72,7 +71,7 @@ function setup() {
 
 export function update(
     path: string,
-    fileContent: string,
+    source: ts.SourceFile,
     dependencies: ConstructorParam[],
     classUnderTestName: string,
     action: 'add' | 'remove' | 'add-spy-methods-and-props',
@@ -81,17 +80,22 @@ export function update(
     deps: DependencyMethodReturnAndPropertyTypes | undefined,
     options: UpdateOptions
 ): Change[] {
-    const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
+    const log = getLogger(update.name);
+    log.debug(`[action: ${action}] path:${path} ${classUnderTestName} params ${dependencies.map(d => `${d.name}: ${d.type}`).join()} publicMethods ${publicMethods.join(',')}  deps ${JSON.stringify(deps)} options ${JSON.stringify(options)}` )
 
     const setupFunctionNode = readSetupFunction(source);
     if (setupFunctionNode == null) {
+        log.error("There is no setup function in the source file. We can't update that.");
         throw new Error("There is no setup function in the source file. We can't update that.");
     }
 
     const currentParams = readCurrentParameterNames(setupFunctionNode, classUnderTestName);
-
     const paramsToRemove = currentParams.filter((p) => !dependencies.some((d) => d.name === p));
     const paramsToAdd = dependencies.filter((d) => !currentParams.some((c) => c === d.name));
+
+    log.debug(`Current params (${currentParams?.length}):${currentParams?.join(',')}`)
+    log.debug(`Params to remove (${paramsToRemove?.length}):${paramsToRemove?.join(',')}`)
+    log.debug(`Params to add (${paramsToAdd?.length}):${JSON.stringify(paramsToAdd)}`)
 
     switch (action) {
 
@@ -111,7 +115,7 @@ export function update(
                 options
             ),
             // 3 methods - each of them will generate a it test case
-            ...addMethods(publicMethods, path, fileContent, source, shorthand),
+            ...addMethods(publicMethods, path, source.getFullText(), source, shorthand),
             // 4 providers - if TestBed is used it will get the providers from a = setup().default() and provide them the classic Angular way
             ...addProvidersForTestBed(
                 source,
@@ -124,8 +128,8 @@ export function update(
         ];
 
         case 'add-spy-methods-and-props': return [
-            ...addDepReturnsMethods({ allParams: dependencies, path, fileContent: fileContent, deps, framework: options.framework }),
-            ...addDepPropsMocks({ allParams: dependencies, path, fileContent, deps })
+            ...addDepReturnsMethods({ allParams: dependencies, path, source, deps, framework: options.framework }),
+            ...addDepPropsMocks({ allParams: dependencies, path, source, deps })
         ]
 
         default: buildErrorForMissingSwitchCase(action, `Unhandled action ${action}`);
@@ -166,6 +170,8 @@ function readCurrentParameterNames(
     return parameterNames;
 }
 function remove(toRemove: string[], setupFunction: ts.FunctionDeclaration, path: string) {
+    const logger = getLogger(remove.name);
+    logger.debug(`Entering for ${toRemove.join()} at ${path}`)
     // VariableStatement -> let dep:string; Or const service = autoSpy(Object);
     const instantiations = findNodes(setupFunction, ts.SyntaxKind.VariableStatement).filter(
         (n: ts.VariableStatement) =>
@@ -177,7 +183,10 @@ function remove(toRemove: string[], setupFunction: ts.FunctionDeclaration, path:
 
     return instantiations
         .concat(uses)
-        .map((i) => new RemoveChange(path, i.pos, getTextPlusCommaIfNextCharIsComma(i)));
+        .map((i) => {
+            logger.debug(`RemoveChange(${i.pos}, ${getTextPlusCommaIfNextCharIsComma(i).replace(/\n\r|\r\n|\n/, '┘')})`)
+            return new RemoveChange(path, i.pos, getTextPlusCommaIfNextCharIsComma(i));
+        });
 }
 
 /**
@@ -217,7 +226,7 @@ function add(
 
 function addDepReturnsMethods({
     allParams,
-    fileContent: fileContents,
+    source,
     path,
     deps,
     framework
@@ -227,8 +236,6 @@ function addDepReturnsMethods({
     if ([...deps?.entries() ?? []].length === 0) {
         return [];
     }
-
-    const source = ts.createSourceFile(path, fileContents, ts.ScriptTarget.Latest, true);
 
     const setupFunctionNode = readSetupFunction(source);
     if (setupFunctionNode == null) {
@@ -256,7 +263,7 @@ function addDepReturnsMethods({
 
 function addDepPropsMocks({
     allParams,
-    fileContent,
+    source,
     path,
     deps
 }: AddDepPropsMockOptions): InsertChange[] {
@@ -265,8 +272,6 @@ function addDepPropsMocks({
     if ([...deps?.entries() ?? []].length === 0) {
         return [];
     }
-
-    const source = ts.createSourceFile(path, fileContent, ts.ScriptTarget.Latest, true);
 
     const setupFunctionNode = readSetupFunction(source);
     if (setupFunctionNode == null) {
@@ -312,7 +317,7 @@ function addDepPropsMocks({
                         deps,
                         /*skipWhen*/ depOrObj => depOrObj === 'checkShouldSkipObjectWrapper'
                             ? somePropsAdded
-                            : text.includes(`${p.name}${classify(depOrObj.name)}`)
+                            : text.includes(depOrObj.name)
                     )
                 )
             ];
@@ -426,10 +431,15 @@ function addMethods(
     source: ts.SourceFile,
     shorthand: string
 ): Change[] {
+    const logger = getLogger(addMethods.name)
+    logger.debug(`Entering for ${path} ${JSON.stringify(publicMethods)}`)
     const methodsThatHaveNoTests = publicMethods.filter(
-        // search for invocations of the method (c.myMethod) - these are inevitable if one wants to actually test the method...
-        (m) => !fileContent.match(new RegExp(`.${m}`))
+        // search for invocations of the method 'c.myMethod('  - these are inevitable if one wants to actually test the method...
+        (m) => !fileContent.match(new RegExp(`\\.${m}`))
     );
+
+    logger.debug(`methods w/o tests ${methodsThatHaveNoTests.join(',')}`)
+
 
     let lastClosingBracketPositionOfDescribe = findNodes(
         source,
@@ -481,7 +491,7 @@ function addMissingImports(dependencies: ConstructorParam[], path: string, sourc
         }
     );
 
-    return [...dependencies, { name: 'EMPTY', type: 'Observable<void>', importPath: 'rxjs' }]
+    return dependencies
         .filter((d) => d.importPath != null)
         .filter((d) => duplicateMap.get(d) === 'first')
         .filter((d) => !isImported(source, d.type, d.importPath!))

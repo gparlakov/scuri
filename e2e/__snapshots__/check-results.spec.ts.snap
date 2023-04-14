@@ -16,6 +16,7 @@ exports[`spec should check results against snapshot: my-com-expected 1`] = `
  *  className: MyComComponent
  *  publicMethods: ngOnInit
  *  declaration: const router = autoSpy(Router);
+    
  *  builderExports: router,
  *  constructorParams: router
  *  shorthand: m
@@ -53,7 +54,8 @@ describe('MyComComponent', () => {
 
 // tslint-disable-type
 function setup() {
-  const router = autoSpy(Router);const builder = {
+  const router = autoSpy(Router);
+    const builder = {
     router,default() {
       return builder;
     },
@@ -69,8 +71,8 @@ function setup() {
 exports[`spec should check results against snapshot: other-expected 1`] = `
 "import { Service } from '../service';
 import { OtherComponent } from './other.component';
+import { EMPTY, Observable } from 'rxjs';
 import { autoSpy } from 'autoSpy';
-import { EMPTY } from 'rxjs';
 
 describe('OtherComponent', () => {
   it('when anotherMethod is called it should', () => {
@@ -95,9 +97,10 @@ describe('OtherComponent', () => {
 });
 
 function setup() {
-  
-    const s = autoSpy(Service);
+  const s = autoSpy(Service);
     s.promiseReturning.and.returnValue(new Promise(res => {}));
+    s.observableReturning.and.returnValue(EMPTY);
+    
   const builder = {
     s,
     withSPromiseReturningReturn(p: Promise<string>) {
@@ -113,6 +116,83 @@ function setup() {
     },
     build() {
       return new OtherComponent(s);
+    }
+  };
+
+  return builder;
+}
+"
+`;
+
+exports[`spec should check results against snapshot: promise-and-observable 1`] = `
+"import { Service } from './service';
+import { PromiseAndObservableComponent } from './promise-and-observable.component';
+import { EMPTY, Observable, ReplaySubject } from 'rxjs';
+import { autoSpy } from 'autoSpy';
+
+describe('PromiseAndObservableComponent', () => {
+  it('when myMethod is called it should', () => {
+    // arrange
+    const { build } = setup().default();
+    const p = build();
+    // act
+    p.myMethod();
+    // assert
+    // expect(p).toEqual
+  });
+  it('when mySecondMethod is called it should', () => {
+    // arrange
+    const { build } = setup().default();
+    const p = build();
+    // act
+    p.mySecondMethod();
+    // assert
+    // expect(p).toEqual
+  });
+  
+});
+
+function setup() {
+  const serviceUserName$ = new ReplaySubject<string>(1);
+    let resolveComments: Function;
+    let rejectComments: Function;
+    const serviceComments = new Promise((res, rej) => {
+        resolveComments = res;
+        rejectComments = rej;
+    });
+    const service = autoSpy(Service, { userName$: serviceUserName$, comments: serviceComments });
+    service.getComment.and.returnValue(new Promise(res => {}));
+    service.getUser.and.returnValue(EMPTY);
+    
+  const builder = {
+    service,
+    withServiceUserName$(u$: Observable<string>) {
+        u$.subscribe({
+            next: (v) => serviceUserName$.next(v),
+            error: (e) => serviceUserName$.error(e),
+            complete: () => serviceUserName$.complete()
+        });
+        return builder;
+    },
+    withServiceComments(c: Promise<Comment[]>) {
+        c
+            .then((v) => resolveServiceComments(v))
+            .catch((e) => rejectServiceComments(e));
+        return builder;
+    },
+    withServiceGetCommentReturn(g: Promise<Comment>) {
+        service.getComment.and.returnValue(g);
+        return builder;
+    },
+    withServiceGetUserReturn(g: Observable<User>) {
+        service.getUser.and.returnValue(g);
+        return builder;
+    },
+    default() {
+      return builder;
+    },
+    build() {
+      return new PromiseAndObservableComponent(service);
     }
   };
 

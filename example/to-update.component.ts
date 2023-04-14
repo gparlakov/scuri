@@ -4,7 +4,8 @@ import { Service } from './service';
 export class ToUpdateComponent {
   constructor(service: Service, router: Router, just: Just) {}
 
-  myMethod() {}
+  myMethod() {
+  }
 
   mySecondMethod() {}
 }

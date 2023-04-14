@@ -1,23 +1,21 @@
 import { EOL } from 'os';
 import * as ts from 'typescript';
 
-export function printKindAndText(node?: ts.Node[] | ts.Node | null, printOutSpaces = false) {
+export function getKindAndText(node: ts.Node[] | ts.Node | null | undefined, printOutSpaces = false): string {
     if (node != null) {
         if (Array.isArray(node)) {
-            node.forEach((n) => printKindAndText(n, printOutSpaces));
+            return node.map((n) => getKindAndText(n, printOutSpaces)).join('|');
         } else {
-            // tslint:disable-next-line:no-console
-            console.log(
-                _formatTextWithSpaces(node, printOutSpaces),
-                'kind:',
-                ts.SyntaxKind[node.kind],
-                EOL
-            );
+            return `${_formatTextWithSpaces(node, printOutSpaces)} kind:${ts.SyntaxKind[node.kind]}`;
         }
     } else {
-        // tslint:disable-next-line:no-console
-        console.log('this is empty');
+        return 'this is empty'
     }
+}
+
+export function printKindAndText(node: ts.Node[] | ts.Node | null | undefined, printOutSpaces = false) {
+    // tslint:disable-next-line: no-console
+    console.log(getKindAndText(node, printOutSpaces))
 }
 let depth = 1;
 let maxDepthDefault = 5;
