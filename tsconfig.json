@@ -27,6 +27,7 @@
     "tests",
     "lib/utility/*_spec.ts",
     "**/files/",
-    "example"
+    "example",
+    "src/ts-server-plugin"
   ]
 }

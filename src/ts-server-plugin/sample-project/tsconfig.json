@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+        "plugins": [{
+            "name": "scuri_ts_plugin",
+        }]
+    },
+    "files": ["./index.ts"]
+}

@@ -1,0 +1,10 @@
+{
+    "name": "sample_project",
+    "dependencies": {
+        "scuri_ts_plugin": "file:..",
+        "typescript": "^4.4.3"
+    },
+    "scripts": {
+        "my-custom": "$env:TSS_LOG='-logToFile true -file ${PWD}\\ts.log -level verbose'; code ."
+    }
+}
