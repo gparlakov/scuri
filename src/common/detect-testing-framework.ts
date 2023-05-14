@@ -46,20 +46,23 @@ export function detectTestingFramework(
         jest: string[];
         jasmine: string[];
     } = { jest: [], jasmine: [] };
-    t.visit((f, e) => {
+
+    const root = t.getDir('.');
+
+    root.subfiles.forEach(f => {
         if(f.includes('node_modules')) {
             // skip node modules
             return;
         }
 
-        if (f.includes('jest.config')) {
+        if (f.includes('jest')) {
             found.jest.push(f);
             logger.debug(`Detected jest by way of ${f}`);
-        } else if (f.includes('karma.conf')) {
+        } else if (f.includes('karma')) {
             found.jasmine.push(f);
             logger.debug(`Detected jasmine by way of: ${f}`);
         } else if (f.includes('package.json')) {
-            const content = e?.content.toString();
+            const content = t.read(`./${f}`)?.toString();
             if (typeof content === 'string') {
                 if (content.includes('"jasmine-core"')) {
                     found.jasmine.push(f);
