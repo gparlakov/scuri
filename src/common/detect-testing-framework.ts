@@ -1,4 +1,4 @@
-import { Tree, FilterHostTree, filter } from '@angular-devkit/schematics';
+import { Tree } from '@angular-devkit/schematics';
 import { getLogger } from './logger';
 
 export type Supported = 'jest' | 'jasmine';
